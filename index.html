@@ -2320,66 +2320,44 @@ const GRATIS_SPELER_LIMIET = 5;
 
 // ── AUTH STATE ──
 function setupAuth() {
-  // ── TESTMODUS — sla login over in preview of lokaal ──
+  // ── TESTMODUS ──
   const isPreview = window.location.hostname === 'localhost' ||
                     window.location.hostname === '127.0.0.1' ||
                     window.location.protocol === 'file:' ||
                     window.location.hostname.includes('claude.ai') ||
                     window.location.hostname.includes('anthropic');
-
   if (isPreview) {
-    huidigUser = { id: 'preview', email: 'trainer@test.nl', user_metadata: { naam: 'Test Trainer' } };
+    huidigUser = { id:'preview', email:'trainer@test.nl', user_metadata:{ naam:'Test Trainer' } };
     huidigPlan = 'pro';
     toonApp();
     return;
   }
 
-  if (!initSupabase()) {
-    setTimeout(setupAuth, 100);
-    return;
+  // Toon loginscherm METEEN — wacht nergens op
+  toonAuthScherm();
+
+  // Initialiseer Supabase op achtergrond
+  function initLoop() {
+    if (!initSupabase()) { setTimeout(initLoop, 150); return; }
+
+    // Luister naar uitloggen
+    sb.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        huidigUser = null;
+        huidigPlan = 'gratis';
+        toonAuthScherm();
+      }
+    });
+
+    // Check of al ingelogd — als ja, direct app tonen
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        huidigUser = session.user;
+        laadPlan().then(() => toonApp());
+      }
+    }).catch(() => {}); // stil falen — loginscherm staat al
   }
-
-  // Laad lokale data altijd eerst — ongeacht login status
-  laadLokaleData();
-
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_OUT') {
-      huidigUser = null;
-      huidigPlan = 'gratis';
-      toonAuthScherm();
-      return;
-    }
-    if (session?.user) {
-      huidigUser = session.user;
-      await laadPlan();
-      toonApp();
-    }
-  });
-
-  // Check bestaande sessie bij laden pagina
-  // Timeout van 4 seconden — als Supabase niet reageert toon loginscherm
-  let sessieGeladen = false;
-  const sessieTimeout = setTimeout(() => {
-    if (!sessieGeladen) {
-      console.warn('Supabase timeout — toon loginscherm');
-      toonAuthScherm();
-    }
-  }, 4000);
-
-  sb.auth.getSession().then(({ data: { session } }) => {
-    sessieGeladen = true;
-    clearTimeout(sessieTimeout);
-    if (session?.user) {
-      huidigUser = session.user;
-      laadPlan().then(() => toonApp());
-    } else {
-      toonAuthScherm();
-    }
-  }).catch(() => {
-    sessieGeladen = true;
-    clearTimeout(sessieTimeout);
-    toonAuthScherm();
-  });
+  initLoop();
 }
 document.addEventListener('DOMContentLoaded', () => setTimeout(setupAuth, 200));
 
@@ -2596,7 +2574,9 @@ function laadLokaleData() {
 
 async function laadPlan() {
   try {
-    const { data } = await sb.from('abonnementen').select('plan').eq('user_id', huidigUser.id).single();
+    const planQuery = sb.from('abonnementen').select('plan').eq('user_id', huidigUser.id).single();
+    const timeout = new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 3000));
+    const { data } = await Promise.race([planQuery, timeout]);
     huidigPlan = data?.plan || 'gratis';
   } catch { huidigPlan = 'gratis'; }
   updateAccountBtn();
@@ -2645,24 +2625,40 @@ function switchAuthTab(tab, btn) {
 
 // ── LOGIN ──
 async function doLogin() {
-  if (!sb) { initSupabase(); if (!sb) { alert('Even geduld, laden...'); return; } }
+  // Zorg dat Supabase geladen is
+  let poging = 0;
+  while (!sb && poging < 20) { initSupabase(); await new Promise(r=>setTimeout(r,100)); poging++; }
+  if (!sb) { alert('Verbinding mislukt. Herlaad de pagina en probeer opnieuw.'); return; }
+
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPw').value;
   const btn = document.getElementById('loginBtn');
   const err = document.getElementById('loginErr');
   err.style.display = 'none';
   if (!email || !pw) { err.textContent = 'Vul je e-mailadres en wachtwoord in.'; err.style.display = 'block'; return; }
+
   btn.disabled = true; btn.textContent = 'Bezig...';
+
+  // Harde timeout van 8 seconden
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+
   try {
-    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    const { data, error } = await Promise.race([
+      sb.auth.signInWithPassword({ email, password: pw }),
+      timeout
+    ]);
     if (error) throw error;
-    // Direct toonApp zonder wachten op onAuthStateChange
     huidigUser = data.user;
-    await laadPlan();
-    toonApp();
-  } catch(error) {
-    btn.disabled = false; btn.textContent = 'Inloggen';
-    err.textContent = 'Verkeerd e-mailadres of wachtwoord. Heb je je e-mail al bevestigd?';
+    toonApp(); // Direct app tonen — niet wachten
+    laadPlan(); // Op achtergrond laden — niet awaiten
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Inloggen';
+    if (e.message === 'timeout') {
+      err.textContent = 'Verbinding te traag. Controleer je internet en probeer opnieuw.';
+    } else {
+      err.textContent = 'Verkeerd e-mailadres of wachtwoord.';
+    }
     err.style.display = 'block';
   }
 }
