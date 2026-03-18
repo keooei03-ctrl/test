@@ -6,8 +6,6 @@
   <title>TrainersHub Voetbal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://js.stripe.com/v3/"></script>
   <style>
     /* ── AUTH SCHERM ── */
     #authScreen {
@@ -489,6 +487,20 @@
     .aanw-empty h3 { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
     .aanw-empty p { font-size: 13px; color: var(--text-secondary); }
 
+    /* ── TACTISCH BORD ── */
+    .tact-page { display: flex; flex-direction: column; padding: 0; max-width: 100%; }
+    .tact-toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 1.5rem; background: var(--dark); border-bottom: 0.5px solid var(--border); flex-wrap: wrap; }
+    .tact-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border-strong); background: var(--dark2); color: var(--text-secondary); font-family: var(--font-body); transition: all 0.15s; white-space: nowrap; }
+    .tact-btn:hover { color: var(--text); background: var(--dark3); }
+    .tact-btn.active { background: var(--green); color: var(--black); border-color: var(--green); font-weight: 600; }
+    .tact-btn.danger { border-color: rgba(255,107,107,0.3); color: #ff6b6b; }
+    .tact-btn.danger:hover { background: rgba(255,107,107,0.1); }
+    .tact-sep { width: 0.5px; height: 24px; background: var(--border-strong); margin: 0 4px; flex-shrink: 0; }
+    .tact-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; flex-shrink: 0; }
+    .tact-canvas-wrap { display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+    .tact-color { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; flex-shrink: 0; }
+    .tact-color.active { border-color: #fff; transform: scale(1.2); }
+
     /* ── WEDSTRIJDEN ── */
     .wed-hero { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
     .wed-hero::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:radial-gradient(circle,rgba(255,184,77,0.08) 0%,transparent 70%); pointer-events:none; }
@@ -639,6 +651,7 @@
     <button class="nav-tab" onclick="showPage('resultaten',this)">Resultaten</button>
     <button class="nav-tab" onclick="showPage('aanwezigheid',this)">Aanwezigheid</button>
     <button class="nav-tab" onclick="showPage('wedstrijden',this)">Wedstrijden</button>
+    <button class="nav-tab" onclick="showPage('tactisch',this)">✎ Tactisch bord</button>
     <button class="nav-tab" onclick="showPage('ai',this)" style="color:var(--green)">✦ AI Plan</button>
   </div>
   <button class="add-btn" onclick="handleAddBtn()">
@@ -853,6 +866,62 @@
   </div>
 </div>
 
+<!-- PAGE: TACTISCH BORD -->
+<div class="page" id="page-tactisch">
+  <div class="tact-toolbar">
+    <span class="tact-label">Objecten</span>
+    <button class="tact-btn active" id="btnSpeler" onclick="setModus('speler')" title="Speler plaatsen">Speler</button>
+    <button class="tact-btn" id="btnTegenstander" onclick="setModus('tegenstander')" title="Tegenstander plaatsen">Tegenstander</button>
+    <button class="tact-btn" id="btnBal" onclick="setModus('bal')" title="Bal plaatsen">Bal</button>
+    <button class="tact-btn" id="btnPion" onclick="setModus('pion')" title="Pion plaatsen">Pion</button>
+    <div class="tact-sep"></div>
+    <span class="tact-label">Tekenen</span>
+    <button class="tact-btn" id="btnPass" onclick="setModus('pass')" title="Pass (strakke pijl)">Pass ——→</button>
+    <button class="tact-btn" id="btnLoop" onclick="setModus('loop')" title="Loopactie (gestippeld)">Lopen - - →</button>
+    <button class="tact-btn" id="btnZone" onclick="setModus('zone')" title="Zone tekenen">Zone</button>
+    <button class="tact-btn" id="btnTekst" onclick="setModus('tekst')" title="Tekst toevoegen">Tekst</button>
+    <div class="tact-sep"></div>
+    <span class="tact-label">Kleur</span>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div class="tact-color active" style="background:#00e054" onclick="setKleur('#00e054',this)"></div>
+      <div class="tact-color" style="background:#ff6b6b" onclick="setKleur('#ff6b6b',this)"></div>
+      <div class="tact-color" style="background:#5bb8ff" onclick="setKleur('#5bb8ff',this)"></div>
+      <div class="tact-color" style="background:#ffb84d" onclick="setKleur('#ffb84d',this)"></div>
+      <div class="tact-color" style="background:#ffffff" onclick="setKleur('#ffffff',this)"></div>
+      <div class="tact-color" style="background:#ff80b3" onclick="setKleur('#ff80b3',this)"></div>
+    </div>
+    <div class="tact-sep"></div>
+    <span class="tact-label">Formatie</span>
+    <select id="tactFormatie" onchange="laadFormatie()" style="padding:6px 10px;border-radius:8px;border:0.5px solid var(--border-strong);background:var(--dark2);color:var(--text);font-size:12px;font-family:var(--font-body);cursor:pointer">
+      <option value="">Kies...</option>
+      <option value="4-3-3">4-3-3</option>
+      <option value="4-4-2">4-4-2</option>
+      <option value="3-5-2">3-5-2</option>
+      <option value="4-2-3-1">4-2-3-1</option>
+      <option value="5-3-2">5-3-2</option>
+    </select>
+    <div class="tact-sep"></div>
+    <span class="tact-label">Gum</span>
+    <button class="tact-btn" id="btnGum" onclick="setModus('gum')" title="Object verwijderen">Gum</button>
+    <div class="tact-sep"></div>
+    <button class="tact-btn" onclick="undoTact()">↩ Ongedaan</button>
+    <button class="tact-btn danger" onclick="resetBord()">✕ Wis alles</button>
+    <button class="tact-btn" onclick="slaanOpBord()" style="border-color:rgba(0,224,84,0.3);color:var(--green)">↓ PNG</button>
+    <button class="tact-btn" onclick="volledigScherm()" style="border-color:rgba(91,184,255,0.3);color:#5bb8ff">⛶ Volledig</button>
+  </div>
+  <div style="padding:6px 1.5rem;background:var(--dark);border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em">Opgeslagen borden</span>
+    <div id="boardSlots" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <button class="tact-btn" onclick="nieuwBord()" style="font-size:11px;padding:4px 10px">+ Nieuw bord</button>
+  </div>
+  <div class="tact-canvas-wrap">
+    <canvas id="tactCanvas" width="680" height="480"></canvas>
+  </div>
+  <div style="padding:6px 1.5rem;background:var(--dark);border-top:0.5px solid var(--border)">
+    <span style="font-size:11px;color:var(--text-tertiary)">Tip: Klik om te plaatsen · Sleep om te verplaatsen · Dubbelklik op speler om nummer/naam te wijzigen · Rechtsklik om te verwijderen</span>
+  </div>
+</div>
+
 <!-- PAGE: AANWEZIGHEID -->
 <div class="page" id="page-aanwezigheid">
   <div class="main">
@@ -1020,6 +1089,18 @@
 </div>
 <div class="overlay" id="trainingDetailOverlay" onclick="oClick(event,'trainingDetailOverlay')"><div class="modal"><button class="modal-close" onclick="cModal('trainingDetailOverlay')">✕</button><div id="trainingDetailBody"></div></div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// Stripe lazy loader — voorkomt "Stripe is not defined" fout
+let _stripeInstance = null;
+function getStripe() {
+  if (!_stripeInstance && window.Stripe) {
+    _stripeInstance = window.Stripe('pk_test_51R6X33KPkbXyZxvmIhWblSmMZn3aYEtgB5dryZnoeSjgGbwMaYtlthZJBmN5Cv9XyMr7H67yYEWnnZHYOpubiytk00ndLeqrH4');
+  }
+  return _stripeInstance;
+}
+</script>
+<script src="https://js.stripe.com/v3/" async></script>
 <script>
 const COLORS=[
   {bg:'#0d2040',text:'#5bb8ff'},{bg:'#0a2a14',text:'#00e054'},
@@ -1069,23 +1150,475 @@ function showPage(page,el){
   document.getElementById('page-'+page).classList.add('active');
   if(el)el.classList.add('active');
   curPage=page;
-  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',ai:'✦ Plan genereren'};
+  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren'};
   document.getElementById('addBtnLabel').textContent=lbl[page]||'Toevoegen';
   if(page==='spelers')renderSpelers();
   if(page==='resultaten')renderResultaten();
   if(page==='aanwezigheid')renderAanwezigheid();
   if(page==='wedstrijden')renderWedstrijden();
+  if(page==='tactisch')initTactischBord();
 }
 function handleAddBtn(){
   if(curPage==='spelers')openAddSpeler();
   else if(curPage==='resultaten')openAddTraining();
   else if(curPage==='aanwezigheid')openNieuweTrainingAanw();
   else if(curPage==='wedstrijden')openAddWedstrijd();
+  else if(curPage==='tactisch')resetBord();
   else if(curPage==='ai')generatePlan();
   else openAddOef();
 }
 
-// ── WEDSTRIJDEN ──
+// ── TACTISCH BORD ──
+let tactCanvas, tactCtx;
+let tactModus = 'speler';
+let tactKleur = '#00e054';
+let tactObjecten = [];
+let tactHistory = [];
+let tactDragIdx = -1;
+let tactDragOffX = 0, tactDragOffY = 0;
+let tactTrekStart = null;
+let tactZoneStart = null;
+let tactBordInit = false;
+let tactBorden = []; // opgeslagen borden
+let tactHuidigBord = 0;
+const MAX_BORDEN = 5;
+
+const VELD_KLEUR = '#2d5a27';
+const LIJN_KLEUR = 'rgba(255,255,255,0.5)';
+const ALLE_MODI = ['speler','tegenstander','bal','pion','pass','loop','zone','tekst','gum'];
+
+function initTactischBord() {
+  if (tactBordInit) { tekenBord(); renderBordSlots(); return; }
+  tactCanvas = document.getElementById('tactCanvas');
+  if (!tactCanvas) return;
+  tactCtx = tactCanvas.getContext('2d');
+  tactBordInit = true;
+
+  // Borden initialiseren
+  if (!tactBorden.length) {
+    tactBorden = [{ naam: 'Bord 1', objecten: [] }];
+    tactHuidigBord = 0;
+    tactObjecten = [];
+  }
+
+  // Schaal canvas voor mobiel
+  const wrap = tactCanvas.parentElement;
+  const maxW = Math.min(wrap.clientWidth - 32, 680);
+  const schaal = maxW / 680;
+  tactCanvas.style.width = (680 * schaal) + 'px';
+  tactCanvas.style.height = (480 * schaal) + 'px';
+
+  tekenBord();
+  renderBordSlots();
+
+  tactCanvas.addEventListener('mousedown', tactStart);
+  tactCanvas.addEventListener('mousemove', tactMove);
+  tactCanvas.addEventListener('mouseup', tactEnd);
+  tactCanvas.addEventListener('dblclick', tactDblClick);
+  tactCanvas.addEventListener('contextmenu', e => { e.preventDefault(); tactRechtsKlik(e); });
+  tactCanvas.addEventListener('touchstart', e => { e.preventDefault(); tactStart(e.touches[0]); }, {passive:false});
+  tactCanvas.addEventListener('touchmove', e => { e.preventDefault(); tactMove(e.touches[0]); }, {passive:false});
+  tactCanvas.addEventListener('touchend', e => { e.preventDefault(); tactEnd(e.changedTouches[0]); }, {passive:false});
+}
+
+function getCanvasPos(e) {
+  const rect = tactCanvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (tactCanvas.width / rect.width),
+    y: (e.clientY - rect.top) * (tactCanvas.height / rect.height)
+  };
+}
+
+function tekenVeld() {
+  const ctx = tactCtx;
+  const W = tactCanvas.width, H = tactCanvas.height;
+
+  ctx.fillStyle = VELD_KLEUR;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, W, H, 12);
+  ctx.fill();
+
+  // Grasstrepen
+  ctx.globalAlpha = 0.05;
+  ctx.fillStyle = '#fff';
+  for (let i = 0; i < 8; i++) {
+    if (i % 2 === 0) ctx.fillRect(i * (W/8), 0, W/8, H);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = LIJN_KLEUR;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(30, 20, W-60, H-40);
+  ctx.beginPath(); ctx.moveTo(W/2, 20); ctx.lineTo(W/2, H-20); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2, 60, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2, 3, 0, Math.PI*2); ctx.fillStyle=LIJN_KLEUR; ctx.fill();
+  ctx.strokeRect(30, H/2-90, 100, 180);
+  ctx.strokeRect(30, H/2-50, 55, 100);
+  ctx.strokeRect(W-130, H/2-90, 100, 180);
+  ctx.strokeRect(W-85, H/2-50, 55, 100);
+  ctx.lineWidth = 1;
+  [[30,20,0,0.5],[W-30,20,0.5,1],[30,H-20,-0.5,0],[W-30,H-20,1,1.5]].forEach(([cx,cy,a1m,a2m]) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, 10, Math.PI*a1m, Math.PI*a2m);
+    ctx.stroke();
+  });
+}
+
+function tekenObject(obj, isSelected) {
+  const ctx = tactCtx;
+  ctx.save();
+
+  if (obj.type === 'speler' || obj.type === 'tegenstander') {
+    const r = 18;
+    ctx.beginPath();
+    ctx.arc(obj.x, obj.y, r, 0, Math.PI*2);
+    ctx.fillStyle = obj.kleur;
+    ctx.fill();
+    if (isSelected) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+    // Nummer
+    ctx.fillStyle = obj.type==='tegenstander'?'#fff':'#0a0a0a';
+    ctx.font = 'bold 12px DM Sans,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(obj.label||'', obj.x, obj.y);
+    // Naam onder
+    if (obj.naam) {
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = '10px DM Sans,sans-serif';
+      ctx.fillText(obj.naam, obj.x, obj.y + 28);
+    }
+
+  } else if (obj.type === 'bal') {
+    ctx.beginPath();
+    ctx.arc(obj.x, obj.y, 10, 0, Math.PI*2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // Voetbalpatroon
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.arc(obj.x, obj.y, 5, 0, Math.PI*2); ctx.stroke();
+
+  } else if (obj.type === 'pion') {
+    // Driehoek pion (oranje)
+    ctx.beginPath();
+    ctx.moveTo(obj.x, obj.y - 14);
+    ctx.lineTo(obj.x + 12, obj.y + 8);
+    ctx.lineTo(obj.x - 12, obj.y + 8);
+    ctx.closePath();
+    ctx.fillStyle = obj.kleur || '#ffb84d';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+  } else if (obj.type === 'pass' || obj.type === 'loop') {
+    const dx = obj.x2 - obj.x, dy = obj.y2 - obj.y;
+    const len = Math.sqrt(dx*dx+dy*dy);
+    if (len < 5) { ctx.restore(); return; }
+    ctx.beginPath();
+    ctx.moveTo(obj.x, obj.y);
+    ctx.lineTo(obj.x2, obj.y2);
+    ctx.strokeStyle = obj.kleur;
+    ctx.lineWidth = obj.type==='pass' ? 2.5 : 2;
+    ctx.setLineDash(obj.type==='loop' ? [8, 5] : []);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Pijlpunt
+    const angle = Math.atan2(dy, dx);
+    const tipX = obj.x2 - 2*Math.cos(angle);
+    const tipY = obj.y2 - 2*Math.sin(angle);
+    ctx.beginPath();
+    ctx.moveTo(tipX, tipY);
+    ctx.lineTo(tipX - 14*Math.cos(angle-0.4), tipY - 14*Math.sin(angle-0.4));
+    ctx.lineTo(tipX - 14*Math.cos(angle+0.4), tipY - 14*Math.sin(angle+0.4));
+    ctx.closePath();
+    ctx.fillStyle = obj.kleur;
+    ctx.fill();
+
+  } else if (obj.type === 'zone') {
+    const w = obj.x2 - obj.x, h = obj.y2 - obj.y;
+    ctx.fillStyle = obj.kleur.replace(')', ',0.15)').replace('rgb','rgba').replace('#', 'rgba(').replace(/rgba\(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),0\.15\)/, (m,r,g,b)=>`rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.15)`);
+    // simpele aanpak
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = obj.kleur;
+    ctx.fillRect(obj.x, obj.y, w, h);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = obj.kleur;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5,4]);
+    ctx.strokeRect(obj.x, obj.y, w, h);
+    ctx.setLineDash([]);
+
+  } else if (obj.type === 'tekst') {
+    ctx.fillStyle = obj.kleur;
+    ctx.font = 'bold 14px DM Sans,sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(obj.tekst||'', obj.x, obj.y);
+  }
+
+  ctx.restore();
+}
+
+function tekenBord() {
+  if (!tactCtx) return;
+  tekenVeld();
+  tactObjecten.forEach((obj, i) => tekenObject(obj, i === tactDragIdx));
+}
+
+function vindObjectBij(x, y) {
+  for (let i = tactObjecten.length - 1; i >= 0; i--) {
+    const obj = tactObjecten[i];
+    if (['speler','tegenstander'].includes(obj.type)) {
+      const dx=x-obj.x, dy=y-obj.y;
+      if (dx*dx+dy*dy < 22*22) return i;
+    } else if (obj.type === 'bal') {
+      const dx=x-obj.x, dy=y-obj.y;
+      if (dx*dx+dy*dy < 14*14) return i;
+    } else if (obj.type === 'pion') {
+      const dx=x-obj.x, dy=y-obj.y;
+      if (Math.abs(dx)<14 && dy>-16 && dy<10) return i;
+    } else if (obj.type === 'tekst') {
+      if (x>obj.x && x<obj.x+80 && y>obj.y && y<obj.y+20) return i;
+    }
+  }
+  return -1;
+}
+
+function tactStart(e) {
+  const pos = getCanvasPos(e);
+
+  if (tactModus === 'gum') {
+    const idx = vindObjectBij(pos.x, pos.y);
+    if (idx >= 0) { slaHistoryOp(); tactObjecten.splice(idx, 1); tekenBord(); }
+    return;
+  }
+  if (tactModus === 'tekst') {
+    const txt = prompt('Tekst invoeren:');
+    if (!txt) return;
+    slaHistoryOp();
+    tactObjecten.push({ type:'tekst', x:pos.x, y:pos.y, tekst:txt, kleur:tactKleur });
+    tekenBord(); slaanInBord(); return;
+  }
+  if (['pass','loop'].includes(tactModus)) {
+    tactTrekStart = pos; return;
+  }
+  if (tactModus === 'zone') {
+    tactZoneStart = pos; return;
+  }
+
+  const idx = vindObjectBij(pos.x, pos.y);
+  if (idx >= 0) {
+    tactDragIdx = idx;
+    tactDragOffX = pos.x - tactObjecten[idx].x;
+    tactDragOffY = pos.y - tactObjecten[idx].y;
+  } else {
+    slaHistoryOp();
+    const num = tactObjecten.filter(o=>o.type===tactModus).length + 1;
+    if (tactModus === 'speler') {
+      const naam = spelers[num-1]?.naam.split(' ')[0] || '';
+      tactObjecten.push({ type:'speler', x:pos.x, y:pos.y, kleur:tactKleur, label:String(num), naam });
+    } else if (tactModus === 'tegenstander') {
+      tactObjecten.push({ type:'tegenstander', x:pos.x, y:pos.y, kleur:'#ff6b6b', label:String(num), naam:'' });
+    } else if (tactModus === 'bal') {
+      tactObjecten.push({ type:'bal', x:pos.x, y:pos.y });
+    } else if (tactModus === 'pion') {
+      tactObjecten.push({ type:'pion', x:pos.x, y:pos.y, kleur:tactKleur });
+    }
+    tekenBord(); slaanInBord();
+  }
+}
+
+function tactMove(e) {
+  const pos = getCanvasPos(e);
+  if (tactDragIdx >= 0) {
+    tactObjecten[tactDragIdx].x = pos.x - tactDragOffX;
+    tactObjecten[tactDragIdx].y = pos.y - tactDragOffY;
+    tekenBord();
+  } else if (tactTrekStart && ['pass','loop'].includes(tactModus)) {
+    tekenBord();
+    const ctx = tactCtx;
+    ctx.beginPath();
+    ctx.moveTo(tactTrekStart.x, tactTrekStart.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = tactKleur;
+    ctx.lineWidth = 2;
+    ctx.setLineDash(tactModus==='loop'?[8,5]:[]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  } else if (tactZoneStart && tactModus === 'zone') {
+    tekenBord();
+    const ctx = tactCtx;
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = tactKleur;
+    ctx.fillRect(tactZoneStart.x, tactZoneStart.y, pos.x-tactZoneStart.x, pos.y-tactZoneStart.y);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = tactKleur;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5,4]);
+    ctx.strokeRect(tactZoneStart.x, tactZoneStart.y, pos.x-tactZoneStart.x, pos.y-tactZoneStart.y);
+    ctx.setLineDash([]);
+  }
+}
+
+function tactEnd(e) {
+  const pos = getCanvasPos(e);
+  if (tactDragIdx >= 0) {
+    slaHistoryOp();
+    tactDragIdx = -1;
+    tekenBord(); slaanInBord();
+  }
+  if (tactTrekStart) {
+    const dx=pos.x-tactTrekStart.x, dy=pos.y-tactTrekStart.y;
+    if (Math.sqrt(dx*dx+dy*dy) > 15) {
+      slaHistoryOp();
+      tactObjecten.push({ type:tactModus, x:tactTrekStart.x, y:tactTrekStart.y, x2:pos.x, y2:pos.y, kleur:tactKleur });
+      tekenBord(); slaanInBord();
+    }
+    tactTrekStart = null;
+  }
+  if (tactZoneStart) {
+    const dx=pos.x-tactZoneStart.x, dy=pos.y-tactZoneStart.y;
+    if (Math.abs(dx)>15 && Math.abs(dy)>15) {
+      slaHistoryOp();
+      tactObjecten.push({ type:'zone', x:tactZoneStart.x, y:tactZoneStart.y, x2:pos.x, y2:pos.y, kleur:tactKleur });
+      tekenBord(); slaanInBord();
+    }
+    tactZoneStart = null;
+  }
+}
+
+function tactDblClick(e) {
+  const pos = getCanvasPos(e);
+  const idx = vindObjectBij(pos.x, pos.y);
+  if (idx < 0) return;
+  const obj = tactObjecten[idx];
+  if (obj.type === 'speler' || obj.type === 'tegenstander') {
+    const nieuwNr = prompt('Rugnummer / label:', obj.label||'');
+    if (nieuwNr !== null) { slaHistoryOp(); obj.label = nieuwNr.trim(); }
+    const nieuwNaam = prompt('Naam (leeglaten om te wissen):', obj.naam||'');
+    if (nieuwNaam !== null) obj.naam = nieuwNaam.trim();
+    tekenBord(); slaanInBord();
+  } else if (obj.type === 'tekst') {
+    const nieuw = prompt('Tekst aanpassen:', obj.tekst||'');
+    if (nieuw !== null) { slaHistoryOp(); obj.tekst = nieuw; tekenBord(); slaanInBord(); }
+  }
+}
+
+function tactRechtsKlik(e) {
+  const pos = getCanvasPos(e);
+  const idx = vindObjectBij(pos.x, pos.y);
+  if (idx >= 0) { slaHistoryOp(); tactObjecten.splice(idx, 1); tekenBord(); slaanInBord(); }
+}
+
+function slaHistoryOp() {
+  tactHistory.push(JSON.stringify(tactObjecten));
+  if (tactHistory.length > 40) tactHistory.shift();
+}
+
+function undoTact() {
+  if (tactHistory.length) { tactObjecten=JSON.parse(tactHistory.pop()); tekenBord(); slaanInBord(); }
+}
+
+function resetBord() {
+  slaHistoryOp(); tactObjecten=[]; tekenBord(); slaanInBord();
+}
+
+function slaanInBord() {
+  if (tactBorden[tactHuidigBord]) {
+    tactBorden[tactHuidigBord].objecten = JSON.parse(JSON.stringify(tactObjecten));
+    slaLokaalOp();
+    dbSlaaBordOp(tactBorden[tactHuidigBord]).then(id => {
+      if (id && !tactBorden[tactHuidigBord].id) tactBorden[tactHuidigBord].id = id;
+    });
+  }
+}
+
+function setModus(m) {
+  tactModus = m;
+  ALLE_MODI.forEach(id => {
+    const btn = document.getElementById('btn' + id.charAt(0).toUpperCase() + id.slice(1));
+    if (btn) btn.classList.toggle('active', id === m);
+  });
+  if (tactCanvas) {
+    tactCanvas.style.cursor = ['pass','loop','zone'].includes(m)?'crosshair':m==='gum'?'not-allowed':m==='tekst'?'text':'default';
+  }
+}
+
+function setKleur(k, el) {
+  tactKleur = k;
+  document.querySelectorAll('.tact-color').forEach(c=>c.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function laadFormatie() {
+  const f = document.getElementById('tactFormatie').value;
+  if (!f) return;
+  slaHistoryOp();
+  tactObjecten = tactObjecten.filter(o=>o.type!=='speler');
+  const W=680, H=480;
+  const delen = f.split('-').map(Number);
+  const lijnen = [1, ...delen];
+  let idx=0;
+  lijnen.forEach((n, li) => {
+    const yPct = 0.85 - (li/(lijnen.length-1))*0.7;
+    const y = 20 + yPct*(H-40);
+    for (let i=0; i<n; i++) {
+      const x = (W-60)*((i+1)/(n+1))+30;
+      const naam = spelers[idx]?.naam.split(' ')[0]||'';
+      tactObjecten.push({ type:'speler', x, y, kleur:'#00e054', label:String(idx+1), naam });
+      idx++;
+    }
+  });
+  tekenBord(); slaanInBord();
+}
+
+// Meerdere borden
+function renderBordSlots() {
+  const el = document.getElementById('boardSlots');
+  if (!el) return;
+  el.innerHTML = tactBorden.map((b,i)=>`
+    <button class="tact-btn${i===tactHuidigBord?' active':''}" onclick="wissel NaarBord(${i})" style="font-size:11px;padding:4px 10px">${b.naam}</button>
+  `).join('').replace(/wissel Naar/g,'wisselNaar');
+}
+
+function wisselNaarBord(i) {
+  slaanInBord();
+  tactHuidigBord = i;
+  tactObjecten = JSON.parse(JSON.stringify(tactBorden[i].objecten || []));
+  tactHistory = [];
+  tekenBord();
+  renderBordSlots();
+}
+
+function nieuwBord() {
+  if (tactBorden.length >= MAX_BORDEN) { alert(`Maximum van ${MAX_BORDEN} borden bereikt.`); return; }
+  slaanInBord();
+  tactBorden.push({ naam:`Bord ${tactBorden.length+1}`, objecten:[] });
+  wisselNaarBord(tactBorden.length-1);
+}
+
+function slaanOpBord() {
+  if (!tactCanvas) return;
+  const link = document.createElement('a');
+  link.download = `tactisch-bord-${tactHuidigBord+1}.png`;
+  link.href = tactCanvas.toDataURL('image/png');
+  link.click();
+}
+
+function volledigScherm() {
+  const wrap = tactCanvas.parentElement;
+  if (wrap.requestFullscreen) wrap.requestFullscreen();
+  else if (wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
+}
+
 let wedstrijden=[], nextWId=1;
 let huidigFormatie='4-3-3';
 let opstellingData={}; // {positieKey: spelerId|null}
@@ -1223,17 +1756,13 @@ function submitWedstrijd(){
   const dv=parseInt(document.getElementById('wDoelVoor').value)||0;
   const dt=parseInt(document.getElementById('wDoelTegen').value)||0;
   const result=dv>dt?'win':dv===dt?'draw':'loss';
-  wedstrijden.unshift({
-    id:nextWId++, datum, tegenstander:tegen,
-    thuisUit:document.getElementById('wThuisUit').value,
-    doelVoor:dv, doelTegen:dt, result,
-    formatie:huidigFormatie,
-    opstelling:{...opstellingData},
-    doelpunten:[...doelpuntenmakers],
-    notitie:document.getElementById('wNotitie').value.trim()
-  });
+  const nieuwW={datum,tegenstander:tegen,thuisUit:document.getElementById('wThuisUit').value,doelVoor:dv,doelTegen:dt,result,formatie:huidigFormatie,opstelling:{...opstellingData},doelpunten:[...doelpuntenmakers],notitie:document.getElementById('wNotitie').value.trim()};
   cModal('addWedOverlay');
-  renderWedstrijden();
+  dbVoegWedstrijdToe(nieuwW).then(id => {
+    nieuwW.id = id || Date.now();
+    wedstrijden.unshift(nieuwW);
+    renderWedstrijden(); slaLokaalOp();
+  });
 }
 
 function resultLabel(r){return r==='win'?'W':r==='draw'?'G':'V';}
@@ -1305,7 +1834,11 @@ function openWedDetail(id){
     </div>`;
   oModal('wedDetailOverlay');
 }
-function delWed(id){wedstrijden=wedstrijden.filter(x=>x.id!==id);cModal('wedDetailOverlay');renderWedstrijden();}
+function delWed(id){
+  wedstrijden=wedstrijden.filter(x=>x.id!==id);
+  cModal('wedDetailOverlay');renderWedstrijden();slaLokaalOp();
+  dbVerwijderWedstrijd(id);
+}
 
 // ── AANWEZIGHEID ──
 let aanwSessies=[]; // [{id, datum, notitie, aanwezig:{spelerId: true/false/null}}]
@@ -1325,16 +1858,21 @@ function submitNieuweTrainingAanw(){
   if(!datum)return;
   const aanwezig={};
   spelers.forEach(s=>aanwezig[s.id]=null);
-  aanwSessies.unshift({id:nextAanwId++,datum,notitie:document.getElementById('aanwNotitie').value.trim(),aanwezig});
+  const nieuwA={datum,notitie:document.getElementById('aanwNotitie').value.trim(),aanwezig};
   cModal('aanwOverlay');
-  renderAanwezigheid();
+  dbVoegAanwToe(nieuwA).then(id => {
+    nieuwA.id = id || Date.now();
+    aanwSessies.unshift(nieuwA);
+    renderAanwezigheid(); slaLokaalOp();
+  });
 }
 
 function toggleAanw(sessieId, spelerId, status){
   const s=aanwSessies.find(x=>x.id===sessieId);
   if(!s)return;
   s.aanwezig[spelerId]=s.aanwezig[spelerId]===status?null:status;
-  renderAanwezigheid();
+  renderAanwezigheid();slaLokaalOp();
+  dbUpdateAanw(sessieId, s.aanwezig);
 }
 
 function toggleSessie(id){
@@ -1430,7 +1968,11 @@ function renderAanwezigheid(){
   if(curPage==='spelers')renderSpelers();
 }
 
-function delAanwSessie(id){aanwSessies=aanwSessies.filter(s=>s.id!==id);renderAanwezigheid();}
+function delAanwSessie(id){
+  aanwSessies=aanwSessies.filter(s=>s.id!==id);
+  renderAanwezigheid();slaLokaalOp();
+  dbVerwijderAanw(id);
+}
 
 // ── AI GENERATOR ──
 function setExample(txt){ document.getElementById('aiExtra').value=txt; }
@@ -1596,7 +2138,11 @@ function openDetail(id){
   document.getElementById('detailBody').innerHTML=`${vh}<div class="detail-body"><span class="badge ${aC(o.age)}">${aL(o.age)}</span><div class="detail-title">${o.title}</div><div class="detail-cat"><span class="dot d-${o.cat}"></span>${cL(o.cat)}${o.eigen?' · <span style="color:var(--green)">Eigen oefening</span>':''}</div><div class="sec-label">Beschrijving</div><div class="sec-text">${o.desc}</div><div class="sec-label">Trainingsdoel</div><div class="sec-text">${o.doel||'–'}</div><div class="info-grid"><div class="info-item"><div class="info-label">Duur</div><div class="info-val">${o.duur||'–'}</div></div><div class="info-item"><div class="info-label">Spelers</div><div class="info-val">${o.spelers||'–'}</div></div><div class="info-item" style="grid-column:1/-1"><div class="info-label">Materiaal</div><div class="info-val">${o.materiaal||'–'}</div></div></div>${o.eigen?`<button class="del-btn" onclick="delOef(${id})">Verwijderen</button>`:''}</div>`;
   oModal('detailOverlay');
 }
-function delOef(id){oefeningen=oefeningen.filter(o=>o.id!==id);cModal('detailOverlay');renderOefeningen();}
+function delOef(id){
+  oefeningen=oefeningen.filter(o=>o.id!==id);
+  cModal('detailOverlay');renderOefeningen();slaLokaalOp();
+  dbVerwijderOefening(id);
+}
 
 function openAddOef(){
   ['fTitle','fDuur','fSpelers','fDesc','fDoel','fMat','fVideo'].forEach(id=>document.getElementById(id).value='');
@@ -1611,8 +2157,13 @@ function submitOefening(){
   document.getElementById('errDesc').style.display=desc?'none':'block';if(!desc)ok=false;
   if(vid&&!embedUrl(vid)){document.getElementById('errVideo').style.display='block';ok=false;}else document.getElementById('errVideo').style.display='none';
   if(!ok)return;
-  oefeningen.unshift({id:nextOId++,title,age:document.getElementById('fAge').value,cat:document.getElementById('fCat').value,duur:document.getElementById('fDuur').value.trim()||'–',spelers:document.getElementById('fSpelers').value.trim()||'–',desc,doel:document.getElementById('fDoel').value.trim(),materiaal:document.getElementById('fMat').value.trim(),video:vid||null,eigen:true});
-  cModal('addOefOverlay');renderOefeningen();
+  const nieuw={title,age:document.getElementById('fAge').value,cat:document.getElementById('fCat').value,duur:document.getElementById('fDuur').value.trim()||'–',spelers:document.getElementById('fSpelers').value.trim()||'–',desc,doel:document.getElementById('fDoel').value.trim(),materiaal:document.getElementById('fMat').value.trim(),video:vid||null,eigen:true};
+  cModal('addOefOverlay');
+  dbVoegOefeningToe(nieuw).then(id => {
+    nieuw.id = id || Date.now();
+    oefeningen.unshift(nieuw);
+    renderOefeningen(); slaLokaalOp();
+  });
 }
 
 function renderSpelers(){
@@ -1640,7 +2191,12 @@ function openSpeler(id){
   document.getElementById('spelerDetailBody').innerHTML=`<div class="modal-header-block"><div class="modal-avatar-lg" style="background:${c.bg};color:${c.text}">${ini(s.naam)}</div><div><div class="modal-name">${s.naam}</div><div class="modal-sub">${s.positie||'–'} · ${lft}</div></div></div><div class="modal-body"><div class="info-grid"><div class="info-item"><div class="info-label">Geboortejaar</div><div class="info-val">${s.jaar||'–'}</div></div><div class="info-item"><div class="info-label">Leeftijd</div><div class="info-val">${lft}</div></div><div class="info-item"><div class="info-label">Positie</div><div class="info-val">${s.positie||'–'}</div></div><div class="info-item"><div class="info-label">Sterkste voet</div><div class="info-val">${s.voet||'–'}</div></div><div class="info-item"><div class="info-label">Rugnummer</div><div class="info-val">${s.nummer?'#'+s.nummer:'–'}</div></div><div class="info-item"><div class="info-label">Trainingen</div><div class="info-val">${st.length}</div></div></div>${s.notities?`<div class="sec-label">Notities</div><div class="sec-text" style="font-style:italic">${s.notities}</div>`:''}<div class="sec-label">Recente trainingen</div>${th}<button class="del-btn" onclick="delSpeler(${id})">Speler verwijderen</button></div>`;
   oModal('spelerDetailOverlay');
 }
-function delSpeler(id){spelers=spelers.filter(s=>s.id!==id);trainingen=trainingen.filter(t=>t.sid!==id);cModal('spelerDetailOverlay');renderSpelers();}
+function delSpeler(id){
+  spelers=spelers.filter(s=>s.id!==id);
+  trainingen=trainingen.filter(t=>t.sid!==id);
+  cModal('spelerDetailOverlay');renderSpelers();slaLokaalOp();
+  dbVerwijderSpeler(id);
+}
 function openAddSpeler(){
   ['sNaam','sJaar','sNummer','sNotities'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('sPositie').value='';document.getElementById('sVoet').value='';
@@ -1649,10 +2205,16 @@ function openAddSpeler(){
   oModal('addSpelerOverlay');
 }
 function submitSpeler(){
+  if (!checkSpelerLimiet()) return;
   const naam=document.getElementById('sNaam').value.trim();
   document.getElementById('errNaam').style.display=naam?'none':'block';if(!naam)return;
-  spelers.push({id:nextSId++,naam,jaar:parseInt(document.getElementById('sJaar').value)||null,positie:document.getElementById('sPositie').value,voet:document.getElementById('sVoet').value,nummer:document.getElementById('sNummer').value||null,notities:document.getElementById('sNotities').value.trim(),ci:selColor});
-  cModal('addSpelerOverlay');renderSpelers();
+  const nieuw={naam,jaar:parseInt(document.getElementById('sJaar').value)||null,positie:document.getElementById('sPositie').value,voet:document.getElementById('sVoet').value,nummer:document.getElementById('sNummer').value||null,notities:document.getElementById('sNotities').value.trim(),ci:selColor};
+  cModal('addSpelerOverlay');
+  dbVoegSpelerToe(nieuw).then(id => {
+    nieuw.id = id || Date.now();
+    spelers.push(nieuw);
+    renderSpelers(); slaLokaalOp();
+  });
 }
 
 function renderResultaten(){
@@ -1678,7 +2240,11 @@ function openTraining(id){
   document.getElementById('trainingDetailBody').innerHTML=`<div class="modal-header-block">${av}<div style="flex:1"><div class="modal-name">${fmtD(t.datum)}</div><div class="modal-sub" style="display:flex;align-items:center;gap:8px">${s?s.naam:'–'}<span>${sterH(t.ster,13)}</span></div></div></div><div class="modal-body"><div class="sec-label">Oefeningen (${t.oefIds.length})</div>${oefHtml||'<div style="font-size:13px;color:var(--text-secondary)">Geen oefeningen gelogd.</div>'}${t.notitie?`<div class="sec-label">Notitie</div><div class="sec-text" style="font-style:italic">${t.notitie}</div>`:''}<button class="del-btn" onclick="delTraining(${id})">Training verwijderen</button></div>`;
   oModal('trainingDetailOverlay');
 }
-function delTraining(id){trainingen=trainingen.filter(t=>t.id!==id);cModal('trainingDetailOverlay');renderResultaten();}
+function delTraining(id){
+  trainingen=trainingen.filter(t=>t.id!==id);
+  cModal('trainingDetailOverlay');renderResultaten();slaLokaalOp();
+  dbVerwijderTraining(id);
+}
 function openAddTraining(){
   if(!spelers.length){alert('Voeg eerst een speler toe.');return;}
   document.getElementById('tDatum').value=new Date().toISOString().split('T')[0];
@@ -1696,9 +2262,14 @@ function submitTraining(){
   document.getElementById('errSpeler').style.display=sid?'none':'block';if(!sid)ok=false;
   if(!ok)return;
   const oefIds=Array.from(document.querySelectorAll('#oefChecklist input:checked')).map(el=>parseInt(el.value));
-  trainingen.push({id:nextTId++,datum,sid,oefIds,ster:sterRating,notitie:document.getElementById('tNotitie').value.trim()});
-  cModal('addTrainingOverlay');renderResultaten();
-  if(curPage==='spelers')renderSpelers();
+  const nieuwT={datum,sid,oefIds,ster:sterRating,notitie:document.getElementById('tNotitie').value.trim()};
+  cModal('addTrainingOverlay');
+  dbVoegTrainingToe(nieuwT).then(id => {
+    nieuwT.id = id || Date.now();
+    trainingen.unshift(nieuwT);
+    renderResultaten(); slaLokaalOp();
+    if(curPage==='spelers')renderSpelers();
+  });
 }
 
 document.querySelectorAll('.pill[data-age]').forEach(el=>el.addEventListener('click',()=>{
@@ -1710,9 +2281,6 @@ document.querySelectorAll('.cat-pill[data-cat]').forEach(el=>el.addEventListener
   el.classList.add('active');fCat=el.dataset.cat;renderOefeningen();
 }));
 
-buildCP();
-renderOefeningen();
-
 // ══ SUPABASE + STRIPE INIT ══
 const SUPABASE_URL = 'https://nwuxepqtchrxeejtrajn.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53dXhlcHF0Y2hyeGVlanRyYWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MzQ0ODQsImV4cCI6MjA4OTQxMDQ4NH0.Vz05DQ7E7085hRqqaLt-x6rnBrxR9zhxq4UsvDj_3hs';
@@ -1720,25 +2288,265 @@ const STRIPE_PK = 'pk_test_51R6X33KPkbXyZxvmIhWblSmMZn3aYEtgB5dryZnoeSjgGbwMaYtl
 const PRICE_PRO = 'price_1TCIiGKPkbXyZxvmbxnv6owj';
 const PRICE_CLUB = 'price_1TCIkRKPkbXyZxvmVrNwUM8r';
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-const stripe = Stripe(STRIPE_PK);
+// Wacht tot Supabase beschikbaar is
+let sb;
+function initSupabase() {
+  if (window.supabase) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    return true;
+  }
+  return false;
+}
 
 let huidigUser = null;
-let huidigPlan = 'gratis'; // 'gratis' | 'pro' | 'club'
+let huidigPlan = 'gratis';
 const GRATIS_SPELER_LIMIET = 5;
 
 // ── AUTH STATE ──
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (session?.user) {
-    huidigUser = session.user;
-    await laadPlan();
-    toonApp();
-  } else {
-    huidigUser = null;
-    huidigPlan = 'gratis';
-    toonAuthScherm();
+function setupAuth() {
+  if (!initSupabase()) {
+    setTimeout(setupAuth, 100);
+    return;
   }
-});
+
+  // Laad lokale data altijd eerst — ongeacht login status
+  laadLokaleData();
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_OUT') {
+      huidigUser = null;
+      huidigPlan = 'gratis';
+      toonAuthScherm();
+      return;
+    }
+    if (session?.user) {
+      huidigUser = session.user;
+      await laadPlan();
+      toonApp();
+    }
+  });
+
+  // Check bestaande sessie bij laden pagina
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session?.user) {
+      huidigUser = session.user;
+      laadPlan().then(() => toonApp());
+    } else {
+      toonAuthScherm();
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', () => setTimeout(setupAuth, 200));
+
+// ── SUPABASE DATA LAAG ──
+// Laad alles uit Supabase na inloggen
+async function laadAlleData() {
+  if (!huidigUser) return;
+  try {
+    const uid = huidigUser.id;
+    const [sp, oe, tr, we, aa, bo] = await Promise.all([
+      sb.from('spelers').select('*').eq('user_id', uid).order('aangemaakt_op'),
+      sb.from('eigen_oefeningen').select('*').eq('user_id', uid).order('aangemaakt_op', {ascending:false}),
+      sb.from('trainingen').select('*').eq('user_id', uid).order('datum', {ascending:false}),
+      sb.from('wedstrijden').select('*').eq('user_id', uid).order('datum', {ascending:false}),
+      sb.from('aanwezigheid').select('*').eq('user_id', uid).order('datum', {ascending:false}),
+      sb.from('tactische_borden').select('*').eq('user_id', uid).order('aangemaakt_op'),
+    ]);
+
+    // Spelers
+    if (sp.data?.length) {
+      spelers = sp.data.map(s => ({
+        id: s.id, naam: s.naam, jaar: s.jaar, positie: s.positie,
+        voet: s.voet, nummer: s.nummer, notities: s.notities, ci: s.kleur_index || 0
+      }));
+    }
+
+    // Eigen oefeningen
+    if (oe.data?.length) {
+      oe.data.forEach(o => {
+        if (!oefeningen.find(x => x.id === o.id)) {
+          oefeningen.unshift({
+            id: o.id, title: o.title, age: o.age, cat: o.cat,
+            duur: o.duur, spelers: o.spelers_aantal, desc: o.beschrijving,
+            doel: o.doel, materiaal: o.materiaal, video: o.video, eigen: true
+          });
+        }
+      });
+    }
+
+    // Trainingen
+    if (tr.data?.length) {
+      trainingen = tr.data.map(t => ({
+        id: t.id, datum: t.datum, sid: t.speler_id,
+        oefIds: t.oef_ids || [], ster: t.ster || 0, notitie: t.notitie || ''
+      }));
+    }
+
+    // Wedstrijden
+    if (we.data?.length) {
+      wedstrijden = we.data.map(w => ({
+        id: w.id, datum: w.datum, tegenstander: w.tegenstander,
+        thuisUit: w.thuis_uit, doelVoor: w.doel_voor, doelTegen: w.doel_tegen,
+        result: w.result, formatie: w.formatie, opstelling: w.opstelling || {},
+        doelpunten: w.doelpunten || [], notitie: w.notitie || ''
+      }));
+    }
+
+    // Aanwezigheid
+    if (aa.data?.length) {
+      aanwSessies = aa.data.map(a => ({
+        id: a.id, datum: a.datum, notitie: a.notitie || '', aanwezig: a.aanwezig || {}
+      }));
+    }
+
+    // Tactische borden
+    if (bo.data?.length) {
+      tactBorden = bo.data.map(b => ({ id: b.id, naam: b.naam, objecten: b.objecten || [] }));
+      tactObjecten = JSON.parse(JSON.stringify(tactBorden[0]?.objecten || []));
+    }
+
+    // Herrender actieve pagina
+    renderOefeningen();
+    if (curPage === 'spelers') renderSpelers();
+    if (curPage === 'resultaten') renderResultaten();
+    if (curPage === 'wedstrijden') renderWedstrijden();
+    if (curPage === 'aanwezigheid') renderAanwezigheid();
+
+    console.log('✓ Data geladen uit Supabase');
+  } catch(e) {
+    console.warn('Supabase laden mislukt, gebruik localStorage als backup:', e);
+    laadLokaleData();
+  }
+}
+
+// ── SUPABASE SCHRIJF FUNCTIES ──
+async function dbVoegSpelerToe(spelerData) {
+  if (!huidigUser) return null;
+  const { data, error } = await sb.from('spelers').insert({
+    user_id: huidigUser.id,
+    naam: spelerData.naam, jaar: spelerData.jaar, positie: spelerData.positie,
+    voet: spelerData.voet, nummer: spelerData.nummer,
+    notities: spelerData.notities, kleur_index: spelerData.ci
+  }).select().single();
+  if (error) { console.error(error); return null; }
+  return data.id;
+}
+
+async function dbVerwijderSpeler(id) {
+  if (!huidigUser) return;
+  await sb.from('spelers').delete().eq('id', id).eq('user_id', huidigUser.id);
+}
+
+async function dbVoegOefeningToe(o) {
+  if (!huidigUser) return null;
+  const { data, error } = await sb.from('eigen_oefeningen').insert({
+    user_id: huidigUser.id, title: o.title, age: o.age, cat: o.cat,
+    duur: o.duur, spelers_aantal: o.spelers, beschrijving: o.desc,
+    doel: o.doel, materiaal: o.materiaal, video: o.video
+  }).select().single();
+  if (error) { console.error(error); return null; }
+  return data.id;
+}
+
+async function dbVerwijderOefening(id) {
+  if (!huidigUser) return;
+  await sb.from('eigen_oefeningen').delete().eq('id', id).eq('user_id', huidigUser.id);
+}
+
+async function dbVoegTrainingToe(t) {
+  if (!huidigUser) return null;
+  const { data, error } = await sb.from('trainingen').insert({
+    user_id: huidigUser.id, datum: t.datum, speler_id: t.sid,
+    oef_ids: t.oefIds, ster: t.ster, notitie: t.notitie
+  }).select().single();
+  if (error) { console.error(error); return null; }
+  return data.id;
+}
+
+async function dbVerwijderTraining(id) {
+  if (!huidigUser) return;
+  await sb.from('trainingen').delete().eq('id', id).eq('user_id', huidigUser.id);
+}
+
+async function dbVoegWedstrijdToe(w) {
+  if (!huidigUser) return null;
+  const { data, error } = await sb.from('wedstrijden').insert({
+    user_id: huidigUser.id, datum: w.datum, tegenstander: w.tegenstander,
+    thuis_uit: w.thuisUit, doel_voor: w.doelVoor, doel_tegen: w.doelTegen,
+    result: w.result, formatie: w.formatie, opstelling: w.opstelling,
+    doelpunten: w.doelpunten, notitie: w.notitie
+  }).select().single();
+  if (error) { console.error(error); return null; }
+  return data.id;
+}
+
+async function dbVerwijderWedstrijd(id) {
+  if (!huidigUser) return;
+  await sb.from('wedstrijden').delete().eq('id', id).eq('user_id', huidigUser.id);
+}
+
+async function dbVoegAanwToe(a) {
+  if (!huidigUser) return null;
+  const { data, error } = await sb.from('aanwezigheid').insert({
+    user_id: huidigUser.id, datum: a.datum, notitie: a.notitie, aanwezig: a.aanwezig
+  }).select().single();
+  if (error) { console.error(error); return null; }
+  return data.id;
+}
+
+async function dbUpdateAanw(id, aanwezig) {
+  if (!huidigUser) return;
+  await sb.from('aanwezigheid').update({ aanwezig }).eq('id', id).eq('user_id', huidigUser.id);
+}
+
+async function dbVerwijderAanw(id) {
+  if (!huidigUser) return;
+  await sb.from('aanwezigheid').delete().eq('id', id).eq('user_id', huidigUser.id);
+}
+
+async function dbSlaaBordOp(bord) {
+  if (!huidigUser) return null;
+  if (bord.id) {
+    await sb.from('tactische_borden').update({
+      objecten: bord.objecten, bijgewerkt_op: new Date().toISOString()
+    }).eq('id', bord.id).eq('user_id', huidigUser.id);
+    return bord.id;
+  } else {
+    const { data, error } = await sb.from('tactische_borden').insert({
+      user_id: huidigUser.id, naam: bord.naam, objecten: bord.objecten
+    }).select().single();
+    if (error) { console.error(error); return null; }
+    return data.id;
+  }
+}
+
+// ── LOCALSTORAGE als fallback ──
+const LS_KEY = 'trainershub_data_v1';
+function slaLokaalOp() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      spelers, trainingen, wedstrijden, aanwSessies, tactBorden, tactHuidigBord,
+      eigenOefeningen: oefeningen.filter(o=>o.eigen)
+    }));
+  } catch(e) {}
+}
+
+function laadLokaleData() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.spelers?.length) spelers = data.spelers;
+    if (data.trainingen?.length) trainingen = data.trainingen;
+    if (data.wedstrijden?.length) wedstrijden = data.wedstrijden;
+    if (data.aanwSessies?.length) aanwSessies = data.aanwSessies;
+    if (data.tactBorden?.length) { tactBorden = data.tactBorden; tactObjecten = JSON.parse(JSON.stringify(tactBorden[0]?.objecten||[])); }
+    if (data.eigenOefeningen?.length) {
+      data.eigenOefeningen.forEach(o => { if(!oefeningen.find(x=>x.id===o.id)) oefeningen.unshift(o); });
+    }
+    renderOefeningen();
+  } catch(e) {}
+}
 
 async function laadPlan() {
   try {
@@ -1753,6 +2561,8 @@ function toonApp() {
   document.getElementById('authScreen').classList.add('hidden');
   updateAccountBtn();
   updateUpgradeBanner();
+  // Laad data uit Supabase
+  laadAlleData();
 }
 
 function toonAuthScherm() {
@@ -1787,6 +2597,7 @@ function switchAuthTab(tab, btn) {
 
 // ── LOGIN ──
 async function doLogin() {
+  if (!sb) { initSupabase(); if (!sb) { alert('Even geduld, laden...'); return; } }
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPw').value;
   const btn = document.getElementById('loginBtn');
@@ -1796,11 +2607,12 @@ async function doLogin() {
   btn.disabled = true; btn.textContent = 'Bezig...';
   const { error } = await sb.auth.signInWithPassword({ email, password: pw });
   btn.disabled = false; btn.textContent = 'Inloggen';
-  if (error) { err.textContent = 'Verkeerd e-mailadres of wachtwoord.'; err.style.display = 'block'; }
+  if (error) { err.textContent = 'Verkeerd e-mailadres of wachtwoord. Heb je je e-mail al bevestigd?'; err.style.display = 'block'; }
 }
 
 // ── REGISTREREN ──
 async function doRegister() {
+  if (!sb) { initSupabase(); if (!sb) { alert('Even geduld, laden...'); return; } }
   const naam = document.getElementById('regNaam').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const pw = document.getElementById('regPw').value;
@@ -1814,7 +2626,7 @@ async function doRegister() {
   const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { naam } } });
   btn.disabled = false; btn.textContent = 'Gratis account aanmaken';
   if (error) { err.textContent = 'Er ging iets mis: ' + error.message; err.style.display = 'block'; }
-  else { ok.textContent = 'Account aangemaakt! Controleer je e-mail om te bevestigen, dan kun je inloggen.'; ok.style.display = 'block'; }
+  else { ok.textContent = '✓ Account aangemaakt! Controleer je e-mail om te bevestigen, dan kun je inloggen.'; ok.style.display = 'block'; }
 }
 
 // ── WACHTWOORD RESET ──
@@ -1931,18 +2743,9 @@ function toonLimietMelding(type, limiet) {
   oModal('accountOverlay');
 }
 
-// Wrap submitSpeler om limiet te checken
-const _origSubmitSpeler = submitSpeler;
-window.submitSpeler = function() {
-  if (!checkSpelerLimiet()) return;
-  _origSubmitSpeler();
-};
-
-// ── CHECK OF AL INGELOGD ──
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) toonAuthScherm();
-})();
+// ── INIT ──
+buildCP();
+renderOefeningen();
 </script>
 <!-- MODAL: aanwezigheid nieuwe training -->
 <div class="overlay" id="aanwOverlay" onclick="oClick(event,'aanwOverlay')">
