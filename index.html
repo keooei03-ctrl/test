@@ -594,8 +594,16 @@
       </div>
       <div class="auth-brand">TrainersHub</div>
     </div>
-    <div class="auth-title">Welkom terug</div>
-    <div class="auth-sub">Log in of maak een gratis account aan om te beginnen.</div>
+
+    <!-- Laadscherm -->
+    <div id="authLoading" style="text-align:center;padding:2rem 0">
+      <div style="width:32px;height:32px;border:2px solid rgba(0,224,84,0.2);border-top-color:#00e054;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 1rem"></div>
+      <div style="font-size:13px;color:#888">Verbinding maken...</div>
+    </div>
+
+    <div id="authForms" style="display:none">
+      <div class="auth-title">Welkom terug</div>
+      <div class="auth-sub">Log in of maak een gratis account aan om te beginnen.</div>
 
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login',this)">Inloggen</button>
@@ -627,6 +635,7 @@
       <button class="auth-btn" onclick="doReset()">Herstelmail sturen</button>
       <div style="text-align:center;margin-top:1rem"><button onclick="switchAuthTab('login',document.querySelectorAll('.auth-tab')[0])" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">← Terug naar inloggen</button></div>
     </div>
+    </div><!-- einde authForms -->
   </div>
 </div>
 
@@ -2348,13 +2357,28 @@ function setupAuth() {
   });
 
   // Check bestaande sessie bij laden pagina
+  // Timeout van 4 seconden — als Supabase niet reageert toon loginscherm
+  let sessieGeladen = false;
+  const sessieTimeout = setTimeout(() => {
+    if (!sessieGeladen) {
+      console.warn('Supabase timeout — toon loginscherm');
+      toonAuthScherm();
+    }
+  }, 4000);
+
   sb.auth.getSession().then(({ data: { session } }) => {
+    sessieGeladen = true;
+    clearTimeout(sessieTimeout);
     if (session?.user) {
       huidigUser = session.user;
       laadPlan().then(() => toonApp());
     } else {
       toonAuthScherm();
     }
+  }).catch(() => {
+    sessieGeladen = true;
+    clearTimeout(sessieTimeout);
+    toonAuthScherm();
   });
 }
 document.addEventListener('DOMContentLoaded', () => setTimeout(setupAuth, 200));
@@ -2589,6 +2613,8 @@ function toonApp() {
 
 function toonAuthScherm() {
   document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('authLoading').style.display = 'none';
+  document.getElementById('authForms').style.display = 'block';
 }
 
 function updateAccountBtn() {
@@ -2627,9 +2653,18 @@ async function doLogin() {
   err.style.display = 'none';
   if (!email || !pw) { err.textContent = 'Vul je e-mailadres en wachtwoord in.'; err.style.display = 'block'; return; }
   btn.disabled = true; btn.textContent = 'Bezig...';
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  btn.disabled = false; btn.textContent = 'Inloggen';
-  if (error) { err.textContent = 'Verkeerd e-mailadres of wachtwoord. Heb je je e-mail al bevestigd?'; err.style.display = 'block'; }
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) throw error;
+    // Direct toonApp zonder wachten op onAuthStateChange
+    huidigUser = data.user;
+    await laadPlan();
+    toonApp();
+  } catch(error) {
+    btn.disabled = false; btn.textContent = 'Inloggen';
+    err.textContent = 'Verkeerd e-mailadres of wachtwoord. Heb je je e-mail al bevestigd?';
+    err.style.display = 'block';
+  }
 }
 
 // ── REGISTREREN ──
