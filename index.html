@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TrainersHub Voetbal</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#00e054">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TrainersHub">
+  <link rel="apple-touch-icon" href="/icon-192.svg">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="Digitale trainingstool voor jeugdvoetbal trainers">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -2301,6 +2311,20 @@ const GRATIS_SPELER_LIMIET = 5;
 
 // ── AUTH STATE ──
 function setupAuth() {
+  // ── TESTMODUS — sla login over in preview of lokaal ──
+  const isPreview = window.location.hostname === 'localhost' ||
+                    window.location.hostname === '127.0.0.1' ||
+                    window.location.protocol === 'file:' ||
+                    window.location.hostname.includes('claude.ai') ||
+                    window.location.hostname.includes('anthropic');
+
+  if (isPreview) {
+    huidigUser = { id: 'preview', email: 'trainer@test.nl', user_metadata: { naam: 'Test Trainer' } };
+    huidigPlan = 'pro';
+    toonApp();
+    return;
+  }
+
   if (!initSupabase()) {
     setTimeout(setupAuth, 100);
     return;
@@ -2339,6 +2363,7 @@ document.addEventListener('DOMContentLoaded', () => setTimeout(setupAuth, 200));
 // Laad alles uit Supabase na inloggen
 async function laadAlleData() {
   if (!huidigUser) return;
+  if (huidigUser.id === 'preview') { renderOefeningen(); return; }
   try {
     const uid = huidigUser.id;
     const [sp, oe, tr, we, aa, bo] = await Promise.all([
@@ -2743,6 +2768,60 @@ function toonLimietMelding(type, limiet) {
 // ── INIT ──
 buildCP();
 renderOefeningen();
+
+// ── PWA SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(() => console.log('✓ Service worker geregistreerd'))
+      .catch(err => console.log('Service worker fout:', err));
+  });
+}
+
+// ── PWA INSTALLATIE PROMPT ──
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installPrompt = e;
+  // Toon installatie banner na 10 seconden
+  setTimeout(() => {
+    if (installPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+      toonInstallBanner();
+    }
+  }, 10000);
+});
+
+function toonInstallBanner() {
+  const banner = document.createElement('div');
+  banner.id = 'installBanner';
+  banner.style.cssText = `
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:#1a1a1a;border:0.5px solid rgba(0,224,84,0.3);
+    border-radius:14px;padding:14px 20px;display:flex;align-items:center;
+    gap:14px;z-index:9998;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    max-width:360px;width:calc(100% - 40px);
+  `;
+  banner.innerHTML = `
+    <div style="font-size:28px">📱</div>
+    <div style="flex:1">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:#f0f0f0">App installeren</div>
+      <div style="font-size:12px;color:#888;margin-top:2px">Zet TrainersHub op je beginscherm</div>
+    </div>
+    <button onclick="doInstall()" style="padding:8px 16px;border-radius:8px;background:#00e054;color:#0a0a0a;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">Installeren</button>
+    <button onclick="document.getElementById('installBanner').remove()" style="background:none;border:none;color:#555;font-size:20px;cursor:pointer;padding:0;line-height:1">✕</button>
+  `;
+  document.body.appendChild(banner);
+}
+
+async function doInstall() {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  const { outcome } = await installPrompt.userChoice;
+  if (outcome === 'accepted') {
+    document.getElementById('installBanner')?.remove();
+    installPrompt = null;
+  }
+}
 </script>
 <!-- MODAL: aanwezigheid nieuwe training -->
 <div class="overlay" id="aanwOverlay" onclick="oClick(event,'aanwOverlay')">
