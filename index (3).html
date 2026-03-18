@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrainersHub Voetbal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    /* ── AUTH SCHERM ── */
+    #authScreen {
+      position: fixed; inset: 0; background: #0a0a0a;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; padding: 1rem;
+    }
+    #authScreen.hidden { display: none; }
+    .auth-card {
+      background: #111; border: 0.5px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 2.5rem 2rem; width: 100%; max-width: 400px;
+      position: relative; overflow: hidden;
+    }
+    .auth-card::before {
+      content:''; position:absolute; top:-80px; right:-80px;
+      width:300px; height:300px;
+      background: radial-gradient(circle, rgba(0,224,84,0.08) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .auth-logo { display:flex; align-items:center; gap:12px; margin-bottom:2rem; }
+    .auth-logo-icon { width:38px; height:38px; background:#00e054; border-radius:10px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(0,224,84,0.2); }
+    .auth-logo-icon svg { width:20px; height:20px; }
+    .auth-brand { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; color:#f0f0f0; }
+    .auth-title { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:1.5px; color:#f0f0f0; margin-bottom:6px; }
+    .auth-sub { font-size:13px; color:#888; margin-bottom:2rem; line-height:1.5; }
+    .auth-tabs { display:flex; gap:4px; background:#1a1a1a; border-radius:10px; padding:3px; margin-bottom:1.5rem; border:0.5px solid rgba(255,255,255,0.07); }
+    .auth-tab { flex:1; padding:8px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; border:none; background:transparent; color:#666; transition:all 0.15s; font-family:'DM Sans',sans-serif; }
+    .auth-tab.active { background:#222; color:#f0f0f0; }
+    .auth-field { margin-bottom:1rem; }
+    .auth-label { display:block; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#555; margin-bottom:6px; }
+    .auth-input { width:100%; padding:11px 13px; border:0.5px solid rgba(255,255,255,0.12); border-radius:10px; background:#1a1a1a; color:#f0f0f0; font-size:14px; font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.15s; }
+    .auth-input:focus { border-color:#00e054; }
+    .auth-input::placeholder { color:#444; }
+    .auth-btn { width:100%; padding:13px; border-radius:10px; background:#00e054; color:#0a0a0a; border:none; font-size:15px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; margin-top:0.5rem; box-shadow:0 0 20px rgba(0,224,84,0.2); }
+    .auth-btn:hover { background:#14f06a; }
+    .auth-btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .auth-err { font-size:12px; color:#ff6b6b; margin-top:8px; display:none; padding:8px 12px; background:rgba(255,107,107,0.08); border-radius:8px; border:0.5px solid rgba(255,107,107,0.2); }
+    .auth-ok { font-size:12px; color:#00e054; margin-top:8px; display:none; padding:8px 12px; background:rgba(0,224,84,0.08); border-radius:8px; border:0.5px solid rgba(0,224,84,0.2); }
+
+    /* ── UPGRADE BANNER ── */
+    .upgrade-banner {
+      background: linear-gradient(135deg, #1a2a1a, #0a1a0a);
+      border: 0.5px solid rgba(0,224,84,0.2);
+      border-radius: 14px; padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;
+    }
+    .upgrade-banner-text { font-size:14px; color:#f0f0f0; }
+    .upgrade-banner-sub { font-size:12px; color:#888; margin-top:3px; }
+    .upgrade-banner-btn { padding:9px 20px; border-radius:10px; background:#00e054; color:#0a0a0a; border:none; font-size:13px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; white-space:nowrap; transition:all 0.15s; }
+    .upgrade-banner-btn:hover { background:#14f06a; }
+
+    /* ── ACCOUNT MENU ── */
+    .account-btn { display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:10px; border:0.5px solid rgba(255,255,255,0.1); background:transparent; color:#888; font-size:12px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; flex-shrink:0; }
+    .account-btn:hover { border-color:rgba(255,255,255,0.2); color:#f0f0f0; }
+    .account-avatar { width:26px; height:26px; border-radius:50%; background:#00e054; color:#0a0a0a; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Bebas Neue',sans-serif; }
+    .pro-badge { font-size:9px; background:rgba(0,224,84,0.15); color:#00e054; padding:2px 7px; border-radius:6px; font-weight:700; border:0.5px solid rgba(0,224,84,0.3); }
+
+    /* ── ACCOUNT MODAL ── */
+    .account-modal { background:#111; border:0.5px solid rgba(255,255,255,0.12); border-radius:16px; padding:1.5rem; }
+    .account-modal-naam { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; color:#f0f0f0; margin-bottom:4px; }
+    .account-modal-email { font-size:13px; color:#888; margin-bottom:1.5rem; }
+    .plan-card { border-radius:12px; padding:1rem 1.25rem; margin-bottom:1rem; }
+    .plan-card.gratis { background:rgba(255,255,255,0.04); border:0.5px solid rgba(255,255,255,0.08); }
+    .plan-card.pro { background:rgba(0,224,84,0.06); border:0.5px solid rgba(0,224,84,0.2); }
+    .plan-card-naam { font-size:14px; font-weight:600; color:#f0f0f0; margin-bottom:3px; }
+    .plan-card-desc { font-size:12px; color:#888; }
+    .uitloggen-btn { width:100%; padding:11px; border-radius:10px; border:0.5px solid rgba(255,107,107,0.25); background:transparent; color:#ff6b6b; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; margin-top:0.5rem; }
+    .uitloggen-btn:hover { background:rgba(255,107,107,0.08); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --dark: #111111;
+      --dark2: #1a1a1a;
+      --dark3: #222222;
+      --dark4: #2a2a2a;
+      --green: #00e054;
+      --green-dim: #00b843;
+      --green-glow: rgba(0,224,84,0.15);
+      --green-glow2: rgba(0,224,84,0.06);
+      --text: #f0f0f0;
+      --text-secondary: #888;
+      --text-tertiary: #555;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.14);
+      --radius: 10px;
+      --radius-lg: 16px;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--black); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 0.5px solid var(--border);
+      padding: 0 2rem;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 16px;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      width: 38px; height: 38px;
+      background: var(--green);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px var(--green-glow);
+    }
+    .logo svg { width: 20px; height: 20px; }
+    .brand { font-family: var(--font-display); font-size: 22px; letter-spacing: 1px; color: var(--text); line-height: 1; }
+    .brand-sub { font-size: 11px; color: var(--text-tertiary); letter-spacing: .08em; text-transform: uppercase; margin-top: 1px; }
+
+    .nav-tabs { display: flex; gap: 2px; background: var(--dark2); border-radius: 10px; padding: 3px; border: 0.5px solid var(--border); }
+    .nav-tab { padding: 7px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; font-family: var(--font-body); letter-spacing: .02em; }
+    .nav-tab.active { background: var(--dark4); color: var(--green); }
+    .nav-tab:hover:not(.active) { color: var(--text); }
+
+    .add-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--green); color: var(--black);
+      border: none; border-radius: var(--radius);
+      padding: 9px 18px; font-size: 13px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.2s; flex-shrink: 0;
+      font-family: var(--font-body);
+      box-shadow: 0 0 20px var(--green-glow);
+    }
+    .add-btn:hover { background: #14f06a; box-shadow: 0 0 30px rgba(0,224,84,0.3); transform: translateY(-1px); }
+    .add-btn svg { width: 13px; height: 13px; }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; }
+    .main { max-width: 1140px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── HERO BANNER ── */
+    .hero {
+      position: relative;
+      background: var(--dark2);
+      border: 0.5px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem 2rem;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(0,224,84,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      opacity: 0.4;
+    }
+    .hero-pitch {
+      position: absolute;
+      right: 2rem; top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.06;
+    }
+    .hero-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; font-weight: 500; }
+    .hero-title { font-family: var(--font-display); font-size: 52px; line-height: 1; letter-spacing: 2px; color: var(--text); margin-bottom: 10px; }
+    .hero-title span { color: var(--green); }
+    .hero-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.6; max-width: 480px; }
+    .hero-stats { display: flex; gap: 2rem; margin-top: 1.5rem; }
+    .hero-stat-num { font-family: var(--font-display); font-size: 32px; color: var(--green); letter-spacing: 1px; }
+    .hero-stat-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+
+    /* ── FILTERS ── */
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem; }
+    .filter-section { display: flex; gap: 6px; align-items: center; }
+    .filter-divider { width: 1px; height: 20px; background: var(--border-strong); margin: 0 6px; }
+    .filter-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-tertiary); margin-right: 4px; }
+    .pill { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 0.5px solid var(--border-strong); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: var(--font-body); }
+    .pill:hover { border-color: var(--green); color: var(--green); }
+    .pill.active { background: var(--green); color: var(--black); border-color: var(--green); font-weight: 600; }
+    .cat-pill { padding: 6px 14px; border-radius: 20px; font-size: 12px; border: 0.5px solid var(--border); background: var(--dark2); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: var(--font-body); }
+    .cat-pill[data-cat="passing"].active    { background: #0d2b4a; color: #5bb8ff; border-color: #1a4a7a; }
+    .cat-pill[data-cat="schieten"].active   { background: #3a0a0a; color: #ff6b6b; border-color: #6a1a1a; }
+    .cat-pill[data-cat="positiespel"].active{ background: #0a2a1a; color: #00e054; border-color: #1a5a2a; }
+    .cat-pill[data-cat="dribbelen"].active  { background: #2a1a00; color: #ffb84d; border-color: #5a3a00; }
+    .cat-pill[data-cat="warming-up"].active { background: #2a0a1a; color: #ff80b3; border-color: #5a1a3a; }
+
+    .search-wrap { display: flex; align-items: center; gap: 10px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 9px 14px; background: var(--dark2); margin-bottom: 1.5rem; transition: border-color 0.2s; }
+    .search-wrap:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow2); }
+    .search-wrap input { border: none; outline: none; background: transparent; font-size: 14px; color: var(--text); width: 100%; font-family: var(--font-body); }
+    .search-wrap input::placeholder { color: var(--text-tertiary); }
+
+    /* ── CARDS ── */
+    .count { font-size: 12px; color: var(--text-tertiary); margin-bottom: 1.25rem; letter-spacing: .04em; text-transform: uppercase; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+    .card {
+      background: var(--dark2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+    }
+    .card:hover { border-color: rgba(0,224,84,0.3); transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 20px var(--green-glow2); }
+    .card.eigen { border-color: rgba(0,224,84,0.25); }
+    .eigen-tag { position: absolute; top: 10px; left: 10px; z-index: 2; background: var(--green); color: var(--black); font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 10px; letter-spacing: .06em; text-transform: uppercase; }
+
+    .card-thumb { width: 100%; height: 150px; background: var(--dark3); position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .card-thumb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.6) 100%); }
+    .play-overlay { position: absolute; z-index: 2; width: 40px; height: 40px; background: rgba(0,224,84,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px var(--green-glow); }
+    .play-overlay svg { width: 14px; height: 14px; margin-left: 2px; }
+    .no-thumb { width: 100%; height: 150px; background: var(--dark3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; position: relative; }
+    /* SVG pitch background in card */
+    .no-thumb-pitch { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.07; }
+    .no-thumb-label { font-size: 11px; color: var(--text-tertiary); position: relative; z-index: 1; }
+
+    .card-body { padding: 1rem 1.1rem; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px; }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .badge { font-size: 10px; padding: 3px 9px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; font-weight: 600; letter-spacing: .04em; }
+    .b-u6  { background: #2a0a1a; color: #ff80b3; border: 0.5px solid #4a1a3a; }
+    .b-u10 { background: #0a1a2a; color: #5bb8ff; border: 0.5px solid #1a3a5a; }
+    .b-u14 { background: #0a2a0a; color: #00e054; border: 0.5px solid #1a4a1a; }
+    .card-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; }
+    .card-meta { display: flex; gap: 12px; padding-top: 10px; border-top: 0.5px solid var(--border); }
+    .meta { font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center; gap: 5px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .d-passing{background:#5bb8ff;} .d-schieten{background:#ff6b6b;} .d-positiespel{background:#00e054;} .d-dribbelen{background:#ffb84d;} .d-warming-up{background:#ff80b3;}
+    .empty { text-align: center; padding: 5rem 1rem; color: var(--text-tertiary); font-size: 14px; }
+
+    /* ── SPELERS ── */
+    .section-title { font-family: var(--font-display); font-size: 28px; letter-spacing: 1px; color: var(--text); margin-bottom: 1.25rem; }
+    .section-title span { color: var(--green); }
+    .spelers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+    .speler-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .speler-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--green), transparent); opacity: 0; transition: opacity 0.2s; }
+    .speler-card:hover { border-color: rgba(0,224,84,0.2); transform: translateY(-2px); }
+    .speler-card:hover::before { opacity: 1; }
+    .speler-top { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); letter-spacing: 1px; }
+    .speler-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .speler-pos { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .speler-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .speler-tag { font-size: 10px; padding: 3px 9px; border-radius: 8px; background: var(--dark3); color: var(--text-secondary); border: 0.5px solid var(--border); font-weight: 500; }
+    .speler-note { font-size: 12px; color: var(--text-secondary); margin-top: 10px; line-height: 1.55; border-top: 0.5px solid var(--border); padding-top: 10px; font-style: italic; }
+    .speler-stat-row { display: flex; gap: 0; margin-top: 12px; border-top: 0.5px solid var(--border); padding-top: 12px; }
+    .speler-stat { flex: 1; text-align: center; }
+    .speler-stat:not(:last-child) { border-right: 0.5px solid var(--border); }
+    .speler-stat-num { font-family: var(--font-display); font-size: 22px; color: var(--green); letter-spacing: 1px; }
+    .speler-stat-label { font-size: 9px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+
+    /* ── RESULTATEN ── */
+    .resultaten-list { display: flex; flex-direction: column; gap: 12px; }
+    .training-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem 1.25rem; cursor: pointer; transition: all 0.2s; display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; }
+    .training-card:hover { border-color: rgba(0,224,84,0.2); transform: translateX(3px); }
+    .training-datum-block { text-align: center; min-width: 50px; }
+    .training-dag { font-family: var(--font-display); font-size: 28px; color: var(--text); letter-spacing: 1px; line-height: 1; }
+    .training-mnd { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .08em; }
+    .training-divider { width: 1px; height: 40px; background: var(--border-strong); }
+    .training-info { }
+    .training-speler { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .training-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .training-tag { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: var(--dark3); color: var(--text-secondary); border: 0.5px solid var(--border); }
+    .training-ster { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .ster-row { display: flex; gap: 2px; }
+    .ster { font-size: 12px; color: var(--dark4); }
+    .ster.on { color: #ffb84d; }
+
+    /* ── EMPTY STATES ── */
+    .empty-block { text-align: center; padding: 4rem 1rem; }
+    .empty-block-icon { width: 64px; height: 64px; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
+    .empty-block-icon svg { width: 28px; height: 28px; }
+    .empty-block h3 { font-family: var(--font-display); font-size: 22px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
+    .empty-block p { font-size: 13px; color: var(--text-secondary); }
+
+    /* ── MODALS ── */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; backdrop-filter: blur(4px); }
+    .overlay.open { display: flex; }
+    .modal { background: var(--dark); border: 0.5px solid var(--border-strong); border-radius: 20px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 32px 80px rgba(0,0,0,0.6); }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: var(--dark2); border: 0.5px solid var(--border); border-radius: 50%; width: 30px; height: 30px; font-size: 15px; cursor: pointer; color: var(--text-secondary); line-height: 30px; text-align: center; z-index: 5; transition: all 0.15s; }
+    .modal-close:hover { background: var(--dark3); color: var(--text); }
+
+    .detail-video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 18px 18px 0 0; overflow: hidden; }
+    .detail-video iframe { width: 100%; height: 100%; border: none; }
+    .detail-novideo { width: 100%; aspect-ratio: 16/9; background: var(--dark2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border-radius: 18px 18px 0 0; position: relative; overflow: hidden; }
+    .detail-novideo::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(0,224,84,0.06) 0%, transparent 70%); }
+    .detail-novideo span { font-size: 13px; color: var(--text-secondary); position: relative; z-index: 1; }
+    .detail-body { padding: 1.5rem; }
+    .detail-title { font-family: var(--font-display); font-size: 26px; letter-spacing: 1px; color: var(--text); margin: 10px 0 4px; line-height: 1.1; }
+    .detail-cat { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-bottom: 1.25rem; }
+    .sec-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-tertiary); margin-bottom: 6px; margin-top: 1.25rem; }
+    .sec-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1rem; }
+    .info-item { background: var(--dark2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
+    .info-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; }
+    .info-val { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 3px; }
+    .del-btn { margin-top: 1.25rem; width: 100%; padding: 11px; border-radius: var(--radius); border: 0.5px solid rgba(255,80,80,0.3); background: rgba(255,80,80,0.06); color: #ff6b6b; font-size: 13px; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .del-btn:hover { background: rgba(255,80,80,0.12); border-color: rgba(255,80,80,0.5); }
+
+    .modal-header-block { padding: 1.5rem; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 16px; background: var(--dark2); border-radius: 18px 18px 0 0; }
+    .modal-avatar-lg { width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); letter-spacing: 1px; }
+    .modal-name { font-family: var(--font-display); font-size: 22px; letter-spacing: 1px; color: var(--text); line-height: 1.1; }
+    .modal-sub { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+    .modal-body { padding: 1.5rem; }
+    .mini-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; transition: border-color 0.15s; }
+    .mini-card:hover { border-color: var(--border-strong); }
+    .mini-card strong { color: var(--text); font-size: 13px; display: block; margin-bottom: 2px; }
+
+    /* ── FORMS ── */
+    .form-wrap { padding: 1.5rem; }
+    .form-title { font-family: var(--font-display); font-size: 24px; letter-spacing: 1px; color: var(--text); margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label { display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-tertiary); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 13px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); background: var(--dark2); color: var(--text); font-size: 14px; font-family: var(--font-body); outline: none; transition: all 0.15s; }
+    .form-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow2); }
+    textarea.form-input { resize: vertical; min-height: 70px; line-height: 1.5; }
+    select.form-input { cursor: pointer; }
+    select.form-input option { background: var(--dark2); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-hint { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+    .form-error { font-size: 11px; color: #ff6b6b; margin-top: 4px; display: none; }
+    .form-actions { display: flex; gap: 10px; margin-top: 1.5rem; }
+    .btn-primary { flex: 1; padding: 11px 16px; border-radius: var(--radius); background: var(--green); color: var(--black); border: none; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: var(--font-body); letter-spacing: .02em; }
+    .btn-primary:hover { background: #14f06a; box-shadow: 0 0 20px var(--green-glow); }
+    .btn-cancel { padding: 11px 16px; border-radius: var(--radius); border: 0.5px solid var(--border-strong); background: transparent; color: var(--text-secondary); font-size: 14px; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .btn-cancel:hover { background: var(--dark2); color: var(--text); }
+
+    .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+    .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+    .color-swatch.selected { border-color: var(--green); transform: scale(1.2); box-shadow: 0 0 10px var(--green-glow); }
+
+    .ster-picker { display: flex; gap: 4px; margin-top: 4px; }
+    .ster-btn { font-size: 26px; cursor: pointer; color: var(--dark4); transition: all 0.1s; background: none; border: none; padding: 0; line-height: 1; }
+    .ster-btn.on { color: #ffb84d; text-shadow: 0 0 10px rgba(255,184,77,0.4); }
+    .ster-btn:hover { transform: scale(1.15); }
+
+    .oef-list { max-height: 200px; overflow-y: auto; border: 0.5px solid var(--border-strong); border-radius: var(--radius); margin-top: 4px; background: var(--dark2); }
+    .oef-list::-webkit-scrollbar { width: 4px; }
+    .oef-list::-webkit-scrollbar-track { background: var(--dark2); }
+    .oef-list::-webkit-scrollbar-thumb { background: var(--dark4); border-radius: 2px; }
+    .oef-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.1s; }
+    .oef-item:last-child { border-bottom: none; }
+    .oef-item:hover { background: var(--dark3); }
+    .oef-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+    .oef-item-name { font-size: 13px; color: var(--text); }
+    .oef-item-cat { font-size: 10px; color: var(--text-tertiary); }
+
+    /* ── PITCH SVG decoratie ── */
+    .pitch-svg { stroke: currentColor; fill: none; }
+
+    /* ── AI GENERATOR ── */
+    .ai-page { }
+    .ai-hero {
+      background: var(--dark2); border: 0.5px solid var(--border);
+      border-radius: 20px; padding: 2.5rem 2rem; margin-bottom: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .ai-hero::before {
+      content: ''; position: absolute; top: -80px; right: -80px;
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(0,224,84,0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .ai-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,224,84,0.1); border: 0.5px solid rgba(0,224,84,0.3); border-radius: 20px; padding: 4px 12px; font-size: 11px; color: var(--green); font-weight: 600; letter-spacing: .06em; margin-bottom: 1rem; }
+    .ai-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(0.8)} }
+    .ai-hero-title { font-family: var(--font-display); font-size: 42px; letter-spacing: 2px; color: var(--text); line-height: 1; margin-bottom: 8px; }
+    .ai-hero-title span { color: var(--green); }
+    .ai-hero-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.6; max-width: 520px; }
+
+    .ai-form-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; }
+    .ai-form-title { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; color: var(--text); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+    .ai-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .ai-field { }
+    .ai-field label { display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-tertiary); margin-bottom: 8px; }
+    .ai-select { width: 100%; padding: 11px 14px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); background: var(--dark3); color: var(--text); font-size: 14px; font-family: var(--font-body); outline: none; cursor: pointer; transition: border-color 0.15s; }
+    .ai-select:focus { border-color: var(--green); }
+    .ai-select option { background: var(--dark2); }
+    .ai-textarea { width: 100%; padding: 11px 14px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); background: var(--dark3); color: var(--text); font-size: 14px; font-family: var(--font-body); outline: none; resize: vertical; min-height: 90px; line-height: 1.6; transition: border-color 0.15s; }
+    .ai-textarea:focus { border-color: var(--green); }
+    .ai-textarea::placeholder { color: var(--text-tertiary); }
+    .ai-full { grid-column: 1 / -1; }
+    .ai-generate-btn {
+      width: 100%; padding: 14px; border-radius: var(--radius);
+      background: var(--green); color: var(--black); border: none;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: var(--font-body); letter-spacing: .02em;
+      transition: all 0.2s; margin-top: 1.5rem;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 0 24px var(--green-glow);
+    }
+    .ai-generate-btn:hover:not(:disabled) { background: #14f06a; box-shadow: 0 0 40px rgba(0,224,84,0.3); transform: translateY(-1px); }
+    .ai-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .ai-spinner { width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.2); border-top-color: var(--black); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* AI Result */
+    .ai-result { background: var(--dark2); border: 0.5px solid rgba(0,224,84,0.25); border-radius: 20px; overflow: hidden; margin-bottom: 1.5rem; animation: fadeInUp 0.4s ease; }
+    .ai-result-header { background: rgba(0,224,84,0.06); border-bottom: 0.5px solid rgba(0,224,84,0.15); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .ai-result-title { font-family: var(--font-display); font-size: 18px; letter-spacing: 1px; color: var(--green); }
+    .ai-result-meta { font-size: 12px; color: var(--text-secondary); }
+    .ai-result-body { padding: 1.5rem; }
+    .ai-block { margin-bottom: 1.5rem; }
+    .ai-block:last-child { margin-bottom: 0; }
+    .ai-block-label { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .ai-block-label::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+    .ai-oef-item { background: var(--dark3); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px; display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: start; transition: border-color 0.15s; }
+    .ai-oef-item:hover { border-color: var(--border-strong); }
+    .ai-oef-num { font-family: var(--font-display); font-size: 20px; color: var(--green); letter-spacing: 1px; line-height: 1; }
+    .ai-oef-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .ai-oef-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
+    .ai-oef-duur { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; padding-top: 2px; }
+    .ai-tip { background: rgba(0,224,84,0.06); border: 0.5px solid rgba(0,224,84,0.15); border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .ai-tip strong { color: var(--green); }
+    .ai-error { background: rgba(255,80,80,0.06); border: 0.5px solid rgba(255,80,80,0.2); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; color: #ff6b6b; margin-top: 1rem; }
+    .ai-save-btn { width: 100%; padding: 12px; border-radius: var(--radius); border: 0.5px solid rgba(0,224,84,0.3); background: rgba(0,224,84,0.08); color: var(--green); font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; margin-top: 1rem; }
+    .ai-save-btn:hover { background: rgba(0,224,84,0.15); }
+    .ai-examples { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+    .ai-example-btn { padding: 6px 12px; border-radius: 20px; border: 0.5px solid var(--border-strong); background: var(--dark3); color: var(--text-secondary); font-size: 12px; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .ai-example-btn:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── AANWEZIGHEID ── */
+    .aanw-hero { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+    .aanw-hero::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:radial-gradient(circle,rgba(91,184,255,0.08) 0%,transparent 70%); pointer-events:none; }
+    .aanw-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 1.5rem; }
+    .aanw-stat { background: var(--dark3); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+    .aanw-stat-num { font-family: var(--font-display); font-size: 28px; letter-spacing: 1px; color: var(--green); }
+    .aanw-stat-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+
+    .aanw-session-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; }
+    .aanw-session-header { padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.15s; }
+    .aanw-session-header:hover { background: var(--dark3); }
+    .aanw-session-datum { font-family: var(--font-display); font-size: 18px; letter-spacing: 1px; color: var(--text); }
+    .aanw-session-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .aanw-progress-wrap { flex: 1; margin: 0 1.5rem; max-width: 160px; }
+    .aanw-progress-bar { height: 4px; background: var(--dark4); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+    .aanw-progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s; }
+    .aanw-pct { font-size: 13px; font-weight: 600; color: var(--green); }
+    .aanw-chevron { color: var(--text-tertiary); font-size: 12px; transition: transform 0.2s; }
+    .aanw-chevron.open { transform: rotate(180deg); }
+
+    .aanw-spelers-list { border-top: 0.5px solid var(--border); padding: 1rem 1.25rem; display: none; }
+    .aanw-spelers-list.open { display: block; }
+    .aanw-speler-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+    .aanw-speler-row:last-child { border-bottom: none; }
+    .aanw-speler-name { flex: 1; font-size: 14px; color: var(--text); }
+    .aanw-toggle { display: flex; gap: 6px; }
+    .aanw-btn { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 0.5px solid var(--border-strong); background: transparent; font-family: var(--font-body); transition: all 0.15s; }
+    .aanw-btn.aanwezig { background: rgba(0,224,84,0.15); color: var(--green); border-color: rgba(0,224,84,0.3); }
+    .aanw-btn.afwezig { background: rgba(255,107,107,0.1); color: #ff6b6b; border-color: rgba(255,107,107,0.25); }
+    .aanw-btn:not(.aanwezig):not(.afwezig):hover { border-color: var(--border-strong); background: var(--dark3); }
+
+    .aanw-speler-pct { font-size: 11px; padding: 3px 8px; border-radius: 8px; font-weight: 600; }
+    .aanw-pct-high { background: rgba(0,224,84,0.12); color: var(--green); }
+    .aanw-pct-mid { background: rgba(255,184,77,0.12); color: #ffb84d; }
+    .aanw-pct-low { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+
+    .aanw-new-btn { width: 100%; padding: 14px; border-radius: var(--radius); background: rgba(91,184,255,0.08); border: 0.5px solid rgba(91,184,255,0.2); color: #5bb8ff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 1.5rem; }
+    .aanw-new-btn:hover { background: rgba(91,184,255,0.14); }
+    .aanw-empty { text-align: center; padding: 3rem 1rem; }
+    .aanw-empty h3 { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
+    .aanw-empty p { font-size: 13px; color: var(--text-secondary); }
+
+    /* ── WEDSTRIJDEN ── */
+    .wed-hero { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+    .wed-hero::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:radial-gradient(circle,rgba(255,184,77,0.08) 0%,transparent 70%); pointer-events:none; }
+    .wed-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 1.5rem; }
+    .wed-stat { background: var(--dark3); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+    .wed-stat-num { font-family: var(--font-display); font-size: 26px; letter-spacing: 1px; }
+    .wed-stat-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+    .wed-list { display: flex; flex-direction: column; gap: 10px; }
+    .wed-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem 1.25rem; cursor: pointer; transition: all 0.2s; display: grid; grid-template-columns: 56px 1fr auto; gap: 16px; align-items: center; }
+    .wed-card:hover { border-color: rgba(255,184,77,0.3); transform: translateX(3px); }
+    .wed-card.win { border-left: 3px solid var(--green); }
+    .wed-card.draw { border-left: 3px solid #ffb84d; }
+    .wed-card.loss { border-left: 3px solid #ff6b6b; }
+    .wed-datum-block { text-align: center; }
+    .wed-dag { font-family: var(--font-display); font-size: 26px; color: var(--text); letter-spacing: 1px; line-height: 1; }
+    .wed-mnd { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .08em; }
+    .wed-teams { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .wed-meta { font-size: 12px; color: var(--text-secondary); }
+    .wed-score { font-family: var(--font-display); font-size: 28px; letter-spacing: 2px; text-align: right; }
+    .wed-score.win { color: var(--green); }
+    .wed-score.draw { color: #ffb84d; }
+    .wed-score.loss { color: #ff6b6b; }
+    .wed-result-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; text-align: center; margin-top: 3px; }
+    .wed-result-badge.win { background: rgba(0,224,84,0.15); color: var(--green); }
+    .wed-result-badge.draw { background: rgba(255,184,77,0.12); color: #ffb84d; }
+    .wed-result-badge.loss { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+    .wed-new-btn { width: 100%; padding: 14px; border-radius: var(--radius); background: rgba(255,184,77,0.08); border: 0.5px solid rgba(255,184,77,0.2); color: #ffb84d; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 1.5rem; }
+    .wed-new-btn:hover { background: rgba(255,184,77,0.14); }
+    .wed-empty { text-align: center; padding: 3rem 1rem; }
+    .wed-empty h3 { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
+    .wed-empty p { font-size: 13px; color: var(--text-secondary); }
+
+    /* opstelling veld */
+    .opstelling-veld { background: #1a3a1a; border-radius: var(--radius-lg); padding: 1.5rem 1rem; margin: 1rem 0; position: relative; min-height: 320px; border: 0.5px solid rgba(255,255,255,0.1); }
+    .opstelling-veld::before { content:''; position:absolute; inset:12px; border:1px solid rgba(255,255,255,0.12); border-radius: 6px; pointer-events:none; }
+    .opstelling-veld::after { content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:70px; height:70px; border:1px solid rgba(255,255,255,0.1); border-radius:50%; pointer-events:none; }
+    .opstelling-linie { display: flex; justify-content: center; gap: 12px; margin-bottom: 18px; }
+    .opstelling-linie:last-child { margin-bottom: 0; }
+    .speler-positie { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+    .speler-shirt { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; font-family: var(--font-display); letter-spacing:.5px; border: 2px solid rgba(255,255,255,0.2); transition: all 0.15s; }
+    .speler-shirt:hover { transform: scale(1.1); border-color: var(--green); }
+    .speler-shirt.leeg { background: rgba(255,255,255,0.06); color: var(--text-tertiary); border-style: dashed; }
+    .speler-shirt-naam { font-size: 9px; color: rgba(255,255,255,0.6); text-align: center; max-width: 48px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .formatie-kiezer { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
+    .formatie-btn { padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 0.5px solid var(--border-strong); background: transparent; color: var(--text-secondary); cursor: pointer; font-family: var(--font-body); transition: all 0.15s; }
+    .formatie-btn.active { background: var(--green); color: var(--black); border-color: var(--green); font-weight: 600; }
+    .speler-select-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; max-height: 180px; overflow-y: auto; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 8px; background: var(--dark2); margin-top: 6px; }
+    .speler-select-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; cursor: pointer; transition: background 0.1s; border: 0.5px solid transparent; }
+    .speler-select-item:hover { background: var(--dark3); }
+    .speler-select-item.selected { background: rgba(0,224,84,0.1); border-color: rgba(0,224,84,0.25); }
+    .speler-select-item .mini-av { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
+    .speler-select-item .mini-naam { font-size: 12px; color: var(--text); }
+    .card { animation: fadeInUp 0.3s ease both; }
+    .card:nth-child(2) { animation-delay: .04s; }
+    .card:nth-child(3) { animation-delay: .08s; }
+    .card:nth-child(4) { animation-delay: .12s; }
+    .card:nth-child(5) { animation-delay: .16s; }
+    .card:nth-child(6) { animation-delay: .20s; }
+
+    @media(max-width:700px) {
+      .topbar { padding: 0 1rem; }
+      .brand-sub { display: none; }
+      .main { padding: 1.25rem 1rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .nav-tab { padding: 6px 11px; font-size: 12px; }
+      .hero-title { font-size: 36px; }
+      .hero-pitch { display: none; }
+      .training-card { grid-template-columns: 1fr; gap: 8px; }
+      .training-divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCHERM -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#0a0a0a" stroke-width="1.5"/><path d="M12 3C12 3 9 7 9 12C9 17 12 21 12 21" stroke="#0a0a0a" stroke-width="1.5"/><path d="M3 12H21" stroke="#0a0a0a" stroke-width="1.5"/><path d="M4.5 7.5C8 9 16 9 19.5 7.5" stroke="#0a0a0a" stroke-width="1.2"/><path d="M4.5 16.5C8 15 16 15 19.5 16.5" stroke="#0a0a0a" stroke-width="1.2"/></svg>
+      </div>
+      <div class="auth-brand">TrainersHub</div>
+    </div>
+    <div class="auth-title">Welkom terug</div>
+    <div class="auth-sub">Log in of maak een gratis account aan om te beginnen.</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login',this)">Inloggen</button>
+      <button class="auth-tab" onclick="switchAuthTab('register',this)">Registreren</button>
+    </div>
+
+    <div id="authLogin">
+      <div class="auth-field"><label class="auth-label">E-mailadres</label><input class="auth-input" id="loginEmail" type="email" placeholder="jouw@email.nl"></div>
+      <div class="auth-field"><label class="auth-label">Wachtwoord</label><input class="auth-input" id="loginPw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="auth-err" id="loginErr"></div>
+      <button class="auth-btn" id="loginBtn" onclick="doLogin()">Inloggen</button>
+      <div style="text-align:center;margin-top:1rem"><button onclick="switchAuthTab('reset',document.querySelectorAll('.auth-tab')[0])" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Wachtwoord vergeten?</button></div>
+    </div>
+
+    <div id="authRegister" style="display:none">
+      <div class="auth-field"><label class="auth-label">Naam</label><input class="auth-input" id="regNaam" type="text" placeholder="Jouw naam"></div>
+      <div class="auth-field"><label class="auth-label">E-mailadres</label><input class="auth-input" id="regEmail" type="email" placeholder="jouw@email.nl"></div>
+      <div class="auth-field"><label class="auth-label">Wachtwoord</label><input class="auth-input" id="regPw" type="password" placeholder="Minimaal 6 tekens" onkeydown="if(event.key==='Enter')doRegister()"></div>
+      <div class="auth-err" id="regErr"></div>
+      <div class="auth-ok" id="regOk"></div>
+      <button class="auth-btn" id="regBtn" onclick="doRegister()">Gratis account aanmaken</button>
+      <div style="font-size:11px;color:#444;text-align:center;margin-top:12px;line-height:1.6">Door te registreren ga je akkoord met onze voorwaarden.<br>Geen creditcard nodig voor het gratis plan.</div>
+    </div>
+
+    <div id="authReset" style="display:none">
+      <div class="auth-field"><label class="auth-label">E-mailadres</label><input class="auth-input" id="resetEmail" type="email" placeholder="jouw@email.nl"></div>
+      <div class="auth-err" id="resetErr"></div>
+      <div class="auth-ok" id="resetOk"></div>
+      <button class="auth-btn" onclick="doReset()">Herstelmail sturen</button>
+      <div style="text-align:center;margin-top:1rem"><button onclick="switchAuthTab('login',document.querySelectorAll('.auth-tab')[0])" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">← Terug naar inloggen</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNT MODAL -->
+<div class="overlay" id="accountOverlay" onclick="oClick(event,'accountOverlay')">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="cModal('accountOverlay')">✕</button>
+    <div class="account-modal" id="accountModalBody"></div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="#0a0a0a" stroke-width="1.5"/>
+        <path d="M12 3C12 3 9 7 9 12C9 17 12 21 12 21" stroke="#0a0a0a" stroke-width="1.5"/>
+        <path d="M3 12H21" stroke="#0a0a0a" stroke-width="1.5"/>
+        <path d="M4.5 7.5C8 9 16 9 19.5 7.5" stroke="#0a0a0a" stroke-width="1.2"/>
+        <path d="M4.5 16.5C8 15 16 15 19.5 16.5" stroke="#0a0a0a" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand">TrainersHub</div>
+      <div class="brand-sub">Voetbal · Jeugd</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('oefeningen',this)">Oefeningen</button>
+    <button class="nav-tab" onclick="showPage('spelers',this)">Spelers</button>
+    <button class="nav-tab" onclick="showPage('resultaten',this)">Resultaten</button>
+    <button class="nav-tab" onclick="showPage('aanwezigheid',this)">Aanwezigheid</button>
+    <button class="nav-tab" onclick="showPage('wedstrijden',this)">Wedstrijden</button>
+    <button class="nav-tab" onclick="showPage('ai',this)" style="color:var(--green)">✦ AI Plan</button>
+  </div>
+  <button class="add-btn" onclick="handleAddBtn()">
+    <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <span id="addBtnLabel">Toevoegen</span>
+  </button>
+  <button class="account-btn" onclick="openAccount()" id="accountBtn">
+    <div class="account-avatar" id="accountAvatar">?</div>
+    <span id="accountLabel">Account</span>
+  </button>
+</div>
+
+<!-- PAGE: OEFENINGEN -->
+<div class="page active" id="page-oefeningen">
+  <div class="main">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-pitch">
+        <svg width="280" height="200" viewBox="0 0 280 200" fill="none" stroke="white" stroke-width="1" opacity="1">
+          <rect x="10" y="10" width="260" height="180" rx="4"/>
+          <line x1="140" y1="10" x2="140" y2="190"/>
+          <circle cx="140" cy="100" r="30"/>
+          <rect x="10" y="65" width="40" height="70"/>
+          <rect x="230" y="65" width="40" height="70"/>
+          <rect x="10" y="80" width="20" height="40"/>
+          <rect x="250" y="80" width="20" height="40"/>
+          <circle cx="140" cy="100" r="2" fill="white"/>
+        </svg>
+      </div>
+      <div class="hero-label">Trainersplatform · Nederland</div>
+      <div class="hero-title">Jouw <span>speelboek</span><br>op zak</div>
+      <div class="hero-sub">Oefeningen, video's en spelerprofielen voor jeugdtrainers U6 t/m U17.</div>
+      <div class="hero-stats">
+        <div><div class="hero-stat-num" id="statOef">13</div><div class="hero-stat-label">Oefeningen</div></div>
+        <div><div class="hero-stat-num" id="statCat">5</div><div class="hero-stat-label">Categorieën</div></div>
+        <div><div class="hero-stat-num">3</div><div class="hero-stat-label">Leeftijdsgroepen</div></div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">Leeftijd</span>
+      <div class="pill active" data-age="alle">Alle</div>
+      <div class="pill" data-age="U6">U6–U9</div>
+      <div class="pill" data-age="U10">U10–U13</div>
+      <div class="pill" data-age="U14">U14–U17</div>
+      <div class="filter-divider"></div>
+      <span class="filter-label">Categorie</span>
+      <div class="cat-pill active" data-cat="alle">Alles</div>
+      <div class="cat-pill" data-cat="passing">Passing</div>
+      <div class="cat-pill" data-cat="schieten">Schieten</div>
+      <div class="cat-pill" data-cat="positiespel">Positiespel</div>
+      <div class="cat-pill" data-cat="dribbelen">Dribbelen</div>
+      <div class="cat-pill" data-cat="warming-up">Warming-up</div>
+    </div>
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#555" stroke-width="1.5"/><path d="M10 10L14 14" stroke="#555" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="text" id="searchInput" placeholder="Zoek oefening..." oninput="renderOefeningen()">
+    </div>
+    <div class="count" id="countEl"></div>
+    <div id="upgradeBanner" style="display:none">
+      <div class="upgrade-banner">
+        <div>
+          <div class="upgrade-banner-text">Je gebruikt het gratis plan — <strong>5 spelers limiet</strong></div>
+          <div class="upgrade-banner-sub">Upgrade naar Pro voor onbeperkt spelers, AI generator en alle modules.</div>
+        </div>
+        <button class="upgrade-banner-btn" onclick="openUpgrade()">Upgraden naar Pro · €7/maand</button>
+      </div>
+    </div>
+    <div class="cards" id="cardsEl"></div>
+    <div class="empty" id="emptyEl" style="display:none">Geen oefeningen gevonden.</div>
+  </div>
+</div>
+
+<!-- PAGE: SPELERS -->
+<div class="page" id="page-spelers">
+  <div class="main">
+    <div class="section-title" id="spelersTitle">Spelers <span>0</span></div>
+    <div class="spelers-grid" id="spelersGrid"></div>
+    <div class="empty-block" id="spelersEmpty" style="display:none">
+      <div class="empty-block-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="var(--text-tertiary)" stroke-width="1.5"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <h3>Geen spelers</h3><p>Voeg je eerste speler toe om te beginnen.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: RESULTATEN -->
+<div class="page" id="page-resultaten">
+  <div class="main">
+    <div class="section-title" id="resultatenTitle">Trainingen <span>0</span></div>
+    <div class="resultaten-list" id="resultatenList"></div>
+    <div class="empty-block" id="resultatenEmpty" style="display:none">
+      <div class="empty-block-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <h3>Geen trainingen</h3><p>Log je eerste training via "Training toevoegen".</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- PAGE: WEDSTRIJDEN -->
+<div class="page" id="page-wedstrijden">
+  <div class="main">
+    <div class="wed-hero">
+      <div class="hero-label">Uitslagen · Opstelling · Notities</div>
+      <div class="hero-title" style="font-size:38px">Wedstrijden <span style="color:#ffb84d">bijhouden</span></div>
+      <div class="hero-sub">Leg elke wedstrijd vast — uitslag, opstelling en notities. Bekijk het seizoensoverzicht in één oogopslag.</div>
+      <div class="wed-stats">
+        <div class="wed-stat"><div class="wed-stat-num" id="wStatGes" style="color:var(--text)">0</div><div class="wed-stat-label">Gespeeld</div></div>
+        <div class="wed-stat"><div class="wed-stat-num" id="wStatW" style="color:var(--green)">0</div><div class="wed-stat-label">Gewonnen</div></div>
+        <div class="wed-stat"><div class="wed-stat-num" id="wStatD" style="color:#ffb84d">0</div><div class="wed-stat-label">Gelijk</div></div>
+        <div class="wed-stat"><div class="wed-stat-num" id="wStatL" style="color:#ff6b6b">0</div><div class="wed-stat-label">Verloren</div></div>
+      </div>
+    </div>
+
+    <button class="wed-new-btn" onclick="openAddWedstrijd()">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Wedstrijd toevoegen
+    </button>
+
+    <div class="wed-list" id="wedList"></div>
+    <div class="wed-empty" id="wedEmpty" style="display:none">
+      <h3>Geen wedstrijden</h3>
+      <p>Voeg je eerste wedstrijd toe om het seizoensoverzicht te starten.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: wedstrijd detail -->
+<div class="overlay" id="wedDetailOverlay" onclick="oClick(event,'wedDetailOverlay')">
+  <div class="modal"><button class="modal-close" onclick="cModal('wedDetailOverlay')">✕</button><div id="wedDetailBody"></div></div>
+</div>
+
+<!-- MODAL: wedstrijd toevoegen -->
+<div class="overlay" id="addWedOverlay" onclick="oClick(event,'addWedOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('addWedOverlay')">✕</button>
+    <div class="form-wrap">
+      <div class="form-title">Wedstrijd toevoegen</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Datum *</label>
+          <input class="form-input" id="wDatum" type="date">
+          <div class="form-error" id="errWDatum">Kies een datum.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Thuis / Uit</label>
+          <select class="form-input" id="wThuisUit">
+            <option value="thuis">Thuis</option>
+            <option value="uit">Uit</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tegenstander *</label>
+        <input class="form-input" id="wTegenstander" type="text" placeholder="Naam van de tegenstander">
+        <div class="form-error" id="errWTegen">Vul een tegenstander in.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Onze doelpunten</label>
+          <input class="form-input" id="wDoelVoor" type="number" min="0" max="30" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tegenstander doelpunten</label>
+          <input class="form-input" id="wDoelTegen" type="number" min="0" max="30" placeholder="0" value="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Formatie</label>
+        <div class="formatie-kiezer" id="formatieKiezer">
+          <button class="formatie-btn active" data-f="4-3-3" onclick="setFormatie('4-3-3',this)">4-3-3</button>
+          <button class="formatie-btn" data-f="4-4-2" onclick="setFormatie('4-4-2',this)">4-4-2</button>
+          <button class="formatie-btn" data-f="3-5-2" onclick="setFormatie('3-5-2',this)">3-5-2</button>
+          <button class="formatie-btn" data-f="4-2-3-1" onclick="setFormatie('4-2-3-1',this)">4-2-3-1</button>
+          <button class="formatie-btn" data-f="5-3-2" onclick="setFormatie('5-3-2',this)">5-3-2</button>
+        </div>
+        <label class="form-label" style="margin-top:10px">Opstelling — klik op een positie om een speler toe te wijzen</label>
+        <div class="opstelling-veld" id="opstellingVeld"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Doelpuntenmakers</label>
+        <div class="speler-select-grid" id="doelpuntenGrid"></div>
+        <div class="form-hint">Selecteer de spelers die gescoord hebben.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notities van de trainer</label>
+        <textarea class="form-input" id="wNotitie" placeholder="Hoe verliep de wedstrijd? Wat ging goed, wat kan beter?"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="cModal('addWedOverlay')">Annuleren</button>
+        <button class="btn-primary" onclick="submitWedstrijd()">Opslaan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: positie kiezen -->
+<div class="overlay" id="positieOverlay" onclick="oClick(event,'positieOverlay')">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-close" onclick="cModal('positieOverlay')">✕</button>
+    <div class="form-wrap">
+      <div class="form-title" style="font-size:18px">Speler kiezen</div>
+      <div class="speler-select-grid" id="positieSpelerGrid"></div>
+      <div style="margin-top:1rem"><button class="del-btn" onclick="clearPositie()">Positie leeg maken</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: AANWEZIGHEID -->
+<div class="page" id="page-aanwezigheid">
+  <div class="main">
+    <div class="aanw-hero">
+      <div class="hero-label">Per training · Per speler</div>
+      <div class="hero-title" style="font-size:38px">Aanwezigheid <span style="color:#5bb8ff">bijhouden</span></div>
+      <div class="hero-sub">Wie was er? Wie miste de training? Bekijk in één oogopslag de aanwezigheidspercentages per speler over het seizoen.</div>
+      <div class="aanw-stats">
+        <div class="aanw-stat"><div class="aanw-stat-num" id="statSessies">0</div><div class="aanw-stat-label">Trainingen</div></div>
+        <div class="aanw-stat"><div class="aanw-stat-num" id="statGemiddeld">–</div><div class="aanw-stat-label">Gem. aanwezigheid</div></div>
+        <div class="aanw-stat"><div class="aanw-stat-num" id="statBeste">–</div><div class="aanw-stat-label">Beste bezoeker</div></div>
+      </div>
+    </div>
+
+    <button class="aanw-new-btn" onclick="openNieuweTrainingAanw()">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Training registreren
+    </button>
+
+    <div id="aanwList"></div>
+    <div class="aanw-empty" id="aanwEmpty" style="display:none">
+      <h3>Geen trainingen</h3>
+      <p>Klik op "Training registreren" om je eerste aanwezigheid bij te houden.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: AI GENERATOR -->
+<div class="page" id="page-ai">
+  <div class="main ai-page">
+    <div class="ai-hero">
+      <div class="ai-badge"><div class="ai-badge-dot"></div>AI · Powered by Claude</div>
+      <div class="ai-hero-title">Jouw <span>AI</span><br>assistent-trainer</div>
+      <div class="ai-hero-sub">Vertel wat je nodig hebt — de AI stelt een compleet trainingsplan samen op basis van jouw oefeningen, leeftijdsgroep en focus van de dag.</div>
+    </div>
+
+    <div class="ai-form-card">
+      <div class="ai-form-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="var(--green)" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        Training configureren
+      </div>
+      <div class="ai-form-grid">
+        <div class="ai-field">
+          <label>Leeftijdsgroep</label>
+          <select class="ai-select" id="aiAge">
+            <option value="U6-U9">U6–U9 (mini's)</option>
+            <option value="U10-U13" selected>U10–U13 (pupillen)</option>
+            <option value="U14-U17">U14–U17 (junioren)</option>
+          </select>
+        </div>
+        <div class="ai-field">
+          <label>Duur van de training</label>
+          <select class="ai-select" id="aiDuur">
+            <option value="45 minuten">45 minuten</option>
+            <option value="60 minuten" selected>60 minuten</option>
+            <option value="75 minuten">75 minuten</option>
+            <option value="90 minuten">90 minuten</option>
+          </select>
+        </div>
+        <div class="ai-field">
+          <label>Hoofdfocus</label>
+          <select class="ai-select" id="aiFocus">
+            <option value="passing en balcirculatie">Passing &amp; balcirculatie</option>
+            <option value="schieten en afronden">Schieten &amp; afronden</option>
+            <option value="positiespel en ruimtegebruik">Positiespel &amp; ruimtegebruik</option>
+            <option value="dribbelen en 1v1">Dribbelen &amp; 1v1</option>
+            <option value="pressing en verdedigen">Pressing &amp; verdedigen</option>
+            <option value="algemene conditie en warming-up">Conditie &amp; warming-up</option>
+          </select>
+        </div>
+        <div class="ai-field">
+          <label>Aantal spelers</label>
+          <select class="ai-select" id="aiSpelers">
+            <option value="6 tot 8">6–8 spelers</option>
+            <option value="8 tot 12" selected>8–12 spelers</option>
+            <option value="12 tot 16">12–16 spelers</option>
+            <option value="meer dan 16">16+ spelers</option>
+          </select>
+        </div>
+        <div class="ai-field ai-full">
+          <label>Extra wensen (optioneel)</label>
+          <textarea class="ai-textarea" id="aiExtra" placeholder="Bijv: vorige training ging het schieten niet goed, graag meer aandacht daarvoor. Of: het is de eerste training van het seizoen..."></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:1rem;">
+        <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;">Snelle voorbeelden</div>
+        <div class="ai-examples">
+          <button class="ai-example-btn" onclick="setExample('Eerste training van het seizoen, focus op kennismaking en plezier')">Eerste training seizoen</button>
+          <button class="ai-example-btn" onclick="setExample('Komend weekend een wedstrijd, lichte training met veel balbezit')">Voor wedstrijd</button>
+          <button class="ai-example-btn" onclick="setExample('Vorige week veel fouten bij corners, graag standaardsituaties oefenen')">Na een verlies</button>
+          <button class="ai-example-btn" onclick="setExample('Zomerse dag, korte intensieve oefeningen met veel rust tussendoor')">Zomerse dag</button>
+        </div>
+      </div>
+
+      <button class="ai-generate-btn" id="aiGenBtn" onclick="generatePlan()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor"/></svg>
+        Trainingsplan genereren
+      </button>
+    </div>
+
+    <div id="aiResult" style="display:none"></div>
+  </div>
+</div>
+
+<div class="overlay" id="detailOverlay" onclick="oClick(event,'detailOverlay')"><div class="modal"><button class="modal-close" onclick="cModal('detailOverlay')">✕</button><div id="detailBody"></div></div></div>
+<div class="overlay" id="addOefOverlay" onclick="oClick(event,'addOefOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('addOefOverlay')">✕</button>
+    <div class="form-wrap">
+      <div class="form-title">Oefening toevoegen</div>
+      <div class="form-group"><label class="form-label">Naam *</label><input class="form-input" id="fTitle" type="text" placeholder="Bijv. Rondo 4v2"><div class="form-error" id="errTitle">Vul een naam in.</div></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Leeftijdsgroep</label><select class="form-input" id="fAge"><option value="U6">U6–U9</option><option value="U10" selected>U10–U13</option><option value="U14">U14–U17</option></select></div>
+        <div class="form-group"><label class="form-label">Categorie</label><select class="form-input" id="fCat"><option value="passing">Passing</option><option value="schieten">Schieten</option><option value="positiespel">Positiespel</option><option value="dribbelen">Dribbelen</option><option value="warming-up">Warming-up</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Duur</label><input class="form-input" id="fDuur" type="text" placeholder="15 min"></div>
+        <div class="form-group"><label class="form-label">Spelers</label><input class="form-input" id="fSpelers" type="text" placeholder="8–12"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Beschrijving *</label><textarea class="form-input" id="fDesc" placeholder="Beschrijf de oefening..."></textarea><div class="form-error" id="errDesc">Vul een beschrijving in.</div></div>
+      <div class="form-group"><label class="form-label">Trainingsdoel</label><input class="form-input" id="fDoel" type="text" placeholder="Bijv. Pasnauwkeurigheid verbeteren"></div>
+      <div class="form-group"><label class="form-label">Materiaal</label><input class="form-input" id="fMat" type="text" placeholder="Bijv. 8 pionnen, 1 bal"></div>
+      <div class="form-group"><label class="form-label">Video (YouTube / Vimeo)</label><input class="form-input" id="fVideo" type="text" placeholder="https://youtube.com/..."><div class="form-hint">Plak een YouTube of Vimeo link.</div><div class="form-error" id="errVideo">Ongeldige link.</div></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="cModal('addOefOverlay')">Annuleren</button><button class="btn-primary" onclick="submitOefening()">Opslaan</button></div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="spelerDetailOverlay" onclick="oClick(event,'spelerDetailOverlay')"><div class="modal"><button class="modal-close" onclick="cModal('spelerDetailOverlay')">✕</button><div id="spelerDetailBody"></div></div></div>
+<div class="overlay" id="addSpelerOverlay" onclick="oClick(event,'addSpelerOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('addSpelerOverlay')">✕</button>
+    <div class="form-wrap">
+      <div class="form-title">Speler toevoegen</div>
+      <div class="form-group"><label class="form-label">Naam *</label><input class="form-input" id="sNaam" type="text" placeholder="Volledige naam"><div class="form-error" id="errNaam">Vul een naam in.</div></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Geboortejaar</label><input class="form-input" id="sJaar" type="number" placeholder="2014" min="2000" max="2022"></div>
+        <div class="form-group"><label class="form-label">Positie</label><select class="form-input" id="sPositie"><option value="">Onbekend</option><option value="Keeper">Keeper</option><option value="Verdediger">Verdediger</option><option value="Middenvelder">Middenvelder</option><option value="Aanvaller">Aanvaller</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Sterkste voet</label><select class="form-input" id="sVoet"><option value="">Onbekend</option><option value="Rechts">Rechts</option><option value="Links">Links</option><option value="Twee-voeter">Twee-voeter</option></select></div>
+        <div class="form-group"><label class="form-label">Rugnummer</label><input class="form-input" id="sNummer" type="number" placeholder="10" min="1" max="99"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Notities</label><textarea class="form-input" id="sNotities" placeholder="Sterke punten, aandachtspunten..."></textarea></div>
+      <div class="form-group"><label class="form-label">Profielkleur</label><div class="color-picker" id="colorPicker"></div></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="cModal('addSpelerOverlay')">Annuleren</button><button class="btn-primary" onclick="submitSpeler()">Opslaan</button></div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="addTrainingOverlay" onclick="oClick(event,'addTrainingOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('addTrainingOverlay')">✕</button>
+    <div class="form-wrap">
+      <div class="form-title">Training loggen</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Datum *</label><input class="form-input" id="tDatum" type="date"><div class="form-error" id="errDatum">Kies een datum.</div></div>
+        <div class="form-group"><label class="form-label">Speler *</label><select class="form-input" id="tSpeler"><option value="">Kies speler...</option></select><div class="form-error" id="errSpeler">Kies een speler.</div></div>
+      </div>
+      <div class="form-group"><label class="form-label">Oefeningen gedaan</label><div class="oef-list" id="oefChecklist"></div><div class="form-hint">Vink aan welke oefeningen je hebt gedaan.</div></div>
+      <div class="form-group"><label class="form-label">Beoordeling</label><div class="ster-picker"><button class="ster-btn" data-v="1" onclick="setSter(1)">★</button><button class="ster-btn" data-v="2" onclick="setSter(2)">★</button><button class="ster-btn" data-v="3" onclick="setSter(3)">★</button><button class="ster-btn" data-v="4" onclick="setSter(4)">★</button><button class="ster-btn" data-v="5" onclick="setSter(5)">★</button></div></div>
+      <div class="form-group"><label class="form-label">Notitie</label><textarea class="form-input" id="tNotitie" placeholder="Hoe ging de training? Wat viel op?"></textarea></div>
+      <div class="form-actions"><button class="btn-cancel" onclick="cModal('addTrainingOverlay')">Annuleren</button><button class="btn-primary" onclick="submitTraining()">Opslaan</button></div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="trainingDetailOverlay" onclick="oClick(event,'trainingDetailOverlay')"><div class="modal"><button class="modal-close" onclick="cModal('trainingDetailOverlay')">✕</button><div id="trainingDetailBody"></div></div></div>
+
+<script>
+const COLORS=[
+  {bg:'#0d2040',text:'#5bb8ff'},{bg:'#0a2a14',text:'#00e054'},
+  {bg:'#2a1400',text:'#ffb84d'},{bg:'#250a1a',text:'#ff80b3'},
+  {bg:'#1a0a28',text:'#c084fc'},{bg:'#280a0a',text:'#ff6b6b'},
+  {bg:'#0a1e28',text:'#22d3ee'},{bg:'#1e1a08',text:'#fbbf24'},
+];
+let selColor=0;
+const BASE=[
+  {id:1,title:"Rondo 4v1",age:"U6",cat:"passing",duur:"10 min",spelers:"5",desc:"Vier spelers houden de bal van één verdediger in het midden. Focus op snelle één-twee's en communicatie.",doel:"Passing en balcontrole onder druk.",materiaal:"1 bal, 4 pionnen",video:null,eigen:false},
+  {id:2,title:"Slalom dribbelen",age:"U6",cat:"dribbelen",duur:"8 min",spelers:"6–12",desc:"Spelers dribbelen door een parcours van pionnen, afwisselend links en rechts.",doel:"Balvaardigheid en coördinatie.",materiaal:"8 pionnen, 1 bal p.p.",video:null,eigen:false},
+  {id:3,title:"Raket warming-up",age:"U6",cat:"warming-up",duur:"5 min",spelers:"8–16",desc:"Spelers reageren op commando's: springen, stilstaan, draaien. Speels en energiek.",doel:"Mobilisatie en concentratie.",materiaal:"Geen",video:null,eigen:false},
+  {id:4,title:"Dribbelen naar doel",age:"U6",cat:"schieten",duur:"12 min",spelers:"6–8",desc:"Elke speler dribbelt van 10 meter naar het doel en rondt af.",doel:"Afronden en doelgerichtheid.",materiaal:"Doel, 1 bal p.p.",video:null,eigen:false},
+  {id:5,title:"Paspoort passing",age:"U10",cat:"passing",duur:"15 min",spelers:"8–14",desc:"In tweetallen passen op 5, 10 en 15 meter. Na elke serie schuiven ze op.",doel:"Pasnauwkeurigheid op variabele afstand.",materiaal:"1 bal p. tweetal, pionnen",video:null,eigen:false},
+  {id:6,title:"3v3 positiespel",age:"U10",cat:"positiespel",duur:"20 min",spelers:"6",desc:"Twee teams van drie op klein veld. Geen keeper. Balcirculatie en vrije ruimte.",doel:"Ruimte vinden en snel schakelen.",materiaal:"Hesjes, 2 mini-doelen, 1 bal",video:null,eigen:false},
+  {id:7,title:"Schiettechniek",age:"U10",cat:"schieten",duur:"15 min",spelers:"8–12",desc:"Dribbel naar binnen, schiet met wreef. Wissel kant na elke reeks.",doel:"Schietkracht en techniek.",materiaal:"Doel, pionnen, 2 ballen",video:null,eigen:false},
+  {id:8,title:"Kapbeweging 1v1",age:"U10",cat:"dribbelen",duur:"15 min",spelers:"8",desc:"Aanvaller probeert met kapbeweging langs verdediger in smal kanaal.",doel:"Basisbewegingen in 1v1.",materiaal:"Pionnen, 1 bal p. tweetal",video:null,eigen:false},
+  {id:9,title:"Positiespel 5v2",age:"U14",cat:"positiespel",duur:"20 min",spelers:"7",desc:"Vijf houden bal ten opzichte van twee belagers. Max 2 aanraken.",doel:"Automatiseren van positiespel.",materiaal:"Pionnen, hesjes, 1 bal",video:null,eigen:false},
+  {id:10,title:"Afwerken na combinatie",age:"U14",cat:"schieten",duur:"18 min",spelers:"8–12",desc:"A past naar B, loopt door, ontvangt terugpass en schiet direct.",doel:"Afwerken uit beweging.",materiaal:"Doel, pionnen, 3 ballen",video:null,eigen:false},
+  {id:11,title:"Intensieve warming-up",age:"U14",cat:"warming-up",duur:"8 min",spelers:"10–16",desc:"Hoge knieën, hielen naar billen, zijwaartse stap, sprints op 60–80%.",doel:"Spieractivatie en hartslag verhogen.",materiaal:"Geen",video:null,eigen:false},
+  {id:12,title:"Pressing trigger",age:"U14",cat:"positiespel",duur:"25 min",spelers:"10–14",desc:"Bij een vaste trigger-pass gaat het andere team drukzetten.",doel:"Georganiseerd druk zetten.",materiaal:"Hesjes, pionnen, groot veld",video:null,eigen:false},
+  {id:13,title:"Lange passing",age:"U14",cat:"passing",duur:"15 min",spelers:"8",desc:"Spelers op 25 meter afstand. Lange diagonale pass, ontvanger controleert en geeft terug.",doel:"Lange pass nauwkeurigheid.",materiaal:"Pionnen, 2 ballen",video:null,eigen:false},
+];
+let oefeningen=[...BASE],spelers=[],trainingen=[];
+let nextOId=200,nextSId=1,nextTId=1,fAge='alle',fCat='alle',curPage='oefeningen',sterRating=0;
+
+// pitch SVG voor lege kaartjes
+const PITCH_SVG=`<svg width="120" height="85" viewBox="0 0 120 85" fill="none" stroke="white" stroke-width="0.8"><rect x="2" y="2" width="116" height="81" rx="2"/><line x1="60" y1="2" x2="60" y2="83"/><circle cx="60" cy="42" r="14"/><rect x="2" y="25" width="18" height="35"/><rect x="100" y="25" width="18" height="35"/><rect x="2" y="32" width="8" height="21"/><rect x="110" y="32" width="8" height="21"/></svg>`;
+
+function embedUrl(u){if(!u)return null;const yt=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);if(yt)return`https://www.youtube.com/embed/${yt[1]}`;const vm=u.match(/vimeo\.com\/(?:video\/)?(\d+)/);if(vm)return`https://player.vimeo.com/video/${vm[1]}`;return null;}
+function thumb(u){if(!u)return null;const yt=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);return yt?`https://img.youtube.com/vi/${yt[1]}/mqdefault.jpg`:null;}
+function aC(a){return a==='U6'?'b-u6':a==='U10'?'b-u10':'b-u14';}
+function aL(a){return a==='U6'?'U6–U9':a==='U10'?'U10–U13':'U14–U17';}
+function cL(c){return c.charAt(0).toUpperCase()+c.slice(1);}
+function ini(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+function oModal(id){document.getElementById(id).classList.add('open');}
+function cModal(id){document.getElementById(id).classList.remove('open');}
+function oClick(e,id){if(e.target===document.getElementById(id))cModal(id);}
+function sterH(n,sz){return[1,2,3,4,5].map(i=>`<span class="ster${i<=n?' on':''}" style="font-size:${sz||12}px">★</span>`).join('');}
+function fmtD(d){if(!d)return'–';const dt=new Date(d);return dt.toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDag(d){if(!d)return'–';return new Date(d).toLocaleDateString('nl-NL',{day:'numeric'});}
+function fmtMnd(d){if(!d)return'–';return new Date(d).toLocaleDateString('nl-NL',{month:'short'}).toUpperCase();}
+
+function showPage(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el)el.classList.add('active');
+  curPage=page;
+  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',ai:'✦ Plan genereren'};
+  document.getElementById('addBtnLabel').textContent=lbl[page]||'Toevoegen';
+  if(page==='spelers')renderSpelers();
+  if(page==='resultaten')renderResultaten();
+  if(page==='aanwezigheid')renderAanwezigheid();
+  if(page==='wedstrijden')renderWedstrijden();
+}
+function handleAddBtn(){
+  if(curPage==='spelers')openAddSpeler();
+  else if(curPage==='resultaten')openAddTraining();
+  else if(curPage==='aanwezigheid')openNieuweTrainingAanw();
+  else if(curPage==='wedstrijden')openAddWedstrijd();
+  else if(curPage==='ai')generatePlan();
+  else openAddOef();
+}
+
+// ── WEDSTRIJDEN ──
+let wedstrijden=[], nextWId=1;
+let huidigFormatie='4-3-3';
+let opstellingData={}; // {positieKey: spelerId|null}
+let huidigePosKey=null;
+let doelpuntenmakers=new Set();
+
+const FORMATIES={
+  '4-3-3': [[1],[4,3,2,1],[3,2,1],[3,2,1]],          // keeper, def, mid, fwd
+  '4-4-2': [[1],[4,3,2,1],[4,3,2,1],[2,1]],
+  '3-5-2': [[1],[3,2,1],[5,4,3,2,1],[2,1]],
+  '4-2-3-1':[[1],[4,3,2,1],[2,1],[3,2,1],[1]],
+  '5-3-2': [[1],[5,4,3,2,1],[3,2,1],[2,1]],
+};
+
+// Genereer posities voor een formatie
+function getPosities(formatie){
+  const delen=formatie.split('-').map(Number);
+  const lijnen=[1,...delen]; // keeper + lijnen
+  const pos=[];
+  lijnen.forEach((n,li)=>{
+    for(let i=0;i<n;i++) pos.push(`L${li}_${i}`);
+  });
+  return pos;
+}
+
+function setFormatie(f, btn){
+  huidigFormatie=f;
+  document.querySelectorAll('.formatie-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  // reset opstelling
+  opstellingData={};
+  getPosities(f).forEach(p=>opstellingData[p]=null);
+  renderOpstellingVeld();
+}
+
+function renderOpstellingVeld(){
+  const veld=document.getElementById('opstellingVeld');
+  if(!veld)return;
+  const delen=[1,...huidigFormatie.split('-').map(Number)];
+  const lijnenNamen=['Keeper','Verdediging','Middenveld','Aanval','Aanval'];
+  let html='';
+  delen.forEach((n,li)=>{
+    html+=`<div class="opstelling-linie">`;
+    for(let i=0;i<n;i++){
+      const key=`L${li}_${i}`;
+      const sid=opstellingData[key]||null;
+      const s=sid?spelers.find(x=>x.id===sid):null;
+      const c=s?COLORS[s.ci]||COLORS[0]:null;
+      html+=`<div class="speler-positie" onclick="openPositieKiezer('${key}')">
+        <div class="speler-shirt${s?'':' leeg'}" style="${s?`background:${c.bg};color:${c.text}`:''}">${s?ini(s.naam):'+'}</div>
+        <div class="speler-shirt-naam">${s?s.naam.split(' ')[0]:'–'}</div>
+      </div>`;
+    }
+    html+=`</div>`;
+  });
+  veld.innerHTML=html;
+}
+
+function openPositieKiezer(key){
+  huidigePosKey=key;
+  const huidigSid=opstellingData[key];
+  const grid=document.getElementById('positieSpelerGrid');
+  if(!spelers.length){grid.innerHTML='<div style="font-size:13px;color:var(--text-secondary);padding:8px">Voeg eerst spelers toe.</div>';oModal('positieOverlay');return;}
+  grid.innerHTML=spelers.map(s=>{
+    const c=COLORS[s.ci]||COLORS[0];
+    const selected=huidigSid===s.id;
+    return`<div class="speler-select-item${selected?' selected':''}" onclick="assignSpelerToPos(${s.id})">
+      <div class="mini-av" style="background:${c.bg};color:${c.text}">${ini(s.naam)}</div>
+      <div class="mini-naam">${s.naam}</div>
+    </div>`;
+  }).join('');
+  oModal('positieOverlay');
+}
+
+function assignSpelerToPos(sid){
+  if(huidigePosKey===null)return;
+  // verwijder speler uit andere posities
+  Object.keys(opstellingData).forEach(k=>{if(opstellingData[k]===sid)opstellingData[k]=null;});
+  opstellingData[huidigePosKey]=sid;
+  cModal('positieOverlay');
+  renderOpstellingVeld();
+}
+
+function clearPositie(){
+  if(huidigePosKey!==null)opstellingData[huidigePosKey]=null;
+  cModal('positieOverlay');
+  renderOpstellingVeld();
+}
+
+function renderDoelpuntenGrid(){
+  const grid=document.getElementById('doelpuntenGrid');
+  if(!grid)return;
+  if(!spelers.length){grid.innerHTML='<div style="font-size:13px;color:var(--text-secondary);padding:8px">Voeg eerst spelers toe.</div>';return;}
+  grid.innerHTML=spelers.map(s=>{
+    const c=COLORS[s.ci]||COLORS[0];
+    const sel=doelpuntenmakers.has(s.id);
+    return`<div class="speler-select-item${sel?' selected':''}" onclick="toggleDoel(${s.id})">
+      <div class="mini-av" style="background:${c.bg};color:${c.text}">${ini(s.naam)}</div>
+      <div class="mini-naam">${s.naam}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDoel(sid){
+  if(doelpuntenmakers.has(sid))doelpuntenmakers.delete(sid);
+  else doelpuntenmakers.add(sid);
+  renderDoelpuntenGrid();
+}
+
+function openAddWedstrijd(){
+  document.getElementById('wDatum').value=new Date().toISOString().split('T')[0];
+  document.getElementById('wTegenstander').value='';
+  document.getElementById('wDoelVoor').value='0';
+  document.getElementById('wDoelTegen').value='0';
+  document.getElementById('wNotitie').value='';
+  document.getElementById('wThuisUit').value='thuis';
+  ['errWDatum','errWTegen'].forEach(id=>document.getElementById(id).style.display='none');
+  huidigFormatie='4-3-3';
+  opstellingData={};
+  getPosities(huidigFormatie).forEach(p=>opstellingData[p]=null);
+  doelpuntenmakers=new Set();
+  document.querySelectorAll('.formatie-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='4-3-3'));
+  renderOpstellingVeld();
+  renderDoelpuntenGrid();
+  oModal('addWedOverlay');
+}
+
+function submitWedstrijd(){
+  const datum=document.getElementById('wDatum').value;
+  const tegen=document.getElementById('wTegenstander').value.trim();
+  let ok=true;
+  document.getElementById('errWDatum').style.display=datum?'none':'block';if(!datum)ok=false;
+  document.getElementById('errWTegen').style.display=tegen?'none':'block';if(!tegen)ok=false;
+  if(!ok)return;
+  const dv=parseInt(document.getElementById('wDoelVoor').value)||0;
+  const dt=parseInt(document.getElementById('wDoelTegen').value)||0;
+  const result=dv>dt?'win':dv===dt?'draw':'loss';
+  wedstrijden.unshift({
+    id:nextWId++, datum, tegenstander:tegen,
+    thuisUit:document.getElementById('wThuisUit').value,
+    doelVoor:dv, doelTegen:dt, result,
+    formatie:huidigFormatie,
+    opstelling:{...opstellingData},
+    doelpunten:[...doelpuntenmakers],
+    notitie:document.getElementById('wNotitie').value.trim()
+  });
+  cModal('addWedOverlay');
+  renderWedstrijden();
+}
+
+function resultLabel(r){return r==='win'?'W':r==='draw'?'G':'V';}
+
+function renderWedstrijden(){
+  const list=document.getElementById('wedList');
+  const empty=document.getElementById('wedEmpty');
+  const w=wedstrijden.filter(x=>x.result==='win').length;
+  const d=wedstrijden.filter(x=>x.result==='draw').length;
+  const l=wedstrijden.filter(x=>x.result==='loss').length;
+  document.getElementById('wStatGes').textContent=wedstrijden.length;
+  document.getElementById('wStatW').textContent=w;
+  document.getElementById('wStatD').textContent=d;
+  document.getElementById('wStatL').textContent=l;
+  if(!wedstrijden.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=wedstrijden.map(w=>{
+    const doelNamen=w.doelpunten.map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam.split(' ')[0]:null;}).filter(Boolean);
+    return`<div class="wed-card ${w.result}" onclick="openWedDetail(${w.id})">
+      <div class="wed-datum-block">
+        <div class="wed-dag">${fmtDag(w.datum)}</div>
+        <div class="wed-mnd">${fmtMnd(w.datum)}</div>
+      </div>
+      <div>
+        <div class="wed-teams">${w.thuisUit==='thuis'?'🏠':''} vs ${w.tegenstander}</div>
+        <div class="wed-meta">${w.formatie}${doelNamen.length?' · ⚽ '+doelNamen.join(', '):''}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="wed-score ${w.result}">${w.doelVoor}–${w.doelTegen}</div>
+        <div class="wed-result-badge ${w.result}">${resultLabel(w.result)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openWedDetail(id){
+  const w=wedstrijden.find(x=>x.id===id);if(!w)return;
+  const delen=[1,...w.formatie.split('-').map(Number)];
+  let veldHtml='<div class="opstelling-veld" style="pointer-events:none">';
+  delen.forEach((n,li)=>{
+    veldHtml+=`<div class="opstelling-linie">`;
+    for(let i=0;i<n;i++){
+      const key=`L${li}_${i}`;
+      const sid=w.opstelling[key]||null;
+      const s=sid?spelers.find(x=>x.id===sid):null;
+      const c=s?COLORS[s.ci]||COLORS[0]:null;
+      veldHtml+=`<div class="speler-positie"><div class="speler-shirt${s?'':' leeg'}" style="${s?`background:${c.bg};color:${c.text}`:''}">${s?ini(s.naam):'–'}</div><div class="speler-shirt-naam">${s?s.naam.split(' ')[0]:'–'}</div></div>`;
+    }
+    veldHtml+=`</div>`;
+  });
+  veldHtml+='</div>';
+  const doelNamen=w.doelpunten.map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam:null;}).filter(Boolean);
+  document.getElementById('wedDetailBody').innerHTML=`
+    <div class="modal-header-block" style="background:var(--dark2)">
+      <div style="flex:1">
+        <div class="modal-name" style="display:flex;align-items:center;gap:10px">
+          <span class="wed-score ${w.result}" style="font-size:32px">${w.doelVoor}–${w.doelTegen}</span>
+          <span class="wed-result-badge ${w.result}" style="font-size:12px;padding:4px 10px">${w.result==='win'?'Gewonnen':w.result==='draw'?'Gelijkgespeeld':'Verloren'}</span>
+        </div>
+        <div class="modal-sub">vs ${w.tegenstander} · ${fmtD(w.datum)} · ${w.thuisUit==='thuis'?'Thuiswedstrijd':'Uitwedstrijd'}</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="sec-label">Formatie · ${w.formatie}</div>
+      ${veldHtml}
+      ${doelNamen.length?`<div class="sec-label">Doelpuntenmakers</div><div style="display:flex;gap:8px;flex-wrap:wrap">${doelNamen.map(n=>`<span class="training-tag">⚽ ${n}</span>`).join('')}</div>`:''}
+      ${w.notitie?`<div class="sec-label">Notities</div><div class="sec-text" style="font-style:italic">${w.notitie}</div>`:''}
+      <button class="del-btn" onclick="delWed(${id})">Wedstrijd verwijderen</button>
+    </div>`;
+  oModal('wedDetailOverlay');
+}
+function delWed(id){wedstrijden=wedstrijden.filter(x=>x.id!==id);cModal('wedDetailOverlay');renderWedstrijden();}
+
+// ── AANWEZIGHEID ──
+let aanwSessies=[]; // [{id, datum, notitie, aanwezig:{spelerId: true/false/null}}]
+let nextAanwId=1;
+
+function openNieuweTrainingAanw(){
+  if(!spelers.length){alert('Voeg eerst spelers toe via het tabblad Spelers.');return;}
+  document.getElementById('aanwDatum').value=new Date().toISOString().split('T')[0];
+  document.getElementById('aanwNotitie').value='';
+  document.getElementById('errAanwDatum').style.display='none';
+  oModal('aanwOverlay');
+}
+
+function submitNieuweTrainingAanw(){
+  const datum=document.getElementById('aanwDatum').value;
+  document.getElementById('errAanwDatum').style.display=datum?'none':'block';
+  if(!datum)return;
+  const aanwezig={};
+  spelers.forEach(s=>aanwezig[s.id]=null);
+  aanwSessies.unshift({id:nextAanwId++,datum,notitie:document.getElementById('aanwNotitie').value.trim(),aanwezig});
+  cModal('aanwOverlay');
+  renderAanwezigheid();
+}
+
+function toggleAanw(sessieId, spelerId, status){
+  const s=aanwSessies.find(x=>x.id===sessieId);
+  if(!s)return;
+  s.aanwezig[spelerId]=s.aanwezig[spelerId]===status?null:status;
+  renderAanwezigheid();
+}
+
+function toggleSessie(id){
+  const body=document.getElementById('aanw-body-'+id);
+  const chev=document.getElementById('aanw-chev-'+id);
+  const open=body.classList.toggle('open');
+  chev.classList.toggle('open',open);
+}
+
+function aanwPct(spelerId){
+  const relevant=aanwSessies.filter(s=>s.aanwezig[spelerId]!==undefined);
+  if(!relevant.length)return null;
+  const aanwezig=relevant.filter(s=>s.aanwezig[spelerId]===true).length;
+  const geregistreerd=relevant.filter(s=>s.aanwezig[spelerId]!==null).length;
+  if(!geregistreerd)return null;
+  return Math.round((aanwezig/geregistreerd)*100);
+}
+
+function pctClass(pct){
+  if(pct===null)return'';
+  if(pct>=80)return'aanw-pct-high';
+  if(pct>=50)return'aanw-pct-mid';
+  return'aanw-pct-low';
+}
+
+function renderAanwezigheid(){
+  const list=document.getElementById('aanwList');
+  const empty=document.getElementById('aanwEmpty');
+
+  // stats
+  document.getElementById('statSessies').textContent=aanwSessies.length;
+  if(aanwSessies.length && spelers.length){
+    const pcts=spelers.map(s=>aanwPct(s.id)).filter(p=>p!==null);
+    const gem=pcts.length?Math.round(pcts.reduce((a,b)=>a+b,0)/pcts.length):null;
+    document.getElementById('statGemiddeld').textContent=gem!==null?gem+'%':'–';
+    const beste=spelers.map(s=>({naam:s.naam.split(' ')[0],pct:aanwPct(s.id)})).filter(x=>x.pct!==null).sort((a,b)=>b.pct-a.pct)[0];
+    document.getElementById('statBeste').textContent=beste?beste.naam:'–';
+  } else {
+    document.getElementById('statGemiddeld').textContent='–';
+    document.getElementById('statBeste').textContent='–';
+  }
+
+  if(!aanwSessies.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+
+  list.innerHTML=aanwSessies.map(sessie=>{
+    const totaal=spelers.length;
+    const aanwezig=Object.values(sessie.aanwezig).filter(v=>v===true).length;
+    const geregistreerd=Object.values(sessie.aanwezig).filter(v=>v!==null).length;
+    const pct=geregistreerd?Math.round((aanwezig/geregistreerd)*100):0;
+
+    const spelersRows=spelers.map(s=>{
+      const status=sessie.aanwezig[s.id];
+      const c=COLORS[s.ci]||COLORS[0];
+      return`<div class="aanw-speler-row">
+        <div style="width:32px;height:32px;border-radius:50%;background:${c.bg};color:${c.text};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:'Bebas Neue',sans-serif">${ini(s.naam)}</div>
+        <div class="aanw-speler-name">${s.naam}</div>
+        <div class="aanw-toggle">
+          <button class="aanw-btn${status===true?' aanwezig':''}" onclick="toggleAanw(${sessie.id},${s.id},true)">✓ Aanwezig</button>
+          <button class="aanw-btn${status===false?' afwezig':''}" onclick="toggleAanw(${sessie.id},${s.id},false)">✗ Afwezig</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return`<div class="aanw-session-card">
+      <div class="aanw-session-header" onclick="toggleSessie(${sessie.id})">
+        <div>
+          <div class="aanw-session-datum">${fmtD(sessie.datum)}</div>
+          <div class="aanw-session-meta">${geregistreerd}/${totaal} geregistreerd${sessie.notitie?' · '+sessie.notitie:''}</div>
+        </div>
+        <div class="aanw-progress-wrap">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em">Aanwezig</span>
+            <span class="aanw-pct">${geregistreerd?pct+'%':'–'}</span>
+          </div>
+          <div class="aanw-progress-bar"><div class="aanw-progress-fill" style="width:${geregistreerd?pct:0}%"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--text-secondary)">${aanwezig}/${totaal}</span>
+          <span class="aanw-chevron" id="aanw-chev-${sessie.id}">▼</span>
+        </div>
+      </div>
+      <div class="aanw-spelers-list" id="aanw-body-${sessie.id}">
+        ${spelers.length?spelersRows:`<div style="font-size:13px;color:var(--text-secondary)">Voeg eerst spelers toe.</div>`}
+        <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end">
+          <button onclick="delAanwSessie(${sessie.id})" style="background:none;border:none;color:var(--text-tertiary);font-size:12px;cursor:pointer;font-family:var(--font-body)">Training verwijderen</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Also update speler cards if on spelers page
+  if(curPage==='spelers')renderSpelers();
+}
+
+function delAanwSessie(id){aanwSessies=aanwSessies.filter(s=>s.id!==id);renderAanwezigheid();}
+
+// ── AI GENERATOR ──
+function setExample(txt){ document.getElementById('aiExtra').value=txt; }
+
+async function generatePlan(){
+  const btn=document.getElementById('aiGenBtn');
+  const resultEl=document.getElementById('aiResult');
+  const age=document.getElementById('aiAge').value;
+  const duur=document.getElementById('aiDuur').value;
+  const focus=document.getElementById('aiFocus').value;
+  const spelers=document.getElementById('aiSpelers').value;
+  const extra=document.getElementById('aiExtra').value.trim();
+
+  // Oefeningen uit bibliotheek meegeven als context
+  const oefContext=oefeningen.map(o=>`- ${o.title} (${o.cat}, ${aL(o.age)}, ${o.duur||'?'}): ${o.desc.slice(0,80)}`).join('\n');
+
+  const prompt=`Je bent een ervaren jeugdvoetbaltrainer in Nederland. Stel een concreet trainingsplan op voor de volgende situatie:
+
+Leeftijdsgroep: ${age}
+Duur: ${duur}
+Hoofdfocus: ${focus}
+Aantal spelers: ${spelers}
+${extra?`Extra wensen: ${extra}`:''}
+
+Beschikbare oefeningen uit de bibliotheek:
+${oefContext}
+
+Geef een trainingsplan terug als JSON (geen markdown, geen uitleg, alleen JSON) in dit exacte formaat:
+{
+  "titel": "Korte pakkende titel van het plan",
+  "samenvatting": "Twee zinnen over het doel van deze training",
+  "onderdelen": [
+    {
+      "naam": "Naam van onderdeel",
+      "duur": "X min",
+      "beschrijving": "Concrete instructie voor de trainer (2-3 zinnen)",
+      "type": "warming-up|techniek|spelvorm|cooling-down"
+    }
+  ],
+  "trainerstip": "Één concrete tip voor deze specifieke training"
+}
+
+Gebruik bestaande oefeningen uit de bibliotheek waar mogelijk. Vul aan met eigen onderdelen waar nodig. Zorg dat de totale duur klopt met ${duur}. Antwoord ALLEEN met valid JSON.`;
+
+  btn.disabled=true;
+  btn.innerHTML=`<div class="ai-spinner"></div> Plan wordt gegenereerd...`;
+  resultEl.style.display='none';
+
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const raw=data.content.map(c=>c.text||'').join('');
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const plan=JSON.parse(clean);
+    renderAIPlan(plan, age, duur, focus);
+  } catch(err){
+    resultEl.style.display='block';
+    resultEl.innerHTML=`<div class="ai-error">Er ging iets mis bij het genereren. Controleer je internetverbinding en probeer opnieuw.<br><small style="opacity:.6">${err.message}</small></div>`;
+  } finally {
+    btn.disabled=false;
+    btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor"/></svg> Nieuw plan genereren`;
+  }
+}
+
+function renderAIPlan(plan, age, duur, focus){
+  const typeColors={
+    'warming-up':'rgba(255,184,77,0.12)',
+    'techniek':'rgba(91,184,255,0.1)',
+    'spelvorm':'rgba(0,224,84,0.08)',
+    'cooling-down':'rgba(192,132,252,0.1)'
+  };
+  const typeBorders={
+    'warming-up':'rgba(255,184,77,0.3)',
+    'techniek':'rgba(91,184,255,0.25)',
+    'spelvorm':'rgba(0,224,84,0.25)',
+    'cooling-down':'rgba(192,132,252,0.25)'
+  };
+  const typeLabels={'warming-up':'Warming-up','techniek':'Techniek','spelvorm':'Spelvorm','cooling-down':'Cooling-down'};
+
+  const onderdelen=plan.onderdelen.map((o,i)=>`
+    <div class="ai-oef-item" style="background:${typeColors[o.type]||'var(--dark3)'};border-color:${typeBorders[o.type]||'var(--border)'}">
+      <div class="ai-oef-num">${String(i+1).padStart(2,'0')}</div>
+      <div>
+        <div class="ai-oef-name">${o.naam}</div>
+        <div class="ai-oef-desc">${o.beschrijving}</div>
+        <div style="margin-top:5px"><span style="font-size:10px;padding:2px 8px;border-radius:6px;background:${typeBorders[o.type]||'var(--border)'};color:var(--text-secondary)">${typeLabels[o.type]||o.type}</span></div>
+      </div>
+      <div class="ai-oef-duur">⏱ ${o.duur}</div>
+    </div>`).join('');
+
+  const resultEl=document.getElementById('aiResult');
+  resultEl.style.display='block';
+  resultEl.innerHTML=`
+    <div class="ai-result">
+      <div class="ai-result-header">
+        <div>
+          <div class="ai-result-title">${plan.titel}</div>
+          <div class="ai-result-meta">${age} · ${duur} · Focus: ${focus}</div>
+        </div>
+        <div class="ai-badge" style="flex-shrink:0"><div class="ai-badge-dot"></div>AI gegenereerd</div>
+      </div>
+      <div class="ai-result-body">
+        <div class="ai-block">
+          <div class="ai-block-label">Samenvatting</div>
+          <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">${plan.samenvatting}</div>
+        </div>
+        <div class="ai-block">
+          <div class="ai-block-label">Trainingsonderdelen</div>
+          ${onderdelen}
+        </div>
+        ${plan.trainerstip?`
+        <div class="ai-block">
+          <div class="ai-block-label">Trainerstip</div>
+          <div class="ai-tip"><strong>💡 Tip:</strong> ${plan.trainerstip}</div>
+        </div>`:''}
+        <button class="ai-save-btn" onclick="savePlanAsTraining()">+ Dit plan opslaan als training</button>
+      </div>
+    </div>`;
+  resultEl.scrollIntoView({behavior:'smooth',block:'start'});
+  window._lastPlan=plan;
+}
+
+function savePlanAsTraining(){
+  if(!spelers.length){alert('Voeg eerst een speler toe via het tabblad Spelers.');return;}
+  showPage('resultaten',document.querySelectorAll('.nav-tab')[2]);
+  setTimeout(()=>openAddTraining(),100);
+}
+function buildCP(){document.getElementById('colorPicker').innerHTML=COLORS.map((c,i)=>`<div class="color-swatch${i===selColor?' selected':''}" style="background:${c.bg};border-color:${i===selColor?c.text:'transparent'}" onclick="pickC(${i})"></div>`).join('');}
+function pickC(i){selColor=i;buildCP();}
+function setSter(v){sterRating=v;document.querySelectorAll('.ster-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)<=v));}
+
+function renderOefeningen(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const list=oefeningen.filter(o=>(fAge==='alle'||o.age===fAge)&&(fCat==='alle'||o.cat===fCat)&&(!q||o.title.toLowerCase().includes(q)||o.cat.toLowerCase().includes(q)||o.desc.toLowerCase().includes(q)));
+  document.getElementById('countEl').textContent=list.length+' oefening'+(list.length!==1?'en':'');
+  document.getElementById('statOef').textContent=oefeningen.length;
+  const empty=document.getElementById('emptyEl'),grid=document.getElementById('cardsEl');
+  if(!list.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=list.map(o=>{
+    const t=thumb(o.video);
+    const th=t
+      ?`<div class="card-thumb"><img src="${t}" alt=""><div class="play-overlay"><svg viewBox="0 0 12 14" fill="#0a0a0a"><path d="M1 1l10 6-10 6V1z"/></svg></div></div>`
+      :`<div class="no-thumb"><div class="no-thumb-pitch">${PITCH_SVG}</div><span class="no-thumb-label">Geen video</span></div>`;
+    return`<div class="card${o.eigen?' eigen':''}" onclick="openDetail(${o.id})">${o.eigen?'<span class="eigen-tag">Eigen</span>':''}${th}<div class="card-body"><div class="card-top"><div class="card-title">${o.title}</div><span class="badge ${aC(o.age)}">${aL(o.age)}</span></div><div class="card-desc">${o.desc.slice(0,90)}...</div><div class="card-meta"><span class="meta"><span class="dot d-${o.cat}"></span>${cL(o.cat)}</span><span class="meta">⏱ ${o.duur||'–'}</span><span class="meta">👥 ${o.spelers||'–'}</span></div></div></div>`;
+  }).join('');
+}
+
+function openDetail(id){
+  const o=oefeningen.find(x=>x.id===id);if(!o)return;
+  const e=embedUrl(o.video);
+  const vh=e
+    ?`<div class="detail-video"><iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`
+    :`<div class="detail-novideo"><div style="opacity:.15">${PITCH_SVG}</div><span>Geen video gekoppeld</span></div>`;
+  document.getElementById('detailBody').innerHTML=`${vh}<div class="detail-body"><span class="badge ${aC(o.age)}">${aL(o.age)}</span><div class="detail-title">${o.title}</div><div class="detail-cat"><span class="dot d-${o.cat}"></span>${cL(o.cat)}${o.eigen?' · <span style="color:var(--green)">Eigen oefening</span>':''}</div><div class="sec-label">Beschrijving</div><div class="sec-text">${o.desc}</div><div class="sec-label">Trainingsdoel</div><div class="sec-text">${o.doel||'–'}</div><div class="info-grid"><div class="info-item"><div class="info-label">Duur</div><div class="info-val">${o.duur||'–'}</div></div><div class="info-item"><div class="info-label">Spelers</div><div class="info-val">${o.spelers||'–'}</div></div><div class="info-item" style="grid-column:1/-1"><div class="info-label">Materiaal</div><div class="info-val">${o.materiaal||'–'}</div></div></div>${o.eigen?`<button class="del-btn" onclick="delOef(${id})">Verwijderen</button>`:''}</div>`;
+  oModal('detailOverlay');
+}
+function delOef(id){oefeningen=oefeningen.filter(o=>o.id!==id);cModal('detailOverlay');renderOefeningen();}
+
+function openAddOef(){
+  ['fTitle','fDuur','fSpelers','fDesc','fDoel','fMat','fVideo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fAge').value='U10';document.getElementById('fCat').value='passing';
+  ['errTitle','errDesc','errVideo'].forEach(id=>document.getElementById(id).style.display='none');
+  oModal('addOefOverlay');
+}
+function submitOefening(){
+  const title=document.getElementById('fTitle').value.trim(),desc=document.getElementById('fDesc').value.trim(),vid=document.getElementById('fVideo').value.trim();
+  let ok=true;
+  document.getElementById('errTitle').style.display=title?'none':'block';if(!title)ok=false;
+  document.getElementById('errDesc').style.display=desc?'none':'block';if(!desc)ok=false;
+  if(vid&&!embedUrl(vid)){document.getElementById('errVideo').style.display='block';ok=false;}else document.getElementById('errVideo').style.display='none';
+  if(!ok)return;
+  oefeningen.unshift({id:nextOId++,title,age:document.getElementById('fAge').value,cat:document.getElementById('fCat').value,duur:document.getElementById('fDuur').value.trim()||'–',spelers:document.getElementById('fSpelers').value.trim()||'–',desc,doel:document.getElementById('fDoel').value.trim(),materiaal:document.getElementById('fMat').value.trim(),video:vid||null,eigen:true});
+  cModal('addOefOverlay');renderOefeningen();
+}
+
+function renderSpelers(){
+  const grid=document.getElementById('spelersGrid'),empty=document.getElementById('spelersEmpty');
+  document.getElementById('spelersTitle').innerHTML=`Spelers <span>${spelers.length}</span>`;
+  if(!spelers.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=spelers.map(s=>{
+    const c=COLORS[s.ci]||COLORS[0];
+    const nt=trainingen.filter(t=>t.sid===s.id).length;
+    const pct=aanwPct(s.id);
+    const tags=[s.positie,s.voet,s.nummer?'#'+s.nummer:''].filter(Boolean);
+    return`<div class="speler-card" onclick="openSpeler(${s.id})"><div class="speler-top"><div class="avatar" style="background:${c.bg};color:${c.text}">${ini(s.naam)}</div><div><div class="speler-name">${s.naam}</div><div class="speler-pos">${s.positie||'Positie onbekend'}${s.jaar?' · '+(new Date().getFullYear()-s.jaar)+' jaar':''}</div></div></div><div class="speler-tags">${tags.map(t=>`<span class="speler-tag">${t}</span>`).join('')}</div>${s.notities?`<div class="speler-note">${s.notities.slice(0,70)}${s.notities.length>70?'...':''}</div>`:''}<div class="speler-stat-row"><div class="speler-stat"><div class="speler-stat-num">${nt}</div><div class="speler-stat-label">trainingen</div></div><div class="speler-stat"><div class="speler-stat-num" style="color:${pct===null?'var(--text-tertiary)':pct>=80?'var(--green)':pct>=50?'#ffb84d':'#ff6b6b'}">${pct!==null?pct+'%':'–'}</div><div class="speler-stat-label">aanwezig</div></div></div></div>`;
+  }).join('');
+}
+function openSpeler(id){
+  const s=spelers.find(x=>x.id===id);if(!s)return;
+  const c=COLORS[s.ci]||COLORS[0];
+  const lft=s.jaar?new Date().getFullYear()-s.jaar+' jaar':'–';
+  const st=trainingen.filter(t=>t.sid===id).sort((a,b)=>new Date(b.datum)-new Date(a.datum));
+  const th=st.length?st.slice(0,4).map(t=>{
+    const ns=t.oefIds.map(oid=>{const o=oefeningen.find(x=>x.id===oid);return o?o.title:null;}).filter(Boolean).join(', ');
+    return`<div class="mini-card"><strong>${fmtD(t.datum)} ${sterH(t.ster,11)}</strong>${ns||'Geen oefeningen'}${t.notitie?`<br><em>${t.notitie.slice(0,60)}...</em>`:''}</div>`;
+  }).join(''):`<div style="font-size:13px;color:var(--text-secondary);margin-top:8px;">Nog geen trainingen gelogd.</div>`;
+  document.getElementById('spelerDetailBody').innerHTML=`<div class="modal-header-block"><div class="modal-avatar-lg" style="background:${c.bg};color:${c.text}">${ini(s.naam)}</div><div><div class="modal-name">${s.naam}</div><div class="modal-sub">${s.positie||'–'} · ${lft}</div></div></div><div class="modal-body"><div class="info-grid"><div class="info-item"><div class="info-label">Geboortejaar</div><div class="info-val">${s.jaar||'–'}</div></div><div class="info-item"><div class="info-label">Leeftijd</div><div class="info-val">${lft}</div></div><div class="info-item"><div class="info-label">Positie</div><div class="info-val">${s.positie||'–'}</div></div><div class="info-item"><div class="info-label">Sterkste voet</div><div class="info-val">${s.voet||'–'}</div></div><div class="info-item"><div class="info-label">Rugnummer</div><div class="info-val">${s.nummer?'#'+s.nummer:'–'}</div></div><div class="info-item"><div class="info-label">Trainingen</div><div class="info-val">${st.length}</div></div></div>${s.notities?`<div class="sec-label">Notities</div><div class="sec-text" style="font-style:italic">${s.notities}</div>`:''}<div class="sec-label">Recente trainingen</div>${th}<button class="del-btn" onclick="delSpeler(${id})">Speler verwijderen</button></div>`;
+  oModal('spelerDetailOverlay');
+}
+function delSpeler(id){spelers=spelers.filter(s=>s.id!==id);trainingen=trainingen.filter(t=>t.sid!==id);cModal('spelerDetailOverlay');renderSpelers();}
+function openAddSpeler(){
+  ['sNaam','sJaar','sNummer','sNotities'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sPositie').value='';document.getElementById('sVoet').value='';
+  document.getElementById('errNaam').style.display='none';
+  selColor=Math.floor(Math.random()*COLORS.length);buildCP();
+  oModal('addSpelerOverlay');
+}
+function submitSpeler(){
+  const naam=document.getElementById('sNaam').value.trim();
+  document.getElementById('errNaam').style.display=naam?'none':'block';if(!naam)return;
+  spelers.push({id:nextSId++,naam,jaar:parseInt(document.getElementById('sJaar').value)||null,positie:document.getElementById('sPositie').value,voet:document.getElementById('sVoet').value,nummer:document.getElementById('sNummer').value||null,notities:document.getElementById('sNotities').value.trim(),ci:selColor});
+  cModal('addSpelerOverlay');renderSpelers();
+}
+
+function renderResultaten(){
+  const list=document.getElementById('resultatenList'),empty=document.getElementById('resultatenEmpty');
+  document.getElementById('resultatenTitle').innerHTML=`Trainingen <span>${trainingen.length}</span>`;
+  if(!trainingen.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  const sorted=[...trainingen].sort((a,b)=>new Date(b.datum)-new Date(a.datum));
+  list.innerHTML=sorted.map(t=>{
+    const s=spelers.find(x=>x.id===t.sid);
+    const c=s?COLORS[s.ci]||COLORS[0]:COLORS[0];
+    const ns=t.oefIds.map(id=>{const o=oefeningen.find(x=>x.id===id);return o?o.title:null;}).filter(Boolean);
+    const av=s?`<span style="width:22px;height:22px;border-radius:50%;background:${c.bg};color:${c.text};font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Bebas Neue',sans-serif;letter-spacing:.5px">${ini(s.naam)}</span>`:'';
+    return`<div class="training-card" onclick="openTraining(${t.id})"><div class="training-datum-block"><div class="training-dag">${fmtDag(t.datum)}</div><div class="training-mnd">${fmtMnd(t.datum)}</div></div><div class="training-divider"></div><div class="training-info"><div class="training-speler">${av}${s?s.naam:'Onbekend'}</div><div class="training-tags">${ns.map(n=>`<span class="training-tag">${n}</span>`).join('')}${!ns.length?'<span class="training-tag" style="color:var(--text-tertiary)">Geen oefeningen</span>':''}</div></div><div class="training-ster"><div class="ster-row">${sterH(t.ster,13)}</div>${t.notitie?`<div style="font-size:10px;color:var(--text-tertiary);text-align:right;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notitie}</div>`:''}</div></div>`;
+  }).join('');
+}
+function openTraining(id){
+  const t=trainingen.find(x=>x.id===id);if(!t)return;
+  const s=spelers.find(x=>x.id===t.sid);
+  const c=s?COLORS[s.ci]||COLORS[0]:COLORS[0];
+  const oefHtml=t.oefIds.map(oid=>{const o=oefeningen.find(x=>x.id===oid);return o?`<div class="mini-card"><strong>${o.title}</strong>${cL(o.cat)} · ${aL(o.age)} · ${o.duur||'–'}</div>`:''}).join('');
+  const av=s?`<div class="modal-avatar-lg" style="background:${c.bg};color:${c.text}">${ini(s.naam)}</div>`:'';
+  document.getElementById('trainingDetailBody').innerHTML=`<div class="modal-header-block">${av}<div style="flex:1"><div class="modal-name">${fmtD(t.datum)}</div><div class="modal-sub" style="display:flex;align-items:center;gap:8px">${s?s.naam:'–'}<span>${sterH(t.ster,13)}</span></div></div></div><div class="modal-body"><div class="sec-label">Oefeningen (${t.oefIds.length})</div>${oefHtml||'<div style="font-size:13px;color:var(--text-secondary)">Geen oefeningen gelogd.</div>'}${t.notitie?`<div class="sec-label">Notitie</div><div class="sec-text" style="font-style:italic">${t.notitie}</div>`:''}<button class="del-btn" onclick="delTraining(${id})">Training verwijderen</button></div>`;
+  oModal('trainingDetailOverlay');
+}
+function delTraining(id){trainingen=trainingen.filter(t=>t.id!==id);cModal('trainingDetailOverlay');renderResultaten();}
+function openAddTraining(){
+  if(!spelers.length){alert('Voeg eerst een speler toe.');return;}
+  document.getElementById('tDatum').value=new Date().toISOString().split('T')[0];
+  document.getElementById('tNotitie').value='';
+  document.getElementById('tSpeler').innerHTML='<option value="">Kies speler...</option>'+spelers.map(s=>`<option value="${s.id}">${s.naam}</option>`).join('');
+  document.getElementById('oefChecklist').innerHTML=oefeningen.map(o=>`<label class="oef-item"><input type="checkbox" value="${o.id}"><div><div class="oef-item-name">${o.title}</div><div class="oef-item-cat">${cL(o.cat)} · ${aL(o.age)}</div></div></label>`).join('');
+  sterRating=0;document.querySelectorAll('.ster-btn').forEach(b=>b.classList.remove('on'));
+  ['errDatum','errSpeler'].forEach(id=>document.getElementById(id).style.display='none');
+  oModal('addTrainingOverlay');
+}
+function submitTraining(){
+  const datum=document.getElementById('tDatum').value,sid=parseInt(document.getElementById('tSpeler').value);
+  let ok=true;
+  document.getElementById('errDatum').style.display=datum?'none':'block';if(!datum)ok=false;
+  document.getElementById('errSpeler').style.display=sid?'none':'block';if(!sid)ok=false;
+  if(!ok)return;
+  const oefIds=Array.from(document.querySelectorAll('#oefChecklist input:checked')).map(el=>parseInt(el.value));
+  trainingen.push({id:nextTId++,datum,sid,oefIds,ster:sterRating,notitie:document.getElementById('tNotitie').value.trim()});
+  cModal('addTrainingOverlay');renderResultaten();
+  if(curPage==='spelers')renderSpelers();
+}
+
+document.querySelectorAll('.pill[data-age]').forEach(el=>el.addEventListener('click',()=>{
+  document.querySelectorAll('.pill[data-age]').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');fAge=el.dataset.age;renderOefeningen();
+}));
+document.querySelectorAll('.cat-pill[data-cat]').forEach(el=>el.addEventListener('click',()=>{
+  document.querySelectorAll('.cat-pill[data-cat]').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');fCat=el.dataset.cat;renderOefeningen();
+}));
+
+buildCP();
+renderOefeningen();
+
+// ══ SUPABASE + STRIPE INIT ══
+const SUPABASE_URL = 'https://nwuxepqtchrxeejtrajn.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53dXhlcHF0Y2hyeGVlanRyYWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MzQ0ODQsImV4cCI6MjA4OTQxMDQ4NH0.Vz05DQ7E7085hRqqaLt-x6rnBrxR9zhxq4UsvDj_3hs';
+const STRIPE_PK = 'pk_test_51R6X33KPkbXyZxvmIhWblSmMZn3aYEtgB5dryZnoeSjgGbwMaYtlthZJBmN5Cv9XyMr7H67yYEWnnZHYOpubiytk00ndLeqrH4';
+const PRICE_PRO = 'price_1TCIiGKPkbXyZxvmbxnv6owj';
+const PRICE_CLUB = 'price_1TCIkRKPkbXyZxvmVrNwUM8r';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const stripe = Stripe(STRIPE_PK);
+
+let huidigUser = null;
+let huidigPlan = 'gratis'; // 'gratis' | 'pro' | 'club'
+const GRATIS_SPELER_LIMIET = 5;
+
+// ── AUTH STATE ──
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    huidigUser = session.user;
+    await laadPlan();
+    toonApp();
+  } else {
+    huidigUser = null;
+    huidigPlan = 'gratis';
+    toonAuthScherm();
+  }
+});
+
+async function laadPlan() {
+  try {
+    const { data } = await sb.from('abonnementen').select('plan').eq('user_id', huidigUser.id).single();
+    huidigPlan = data?.plan || 'gratis';
+  } catch { huidigPlan = 'gratis'; }
+  updateAccountBtn();
+  updateUpgradeBanner();
+}
+
+function toonApp() {
+  document.getElementById('authScreen').classList.add('hidden');
+  updateAccountBtn();
+  updateUpgradeBanner();
+}
+
+function toonAuthScherm() {
+  document.getElementById('authScreen').classList.remove('hidden');
+}
+
+function updateAccountBtn() {
+  if (!huidigUser) return;
+  const email = huidigUser.email || '';
+  const naam = huidigUser.user_metadata?.naam || email.split('@')[0];
+  const initialen = naam.slice(0,2).toUpperCase();
+  document.getElementById('accountAvatar').textContent = initialen;
+  document.getElementById('accountLabel').innerHTML = huidigPlan === 'pro' || huidigPlan === 'club'
+    ? `<span class="pro-badge">${huidigPlan.toUpperCase()}</span>`
+    : naam.split(' ')[0];
+}
+
+function updateUpgradeBanner() {
+  const banner = document.getElementById('upgradeBanner');
+  if (huidigPlan === 'gratis') banner.style.display = 'block';
+  else banner.style.display = 'none';
+}
+
+// ── AUTH TABS ──
+function switchAuthTab(tab, btn) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('authLogin').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('authRegister').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('authReset').style.display = tab === 'reset' ? 'block' : 'none';
+}
+
+// ── LOGIN ──
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginErr');
+  err.style.display = 'none';
+  if (!email || !pw) { err.textContent = 'Vul je e-mailadres en wachtwoord in.'; err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Bezig...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  btn.disabled = false; btn.textContent = 'Inloggen';
+  if (error) { err.textContent = 'Verkeerd e-mailadres of wachtwoord.'; err.style.display = 'block'; }
+}
+
+// ── REGISTREREN ──
+async function doRegister() {
+  const naam = document.getElementById('regNaam').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pw = document.getElementById('regPw').value;
+  const btn = document.getElementById('regBtn');
+  const err = document.getElementById('regErr');
+  const ok = document.getElementById('regOk');
+  err.style.display = 'none'; ok.style.display = 'none';
+  if (!naam || !email || !pw) { err.textContent = 'Vul alle velden in.'; err.style.display = 'block'; return; }
+  if (pw.length < 6) { err.textContent = 'Wachtwoord moet minimaal 6 tekens zijn.'; err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Account aanmaken...';
+  const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { naam } } });
+  btn.disabled = false; btn.textContent = 'Gratis account aanmaken';
+  if (error) { err.textContent = 'Er ging iets mis: ' + error.message; err.style.display = 'block'; }
+  else { ok.textContent = 'Account aangemaakt! Controleer je e-mail om te bevestigen, dan kun je inloggen.'; ok.style.display = 'block'; }
+}
+
+// ── WACHTWOORD RESET ──
+async function doReset() {
+  const email = document.getElementById('resetEmail').value.trim();
+  const err = document.getElementById('resetErr');
+  const ok = document.getElementById('resetOk');
+  err.style.display = 'none'; ok.style.display = 'none';
+  if (!email) { err.textContent = 'Vul je e-mailadres in.'; err.style.display = 'block'; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email);
+  if (error) { err.textContent = 'Er ging iets mis.'; err.style.display = 'block'; }
+  else { ok.textContent = 'Herstelmail verstuurd! Controleer je inbox.'; ok.style.display = 'block'; }
+}
+
+// ── ACCOUNT MODAL ──
+function openAccount() {
+  if (!huidigUser) return;
+  const email = huidigUser.email || '';
+  const naam = huidigUser.user_metadata?.naam || email.split('@')[0];
+  const planNaam = huidigPlan === 'pro' ? 'Pro Trainer' : huidigPlan === 'club' ? 'Club' : 'Gratis (Starter)';
+  const planDesc = huidigPlan === 'gratis'
+    ? 'Max. 5 spelers · Beperkte AI generator'
+    : huidigPlan === 'pro'
+    ? 'Onbeperkt spelers · Alle modules · AI onbeperkt'
+    : 'Tot 10 trainers · Alles van Pro · Club dashboard';
+  document.getElementById('accountModalBody').innerHTML = `
+    <div class="account-modal-naam">${naam}</div>
+    <div class="account-modal-email">${email}</div>
+    <div class="plan-card ${huidigPlan === 'gratis' ? 'gratis' : 'pro'}">
+      <div class="plan-card-naam">${planNaam}</div>
+      <div class="plan-card-desc">${planDesc}</div>
+    </div>
+    ${huidigPlan === 'gratis' ? `
+      <button onclick="openUpgrade();cModal('accountOverlay')" style="width:100%;padding:12px;border-radius:10px;background:#00e054;color:#0a0a0a;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:8px">
+        Upgraden naar Pro · €7/maand
+      </button>
+      <button onclick="openUpgrade('club');cModal('accountOverlay')" style="width:100%;padding:12px;border-radius:10px;background:transparent;color:#00e054;border:0.5px solid rgba(0,224,84,0.3);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:8px">
+        Club licentie · €29/maand
+      </button>` : `
+      <div style="font-size:12px;color:#888;margin-bottom:1rem;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px">
+        Om je abonnement op te zeggen, stuur een e-mail naar support@trainershub.nl
+      </div>`}
+    <button class="uitloggen-btn" onclick="doLogout()">Uitloggen</button>
+  `;
+  oModal('accountOverlay');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  cModal('accountOverlay');
+}
+
+// ── STRIPE UPGRADE ──
+async function openUpgrade(plan = 'pro') {
+  const priceId = plan === 'club' ? PRICE_CLUB : PRICE_PRO;
+  if (!huidigUser) { toonAuthScherm(); return; }
+  // Maak Stripe checkout sessie via Supabase Edge Function
+  // Als die niet beschikbaar is, toon instructie
+  try {
+    const { data, error } = await sb.functions.invoke('maak-checkout', {
+      body: { priceId, userId: huidigUser.id, email: huidigUser.email }
+    });
+    if (error) throw error;
+    if (data?.url) window.location.href = data.url;
+  } catch {
+    // Fallback: toon instructie als Edge Function nog niet is ingesteld
+    toonUpgradeInstructie(plan, priceId);
+  }
+}
+
+function toonUpgradeInstructie(plan, priceId) {
+  const naam = plan === 'club' ? 'Club' : 'Pro Trainer';
+  const prijs = plan === 'club' ? '€29' : '€7';
+  cModal('accountOverlay');
+  document.getElementById('accountModalBody').innerHTML = `
+    <div style="text-align:center;padding:1rem 0">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:#f0f0f0;margin-bottom:8px">Upgraden naar ${naam}</div>
+      <div style="font-size:13px;color:#888;margin-bottom:1.5rem">Volg deze stappen om ${prijs}/maand te betalen:</div>
+      <div style="text-align:left;background:rgba(0,224,84,0.06);border:0.5px solid rgba(0,224,84,0.15);border-radius:12px;padding:1rem;margin-bottom:1.5rem">
+        <div style="font-size:13px;color:#f0f0f0;line-height:1.8">
+          1. Ga naar je Stripe dashboard<br>
+          2. Maak een Payment Link aan voor dit product<br>
+          3. Stuur de link naar: <strong style="color:#00e054">${huidigUser?.email}</strong><br>
+          4. Na betaling wordt je account automatisch bijgewerkt
+        </div>
+      </div>
+      <div style="font-size:11px;color:#555">Price ID: ${priceId}</div>
+    </div>
+  `;
+  oModal('accountOverlay');
+}
+
+// ── GRATIS PLAN LIMIETEN ──
+function checkSpelerLimiet() {
+  if (huidigPlan !== 'gratis') return true;
+  if (spelers.length >= GRATIS_SPELER_LIMIET) {
+    toonLimietMelding('spelers', GRATIS_SPELER_LIMIET);
+    return false;
+  }
+  return true;
+}
+
+function toonLimietMelding(type, limiet) {
+  document.getElementById('accountModalBody').innerHTML = `
+    <div style="text-align:center;padding:1rem 0">
+      <div style="font-size:36px;margin-bottom:1rem">🔒</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:#f0f0f0;margin-bottom:8px">Limiet bereikt</div>
+      <div style="font-size:13px;color:#888;margin-bottom:1.5rem">Het gratis plan heeft een limiet van ${limiet} ${type}.<br>Upgrade naar Pro voor onbeperkt gebruik.</div>
+      <button onclick="openUpgrade();cModal('accountOverlay')" style="width:100%;padding:12px;border-radius:10px;background:#00e054;color:#0a0a0a;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">
+        Upgraden naar Pro · €7/maand
+      </button>
+    </div>
+  `;
+  oModal('accountOverlay');
+}
+
+// Wrap submitSpeler om limiet te checken
+const _origSubmitSpeler = submitSpeler;
+window.submitSpeler = function() {
+  if (!checkSpelerLimiet()) return;
+  _origSubmitSpeler();
+};
+
+// ── CHECK OF AL INGELOGD ──
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) toonAuthScherm();
+})();
+</script>
+<!-- MODAL: aanwezigheid nieuwe training -->
+<div class="overlay" id="aanwOverlay" onclick="oClick(event,'aanwOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('aanwOverlay')">✕</button>
+    <div class="form-wrap">
+      <div class="form-title">Training registreren</div>
+      <div class="form-group">
+        <label class="form-label">Datum *</label>
+        <input class="form-input" id="aanwDatum" type="date">
+        <div class="form-error" id="errAanwDatum">Kies een datum.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notitie (optioneel)</label>
+        <input class="form-input" id="aanwNotitie" type="text" placeholder="Bijv. eerste training seizoen, regenachtig...">
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="cModal('aanwOverlay')">Annuleren</button>
+        <button class="btn-primary" onclick="submitNieuweTrainingAanw()">Aanmaken</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
