@@ -3678,26 +3678,33 @@ async function laadPlanning() {
   renderKalender();
 }
 
-// Genereer virtuele schema-items voor de kalender (niet in DB, alleen weergave)
+// Genereer virtuele schema-items voor de kalender
 function getSchemaItemsVoorMaand(jaar, maand) {
   if (!seizoenSchema.length) return [];
   const items = [];
   const dagenInMaand = new Date(jaar, maand + 1, 0).getDate();
-  const seizoenEinde = new Date(jaar <= new Date().getFullYear() ? jaar : new Date().getFullYear(), 5, 30); // juni
+
+  // Seizoen loopt tot juni — als we al voorbij juni zijn, tot juni volgend jaar
+  const nu = new Date();
+  const eindeJaar = (nu.getMonth() >= 6) ? nu.getFullYear() + 1 : nu.getFullYear();
+  const seizoenEinde = new Date(eindeJaar, 5, 30); // 30 juni
 
   for (let dag = 1; dag <= dagenInMaand; dag++) {
     const datum = new Date(jaar, maand, dag);
     if (datum > seizoenEinde) break;
-    // dag.getDay(): 0=zo,1=ma..6=za → omzetten naar ma=0,zo=6
-    let dagIdx = datum.getDay() === 0 ? 6 : datum.getDay() - 1;
+    const dagIdx = datum.getDay() === 0 ? 6 : datum.getDay() - 1; // ma=0, zo=6
     const datumStr = `${jaar}-${String(maand+1).padStart(2,'0')}-${String(dag).padStart(2,'0')}`;
-    // Kijk of er al een echt item op deze datum is met zelfde type
     seizoenSchema.forEach(schema => {
       if (schema.dag_van_week === dagIdx) {
-        const heeftEchtItem = planItems.some(p => p.datum === datumStr && p.schema_id === schema.id);
-        if (!heeftEchtItem) {
-          items.push({ id: 'schema_' + schema.id + '_' + datumStr, datum: datumStr, type: schema.type, titel: schema.titel, tijd: schema.tijd, schema_id: schema.id, isSchema: true });
-        }
+        items.push({
+          id: `schema_${schema.id}_${datumStr}`,
+          datum: datumStr,
+          type: schema.type,
+          titel: schema.titel,
+          tijd: schema.tijd,
+          schema_id: schema.id,
+          isSchema: true
+        });
       }
     });
   }
@@ -3740,9 +3747,12 @@ function renderKalender() {
 
     let itemsHtml = dagItems.slice(0, 2).map(item => {
       const k = PLAN_KLEUREN[item.type] || PLAN_KLEUREN.overig;
-      const isTraining = item.type === 'training';
-      const aanwIcon = isTraining ? ' ✓' : '';
-      return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text};${item.isSchema?'opacity:0.7;border-left:2px solid '+k.text+';':''}" onclick="event.stopPropagation();klikOpItem('${item.id}','${datumStr}','${item.isSchema?'1':'0'}')">${item.titel}${aanwIcon}</div>`;
+      const escapedId = item.id.replace(/'/g, "\\'");
+      if (item.isSchema) {
+        return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text};border-left:2px solid ${k.text}" onclick="event.stopPropagation();openAanwVanAgenda('${datumStr}','${item.schema_id}','1')">${item.titel}</div>`;
+      } else {
+        return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text}" onclick="event.stopPropagation();openPlanItem('${item.id}')">${item.titel}</div>`;
+      }
     }).join('');
     if (dagItems.length > 2) itemsHtml += `<div class="plan-meer">+${dagItems.length - 2} meer</div>`;
 
@@ -3780,8 +3790,8 @@ function renderPlanLijst() {
         <div class="plan-lijst-meta">${PLAN_TYPE_LABELS[item.type]||'–'}${item.tijd?' · '+item.tijd:''}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
-        ${isTraining?`<button onclick="openAanwVanAgenda('${item.datum}','${item.isSchema?item.schema_id:''}','${item.isSchema?'1':'0'}','${item.id}')" style="background:rgba(0,224,84,0.1);border:0.5px solid rgba(0,224,84,0.2);color:var(--green);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);font-weight:700">✓ Aanwezigheid</button>`:''}
-        ${!item.isSchema?`<button class="plan-lijst-del" onclick="verwijderPlanItem(${item.id})">✕</button>`:''}
+        ${isTraining ? `<button onclick="openAanwVanAgenda('${item.datum}','${item.isSchema ? item.schema_id : ''}','${item.isSchema ? '1' : '0'}')" style="background:rgba(0,224,84,0.1);border:0.5px solid rgba(0,224,84,0.2);color:var(--green);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);font-weight:700">✓ Aanwezigheid</button>` : ''}
+        ${!item.isSchema ? `<button class="plan-lijst-del" onclick="verwijderPlanItem(${item.id})">✕</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -3804,15 +3814,6 @@ function klikOpDag(datum) {
   document.getElementById('planDatum').value = datum;
   document.getElementById('planItemTitel').textContent = 'Item toevoegen';
   oModal('planItemOverlay');
-}
-
-function klikOpItem(id, datum, isSchema) {
-  if (isSchema === '1') {
-    // Schema item — vraag of aanwezigheid bijhouden of eenmalig aanpassen
-    openAanwVanAgenda(datum, id.split('_')[1], '1', id);
-  } else {
-    openPlanItem(id);
-  }
 }
 
 function openNieuwPlanItem() {
@@ -3945,10 +3946,9 @@ let aanwAgendaDatum = null;
 let aanwAgendaSchemaId = null;
 let aanwAgendaPlanId = null;
 
-async function openAanwVanAgenda(datum, schemaId, isSchema, itemId) {
+async function openAanwVanAgenda(datum, schemaId, isSchema) {
   aanwAgendaDatum = datum;
   aanwAgendaSchemaId = schemaId || null;
-  aanwAgendaPlanId = isSchema === '0' ? itemId : null;
 
   const d = new Date(datum + 'T12:00:00');
   const datumMooi = d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' });
@@ -4806,6 +4806,7 @@ async function doInstall() {
       <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,184,77,0.5)"></div>Toernooi</div>
       <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(91,184,255,0.5)"></div>Overig</div>
       <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,255,255,0.15)"></div>Vrije dag</div>
+      <div class="plan-legenda-item" style="border-left:2px solid rgba(0,224,84,0.5);padding-left:6px;color:var(--text-tertiary);font-size:11px">Herhalend schema</div>
     </div>
 
     <!-- Weekdagen -->
@@ -4883,7 +4884,11 @@ async function doInstall() {
   <div class="modal">
     <button class="modal-close" onclick="cModal('schemaOverlay')">✕</button>
     <div class="form-title">⚙ Herhalend schema</div>
-    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:1.25rem;line-height:1.6">Stel vaste trainings- en wedstrijddagen in. Ze verschijnen automatisch elke week in je kalender t/m juni.</p>
+    <div style="background:rgba(0,224,84,0.06);border:0.5px solid rgba(0,224,84,0.15);border-radius:10px;padding:12px;margin-bottom:1.25rem">
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">
+        Stel hier je vaste trainings- en wedstrijddagen in. <strong style="color:var(--green)">Ze verschijnen automatisch elke week</strong> in je kalender — je hoeft nooit meer handmatig in te vullen. Het schema loopt automatisch door tot einde van het seizoen (juni).
+      </div>
+    </div>
 
     <!-- Bestaand schema -->
     <div id="schemaLijst" style="margin-bottom:1.5rem"></div>
