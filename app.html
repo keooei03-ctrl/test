@@ -2883,8 +2883,10 @@ function renderOefeningen(){
     // Bepaal of slot nodig is
     const ageKey = o.age || 'alle';
     if (!teller[ageKey]) teller[ageKey] = 0;
-    const isGesloten = !isPro() && !o.eigen && teller[ageKey] >= GRATIS_OEF_LIMIET;
-    if (!isPro() && !o.eigen) teller[ageKey]++;
+    // Gratis zichtbaar flag overschrijft het limiet
+    const gratisVrijgegeven = o.gratis_zichtbaar === true;
+    const isGesloten = !isPro() && !o.eigen && !gratisVrijgegeven && teller[ageKey] >= GRATIS_OEF_LIMIET;
+    if (!isPro() && !o.eigen && !gratisVrijgegeven) teller[ageKey]++;
 
     const slotHtml = isGesloten ? `<div class="card-slot-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><span>Pro</span></div>` : '';
     const cardKlik = isGesloten ? `onclick="checkPro('oefeningen_limiet')"` : `onclick="openDetail('${o.id}')"`;
@@ -4921,6 +4923,7 @@ async function laadPubliekeOefeningen() {
             duur: o.duur, spelers: o.spelers_aantal, desc: o.beschrijving,
             doel: o.doel, materiaal: o.materiaal, video: o.video,
             coaching_punten: o.coaching_punten, variaties: o.variaties,
+            gratis_zichtbaar: o.gratis_zichtbaar || false,
             eigen: false, publiek: true
           });
         }
@@ -5020,6 +5023,7 @@ async function submitAdminOefening() {
       duur: data.duur, spelers: data.spelers_aantal, desc: data.beschrijving,
       doel: data.doel, materiaal: data.materiaal, video: data.video,
       coaching_punten: data.coaching_punten, variaties: data.variaties,
+      gratis_zichtbaar: data.gratis_zichtbaar || false,
       eigen: false, publiek: true
     });
   }
@@ -5045,12 +5049,14 @@ function renderAdminOefeningen() {
     return;
   }
 
-  el.innerHTML = publiekeOefeningen.map(o => `
-    <div class="card">
+  el.innerHTML = publiekeOefeningen.map(o => {
+    const isGratis = o.gratis_zichtbaar === true;
+    return `<div class="card" style="border-color:${isGratis ? 'rgba(0,224,84,0.25)' : 'var(--border)'}">
       <div class="card-top">
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <div class="card-badge">${o.age || 'Alle'}</div>
           <div class="card-badge" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">${o.cat || 'overig'}</div>
+          ${isGratis ? '<div class="card-badge" style="background:rgba(0,224,84,0.1);color:#00e054;border-color:rgba(0,224,84,0.2)">🔓 Gratis</div>' : '<div class="card-badge" style="background:rgba(255,255,255,0.04);color:#555;border-color:rgba(255,255,255,0.08)">🔒 Pro</div>'}
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <button onclick="openAdminOefening(${JSON.stringify(o).replace(/"/g, '&quot;')})" 
@@ -5067,8 +5073,27 @@ function renderAdminOefeningen() {
       <div class="card-meta">${o.duur || '–'} · ${o.spelers_aantal || '–'} spelers</div>
       <div class="card-desc">${(o.beschrijving || '').slice(0, 100)}${(o.beschrijving || '').length > 100 ? '...' : ''}</div>
       ${o.video ? `<div style="margin-top:8px;font-size:11px;color:#00e054">▶ Video gekoppeld</div>` : ''}
-    </div>
-  `).join('');
+      <div style="margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;color:var(--text-tertiary)">Zichtbaar voor gratis gebruikers</span>
+        <button onclick="toggleGratisZichtbaar(${o.id}, ${isGratis})" id="gratisToggle_${o.id}"
+          style="padding:5px 14px;border-radius:20px;border:0.5px solid ${isGratis ? 'rgba(0,224,84,0.4)' : 'rgba(255,255,255,0.12)'};background:${isGratis ? 'rgba(0,224,84,0.12)' : 'var(--dark3)'};color:${isGratis ? '#00e054' : '#555'};font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:all 0.2s">
+          ${isGratis ? '✓ Aan' : '✗ Uit'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleGratisZichtbaar(id, huidigWaarde) {
+  const nieuw = !huidigWaarde;
+  const { error } = await sb.from('publieke_oefeningen').update({ gratis_zichtbaar: nieuw }).eq('id', id);
+  if (error) { alert('Fout: ' + error.message); return; }
+  const idx = publiekeOefeningen.findIndex(o => o.id === id);
+  if (idx >= 0) publiekeOefeningen[idx].gratis_zichtbaar = nieuw;
+  const oIdx = oefeningen.findIndex(o => o.id === 'pub_' + id);
+  if (oIdx >= 0) oefeningen[oIdx].gratis_zichtbaar = nieuw;
+  renderAdminOefeningen();
+  renderOefeningen();
 }
 
 async function verwijderPubliekeOef(id) {
