@@ -2308,7 +2308,15 @@ const PRICE_CLUB = 'price_1TCIkRKPkbXyZxvmVrNwUM8r';
 let sb;
 function initSupabase() {
   if (window.supabase) {
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+      auth: {
+        persistSession: true,
+        storageKey: 'trainershub-auth',
+        storage: window.localStorage,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
     return true;
   }
   return false;
