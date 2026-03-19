@@ -752,7 +752,7 @@
     .card-slot { cursor:pointer !important; pointer-events:all !important; }
     .card-slot:hover::after { background:rgba(10,10,10,0.45); }
     /* ── DETAIL SLIDER ── */
-    .detail-slide { flex:0 0 100%;width:100%; }
+    .detail-slide { flex:0 0 100%;width:100%;min-width:100%; }
     .detail-slide-dot { width:7px;height:7px;border-radius:50%;background:var(--border);cursor:pointer;transition:background 0.2s; }
     .detail-slide-dot.active { background:var(--green); }
     /* ── VELD EDITOR ── */
@@ -3036,7 +3036,7 @@ function openDetail(id){
 
   const videoHtml = `
     <div style="position:relative;overflow:hidden;margin-bottom:4px">
-      <div id="detailSlider" style="display:flex;transition:transform 0.3s ease;will-change:transform">
+      <div id="detailSlider" style="display:flex;transition:transform 0.3s ease;will-change:transform;width:100%">
         ${slidesHtml}
       </div>
       ${aantalSlides > 1 ? `
