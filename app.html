@@ -4398,8 +4398,17 @@ function openNieuwPlanItem() {
   oModal('planItemOverlay');
 }
 
+// ── TRAINING DETAIL ──
+var trainingDetailId = null;
+var trainingDetailOefeningen = []; // [{id, title, cat, duur}]
+
 function openPlanItem(id) {
   const item = planItems.find(p => String(p.id) === String(id)); if (!item) return;
+  // Trainingen openen in detail overlay, rest in edit formulier
+  if (item.type === 'training') {
+    openTrainingDetail(item);
+    return;
+  }
   planBewerkId = id; resetPlanForm();
   document.getElementById('planItemTitel').textContent = 'Item bewerken';
   document.getElementById('planTitel').value = item.titel || '';
@@ -4417,6 +4426,111 @@ function openPlanItem(id) {
     btn.classList.toggle('active', active);
   });
   oModal('planItemOverlay');
+}
+
+function openTrainingDetail(item) {
+  trainingDetailId = item.id;
+  trainingDetailOefeningen = item.oefeningen_ids ? (typeof item.oefeningen_ids === 'string' ? JSON.parse(item.oefeningen_ids) : item.oefeningen_ids) : [];
+
+  const d = new Date(item.datum + 'T12:00:00');
+  const dagNamen = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+  document.getElementById('tdTitel').textContent = item.titel;
+  document.getElementById('tdDatum').textContent = dagNamen[d.getDay()] + ' ' + d.getDate() + ' ' + MAANDEN[d.getMonth()] + (item.tijd ? ' · ' + item.tijd : '') + (item.duur ? ' · ' + item.duur : '');
+  document.getElementById('tdNotitie').value = item.notitie || '';
+  renderTrainingDetailOefeningen();
+  oModal('trainingDetailOverlay');
+}
+
+function renderTrainingDetailOefeningen() {
+  const el = document.getElementById('tdOefLijst');
+  if (!trainingDetailOefeningen.length) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary);padding:1rem 0;text-align:center">Nog geen oefeningen gekoppeld.<br>Voeg ze toe via de knop hieronder.</div>';
+    return;
+  }
+  el.innerHTML = trainingDetailOefeningen.map((oefId, i) => {
+    const oef = oefeningen.find(o => String(o.id) === String(oefId) || o.id === 'pub_' + oefId || String(o.id) === 'pub_' + oefId);
+    if (!oef) return '';
+    const k = { passing:'#5bb8ff', schieten:'#ff6b6b', dribbelen:'#ffb84d', positiespel:'#c084fc', 'warming-up':'#00e054', 'cooling-down':'#a78bfa', overig:'#888' };
+    const kleur = k[oef.cat] || '#888';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
+      <div style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,0.06);color:var(--text-tertiary);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${oef.title}</div>
+        <div style="font-size:11px;margin-top:2px"><span style="color:${kleur}">${oef.cat}</span> · <span style="color:var(--text-tertiary)">${oef.duur||'–'}</span></div>
+      </div>
+      <button onclick="verwijderOefUitTraining(${i})" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:16px;padding:4px" onmouseover="this.style.color='#ff6b6b'" onmouseout="this.style.color='var(--text-tertiary)'">✕</button>
+    </div>`;
+  }).filter(Boolean).join('');
+}
+
+function verwijderOefUitTraining(idx) {
+  trainingDetailOefeningen.splice(idx, 1);
+  renderTrainingDetailOefeningen();
+  slaTrainingDetailOp();
+}
+
+async function slaTrainingDetailOp() {
+  if (!trainingDetailId) return;
+  const notitie = document.getElementById('tdNotitie').value.trim();
+  const payload = { oefeningen_ids: JSON.stringify(trainingDetailOefeningen), notitie: notitie || null };
+  const { error } = await sb.from('seizoensplanning').update(payload).eq('id', trainingDetailId);
+  if (error) { console.warn('Fout bij opslaan:', error.message); return; }
+  const idx = planItems.findIndex(p => String(p.id) === String(trainingDetailId));
+  if (idx >= 0) { planItems[idx].oefeningen_ids = trainingDetailOefeningen; planItems[idx].notitie = notitie; }
+}
+
+function voegOefeningToeAanTraining(oefId) {
+  const oefIdStr = String(oefId);
+  if (trainingDetailOefeningen.includes(oefIdStr)) { alert('Deze oefening staat al in de training.'); return; }
+  trainingDetailOefeningen.push(oefIdStr);
+  renderTrainingDetailOefeningen();
+  slaTrainingDetailOp();
+  cModal('tdOefKiezerOverlay');
+}
+
+function openOefeningKiezer() {
+  renderOefeningKiezerLijst('');
+  oModal('tdOefKiezerOverlay');
+}
+
+function renderOefeningKiezerLijst(zoek) {
+  const el = document.getElementById('tdOefKiezerLijst');
+  const lijst = oefeningen.filter(o => !zoek || o.title.toLowerCase().includes(zoek.toLowerCase()) || (o.cat||'').toLowerCase().includes(zoek.toLowerCase()));
+  el.innerHTML = lijst.slice(0, 40).map(o => {
+    const al = trainingDetailOefeningen.includes(String(o.id));
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:${al?'default':'pointer'};opacity:${al?0.4:1}" onclick="${al ? '' : `voegOefeningToeAanTraining('${o.id}')`}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${o.title}</div>
+        <div style="font-size:11px;color:var(--text-tertiary)">${o.cat} · ${aL(o.age)} · ${o.duur||'–'}</div>
+      </div>
+      <div style="font-size:12px;color:${al?'var(--text-tertiary)':'#00e054'};font-weight:700">${al?'✓ Toegevoegd':'+ Voeg toe'}</div>
+    </div>`;
+  }).join('');
+}
+
+async function genereerAIPlanVoorTraining() {
+  const item = planItems.find(p => String(p.id) === String(trainingDetailId));
+  if (!item) return;
+  const btn = document.getElementById('tdAiBtn');
+  btn.disabled = true; btn.textContent = '⏳ Genereren...';
+  const oefContext = oefeningen.slice(0, 30).map(o => `ID:${o.id} | ${o.title} (${o.cat}, ${o.duur||'?'})`).join('\n');
+  const prompt = `Stel een trainingsplan op voor: "${item.titel}", datum: ${item.datum}${item.duur ? ', duur: ' + item.duur : ''}.
+Geef een JSON array met maximaal 5 oefening-IDs uit deze lijst die het beste passen:
+${oefContext}
+Antwoord ALLEEN met een JSON array van IDs, bijv: ["pub_3","pub_7","pub_12"]`;
+  try {
+    const res = await fetch('https://green-rice-a428trainershub-ai.keooei03.workers.dev', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    const raw = data.content.map(c => c.text||'').join('');
+    const ids = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    ids.forEach(id => { if (!trainingDetailOefeningen.includes(String(id))) trainingDetailOefeningen.push(String(id)); });
+    renderTrainingDetailOefeningen();
+    slaTrainingDetailOp();
+  } catch(e) { alert('AI fout: ' + e.message); }
+  btn.disabled = false; btn.textContent = '✦ AI suggesties';
 }
 
 function resetPlanForm() {
@@ -5802,6 +5916,51 @@ function renderVeldDiagramInDetail(jsonStr, container) {
       <div id="planLijst"></div>
     </div>
 
+  </div>
+</div>
+
+<!-- OVERLAY: TRAINING DETAIL -->
+<div class="overlay" id="trainingDetailOverlay" onclick="oClick(event,'trainingDetailOverlay')">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="cModal('trainingDetailOverlay')">✕</button>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:1.25rem">
+      <div>
+        <div style="font-family:var(--font-display);font-size:22px;letter-spacing:1px;color:var(--text)" id="tdTitel">Training</div>
+        <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px" id="tdDatum"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button id="tdAiBtn" onclick="genereerAIPlanVoorTraining()" style="padding:7px 12px;border-radius:10px;background:rgba(0,224,84,0.08);border:0.5px solid rgba(0,224,84,0.25);color:#00e054;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body)">✦ AI suggesties</button>
+        <button onclick="cModal('trainingDetailOverlay');planBewerkId=trainingDetailId;resetPlanForm();var item=planItems.find(p=>String(p.id)===String(trainingDetailId));if(item){document.getElementById('planTitel').value=item.titel||'';document.getElementById('planDatum').value=item.datum||'';document.getElementById('planTijd').value=item.tijd||'';document.getElementById('planDuur').value=item.duur||'';document.getElementById('planItemTitel').textContent='Item bewerken';}oModal('planItemOverlay');" style="padding:7px 12px;border-radius:10px;background:var(--dark3);border:0.5px solid var(--border);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:var(--font-body)">✎ Bewerken</button>
+      </div>
+    </div>
+
+    <!-- Notities -->
+    <div class="form-group" style="margin-bottom:1.25rem">
+      <label class="form-label">Notities</label>
+      <textarea class="form-input" id="tdNotitie" placeholder="Doel van de training, aandachtspunten, weersomstandigheden..." style="min-height:70px" onblur="slaTrainingDetailOp()"></textarea>
+    </div>
+
+    <!-- Oefeningen -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="form-label" style="margin:0">Oefeningen</div>
+      <button onclick="openOefeningKiezer()" style="padding:6px 12px;border-radius:8px;background:rgba(0,224,84,0.08);border:0.5px solid rgba(0,224,84,0.25);color:#00e054;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body)">+ Toevoegen</button>
+    </div>
+    <div id="tdOefLijst"></div>
+
+    <div style="margin-top:1.25rem;padding-top:1rem;border-top:0.5px solid var(--border);display:flex;gap:8px">
+      <button onclick="slaTrainingDetailOp();cModal('trainingDetailOverlay')" class="btn-primary" style="flex:1">Opslaan</button>
+      <button onclick="verwijderPlanItem(trainingDetailId);cModal('trainingDetailOverlay')" style="padding:10px 16px;border-radius:10px;background:none;border:0.5px solid rgba(255,107,107,0.3);color:#ff6b6b;font-size:13px;cursor:pointer;font-family:var(--font-body)">Verwijderen</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY: OEFENING KIEZER -->
+<div class="overlay" id="tdOefKiezerOverlay" onclick="oClick(event,'tdOefKiezerOverlay')">
+  <div class="modal" style="max-width:540px;max-height:85vh;overflow-y:auto">
+    <button class="modal-close" onclick="cModal('tdOefKiezerOverlay')">✕</button>
+    <div style="font-family:var(--font-display);font-size:18px;letter-spacing:1px;color:var(--text);margin-bottom:1rem">Oefening toevoegen</div>
+    <input class="form-input" type="text" placeholder="Zoek op naam of categorie..." style="margin-bottom:12px" oninput="renderOefeningKiezerLijst(this.value)">
+    <div id="tdOefKiezerLijst"></div>
   </div>
 </div>
 
