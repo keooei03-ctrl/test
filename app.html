@@ -3021,17 +3021,21 @@ function openDetail(id){
     slidesHtml += `<div class="detail-slide"><div class="detail-video"><iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media"></iframe></div></div>`;
   }
   if (heeftDiagram) {
-    slidesHtml += `<div class="detail-slide"><canvas id="detailVeldCanvas" width="480" height="300" style="width:100%;border-radius:12px;display:block"></canvas></div>`;
+    slidesHtml += `<div class="detail-slide"><canvas id="detailVeldCanvas" width="480" height="300" data-diagram='${o.veld_diagram.replace(/'/g,"&apos;")}' style="width:100%;border-radius:12px;display:block"></canvas></div>`;
   }
   if (!heeftVideo && !heeftDiagram) {
     slidesHtml = `<div class="detail-slide"><div style="background:var(--dark3);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border-radius:12px">
       <div style="text-align:center;color:var(--text-tertiary)"><div style="font-size:32px;margin-bottom:8px">📹</div><div style="font-size:13px">Geen video of diagram</div></div></div></div>`;
   }
 
+  // Labels voor dots
+  const slide0label = heeftVideo ? '▶ Video' : '⬜ Diagram';
+  const slide1label = '⬜ Veld';
+
   const dotsHtml = aantalSlides > 1
-    ? `<div style="display:flex;justify-content:center;gap:6px;margin-top:8px;padding:0 1.5rem">
-        ${heeftVideo ? `<div class="detail-slide-dot active" id="dot_0" onclick="gaNaarSlide(0)"></div>` : ''}
-        ${heeftDiagram ? `<div class="detail-slide-dot${!heeftVideo?' active':''}" id="dot_${heeftVideo?1:0}" onclick="gaNaarSlide(${heeftVideo?1:0})"></div>` : ''}
+    ? `<div style="display:flex;justify-content:center;gap:8px;margin-top:8px;padding:0 1.5rem">
+        ${heeftVideo ? `<div class="detail-slide-dot active" id="dot_0" onclick="gaNaarSlide(0)" style="width:auto;height:auto;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;background:rgba(0,224,84,0.2);color:#00e054;cursor:pointer;border:0.5px solid rgba(0,224,84,0.3)">▶ Video</div>` : ''}
+        ${heeftDiagram ? `<div class="detail-slide-dot${!heeftVideo?' active':''}" id="dot_${heeftVideo?1:0}" onclick="gaNaarSlide(${heeftVideo?1:0})" style="width:auto;height:auto;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;background:${!heeftVideo?'rgba(0,224,84,0.2)':'var(--dark3)'};color:${!heeftVideo?'#00e054':'var(--text-tertiary)'};cursor:pointer;border:0.5px solid ${!heeftVideo?'rgba(0,224,84,0.3)':'var(--border)'}">⬜ Veld diagram</div>` : ''}
        </div>` : '';
 
   const videoHtml = `
@@ -3123,23 +3127,21 @@ function openDetail(id){
         ${o.eigen||o.publiek?`<button class="oef-action-btn" style="color:#ff6b6b;border-color:rgba(255,107,107,0.2)" onclick="delOef('${id}')">Verwijderen</button>`:''}
       </div>
     </div>`;
-  // Slider functie
-  window._detailSlideIndex = 0;
-  window._detailAantalSlides = aantalSlides;
-
   // Veld canvas tekenen na render
   if (o.veld_diagram) {
     setTimeout(function() {
       var c = document.getElementById('detailVeldCanvas');
       if (!c) return;
-      var ctx = c.getContext('2d');
       var data;
-      try { data = JSON.parse(o.veld_diagram); } catch(e) { return; }
+      try { data = JSON.parse(o.veld_diagram); } catch(ex) { return; }
+      var ctx = c.getContext('2d');
       _tekenHalfveld(ctx, 480, 300);
       _tekenPijlen(ctx, data.pijlen||[]);
       _tekenElementen(ctx, data.elementen||[]);
     }, 80);
   }
+  window._detailSlideIndex = 0;
+  window._detailAantalSlides = aantalSlides;
   oModal('detailOverlay');
 }
 function delOef(id){
@@ -5353,23 +5355,23 @@ function gaNaarSlide(idx) {
   // Dots updaten
   for (var i = 0; i <= max; i++) {
     var dot = document.getElementById('dot_' + i);
-    if (dot) dot.classList.toggle('active', i === idx);
+    if (!dot) continue;
+    var isActive = i === idx;
+    dot.style.background = isActive ? 'rgba(0,224,84,0.2)' : 'var(--dark3)';
+    dot.style.color = isActive ? '#00e054' : 'var(--text-tertiary)';
+    dot.style.borderColor = isActive ? 'rgba(0,224,84,0.3)' : 'var(--border)';
   }
-  // Prev/next knoppen updaten
-  var prev = document.getElementById('sliderPrev');
-  var next = document.getElementById('sliderNext');
-  if (prev) prev.style.opacity = idx === 0 ? '0.3' : '1';
-  if (next) next.style.opacity = idx === max ? '0.3' : '1';
-  // Teken veld canvas als we naar diagram slide gaan
-  if (idx > 0) {
+  // Teken veld canvas als diagram slide actief
+  if (idx > 0 || max === 0) {
     setTimeout(function() {
       var c = document.getElementById('detailVeldCanvas');
-      if (c && c._data) {
-        var ctx = c.getContext('2d');
-        _tekenHalfveld(ctx, 480, 300);
-        _tekenPijlen(ctx, c._data.pijlen||[]);
-        _tekenElementen(ctx, c._data.elementen||[]);
-      }
+      if (!c) return;
+      var data;
+      try { data = JSON.parse(c.dataset.diagram || '{}'); } catch(e) { return; }
+      var ctx = c.getContext('2d');
+      _tekenHalfveld(ctx, 480, 300);
+      _tekenPijlen(ctx, data.pijlen||[]);
+      _tekenElementen(ctx, data.elementen||[]);
     }, 50);
   }
 }
@@ -5421,22 +5423,21 @@ function tekenVeldCanvas() {
 }
 
 function _tekenHalfveld(ctx, W, H) {
-  // Gras
-  ctx.fillStyle = '#2d6b27'; ctx.fillRect(0,0,W,H);
-  for (var i=0;i<6;i++) { ctx.fillStyle=i%2===0?'#2d6b27':'#316e2b'; ctx.fillRect(i*(W/6),0,W/6,H); }
-  ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=1.5;
-  // Buitenlijn
+  // Donkere achtergrond in app-stijl
+  ctx.fillStyle = '#0d1f0d'; ctx.fillRect(0,0,W,H);
+  for (var i=0;i<8;i++) {
+    ctx.fillStyle = i%2===0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)';
+    ctx.fillRect(i*(W/8),0,W/8,H);
+  }
+  ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5;
   ctx.strokeRect(16,16,W-32,H-32);
-  // Strafschopgebied — GEEN cirkel, alleen rechthoeken
   ctx.strokeRect(W-100,H/2-65,84,130);
   ctx.strokeRect(W-52,H/2-32,36,64);
-  // Strafschopstip
-  ctx.fillStyle='rgba(255,255,255,0.6)';
+  ctx.fillStyle='rgba(255,255,255,0.4)';
   ctx.beginPath(); ctx.arc(W-75,H/2,3,0,Math.PI*2); ctx.fill();
-  // Groot doel rechts
-  ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2;
+  ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.lineWidth=2;
   ctx.strokeRect(W-16,H/2-24,16,48);
-  ctx.fillStyle='rgba(255,255,255,0.15)';
+  ctx.fillStyle='rgba(255,255,255,0.07)';
   ctx.fillRect(W-16,H/2-24,16,48);
 }
 
@@ -5504,22 +5505,17 @@ function _tekenElementen(ctx, elementen) {
       }
       ctx.beginPath(); ctx.arc(el.x,el.y,r,0,Math.PI*2); ctx.strokeStyle='#444'; ctx.lineWidth=1; ctx.stroke();
     } else if (el.type==='pion') {
-      // Pion schaduw
-      ctx.fillStyle='rgba(0,0,0,0.2)';
-      ctx.beginPath(); ctx.ellipse(el.x, el.y+10, 8, 3, 0, 0, Math.PI*2); ctx.fill();
-      // Pion lichaam
+      // Simpele driehoek pion
       ctx.beginPath();
       ctx.moveTo(el.x, el.y-13);
-      ctx.bezierCurveTo(el.x+4, el.y-8, el.x+8, el.y+2, el.x+7, el.y+8);
-      ctx.lineTo(el.x-7, el.y+8); 
-      ctx.bezierCurveTo(el.x-8, el.y+2, el.x-4, el.y-8, el.x, el.y-13);
+      ctx.lineTo(el.x+9, el.y+7);
+      ctx.lineTo(el.x-9, el.y+7);
+      ctx.closePath();
       ctx.fillStyle='#ff6f00'; ctx.fill();
-      ctx.strokeStyle='#e65100'; ctx.lineWidth=1.2; ctx.stroke();
-      // Basis
+      ctx.strokeStyle='#e65100'; ctx.lineWidth=1.5; ctx.stroke();
+      // Basis streep
       ctx.fillStyle='#e65100';
-      ctx.fillRect(el.x-7, el.y+7, 14, 4);
-      ctx.beginPath(); ctx.arc(el.x, el.y+9, 7, 0, Math.PI*2);
-      ctx.fillStyle='#bf360c'; ctx.fill();
+      ctx.fillRect(el.x-8, el.y+7, 16, 3);
     } else if (el.type==='minidoel') {
       // Mini doel — opening rechts (standaard)
       var dir = el.richting || 'rechts';
@@ -6215,7 +6211,7 @@ function renderVeldDiagramInDetail(jsonStr, container) {
           </div>
 
           <!-- Canvas halfveld -->
-          <canvas id="veldEditor" width="480" height="300" style="width:100%;border-radius:8px;cursor:crosshair;touch-action:none"></canvas>
+          <canvas id="veldEditor" width="480" height="300" style="width:100%;border-radius:8px;cursor:crosshair;touch-action:none;background:#0d1f0d"></canvas>
 
           <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px">
             Klik om te plaatsen · Sleep voor lijnen · Klik op element + 🗑️ om te verwijderen
