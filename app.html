@@ -813,7 +813,8 @@
     /* ── WEDSTRIJDEN ── */
     .wed-hero { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
     .wed-hero::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:radial-gradient(circle,rgba(255,184,77,0.08) 0%,transparent 70%); pointer-events:none; }
-    .wed-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 1.5rem; }
+    .wed-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 1.5rem; }
+    @media(max-width:700px){ .wed-stats { grid-template-columns: repeat(3,1fr); } }
     .wed-stat { background: var(--dark3); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
     .wed-stat-num { font-family: var(--font-display); font-size: 26px; letter-spacing: 1px; }
     .wed-stat-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
@@ -1252,6 +1253,22 @@
         <div class="wed-stat"><div class="wed-stat-num" id="wStatW" style="color:var(--green)">0</div><div class="wed-stat-label">Gewonnen</div></div>
         <div class="wed-stat"><div class="wed-stat-num" id="wStatD" style="color:#ffb84d">0</div><div class="wed-stat-label">Gelijk</div></div>
         <div class="wed-stat"><div class="wed-stat-num" id="wStatL" style="color:#ff6b6b">0</div><div class="wed-stat-label">Verloren</div></div>
+        <div class="wed-stat"><div class="wed-stat-num" id="wStatVoor" style="color:var(--green)">0</div><div class="wed-stat-label">Goals voor</div></div>
+        <div class="wed-stat"><div class="wed-stat-num" id="wStatTegen" style="color:#ff6b6b">0</div><div class="wed-stat-label">Goals tegen</div></div>
+      </div>
+    </div>
+
+    <!-- Topscorers & assists tabel -->
+    <div id="wedScorersBlok" style="display:none;margin-bottom:1.5rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--dark2);border:0.5px solid var(--border);border-radius:14px;padding:1rem">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:10px">⚽ Topscorers</div>
+          <div id="topscorersLijst"></div>
+        </div>
+        <div style="background:var(--dark2);border:0.5px solid var(--border);border-radius:14px;padding:1rem">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:10px">🎯 Meeste assists</div>
+          <div id="topAssistsLijst"></div>
+        </div>
       </div>
     </div>
 
@@ -1329,6 +1346,12 @@
         <label class="form-label">Doelpuntenmakers</label>
         <div class="speler-select-grid" id="doelpuntenGrid"></div>
         <div class="form-hint">Selecteer de spelers die gescoord hebben.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Assists</label>
+        <div class="speler-select-grid" id="assistsGrid"></div>
+        <div class="form-hint">Selecteer de spelers die een assist gaven.</div>
       </div>
 
       <div class="form-group">
@@ -2128,6 +2151,7 @@ let huidigFormatie='4-3-3';
 let opstellingData={}; // {positieKey: spelerId|null}
 let huidigePosKey=null;
 let doelpuntenmakers=new Set();
+let assistmakers=new Set();
 
 const FORMATIES={
   '4-3-3': [[1],[4,3,2,1],[3,2,1],[3,2,1]],          // keeper, def, mid, fwd
@@ -2226,10 +2250,30 @@ function renderDoelpuntenGrid(){
   }).join('');
 }
 
+function renderAssistsGrid(){
+  const grid=document.getElementById('assistsGrid');
+  if(!grid)return;
+  if(!spelers.length){grid.innerHTML='<div style="font-size:13px;color:var(--text-secondary);padding:8px">Voeg eerst spelers toe.</div>';return;}
+  grid.innerHTML=spelers.map(s=>{
+    const c=COLORS[s.ci]||COLORS[0];
+    const sel=assistmakers.has(s.id);
+    return`<div class="speler-select-item${sel?' selected':''}" style="${sel?'border-color:rgba(255,184,77,0.4);background:rgba(255,184,77,0.08)':''}" onclick="toggleAssist(${s.id})">
+      <div class="mini-av" style="background:${c.bg};color:${c.text}">${ini(s.naam)}</div>
+      <div class="mini-naam">${s.naam}</div>
+    </div>`;
+  }).join('');
+}
+
 function toggleDoel(sid){
   if(doelpuntenmakers.has(sid))doelpuntenmakers.delete(sid);
   else doelpuntenmakers.add(sid);
   renderDoelpuntenGrid();
+}
+
+function toggleAssist(sid){
+  if(assistmakers.has(sid))assistmakers.delete(sid);
+  else assistmakers.add(sid);
+  renderAssistsGrid();
 }
 
 function openAddWedstrijd(){
@@ -2244,9 +2288,11 @@ function openAddWedstrijd(){
   opstellingData={};
   getPosities(huidigFormatie).forEach(p=>opstellingData[p]=null);
   doelpuntenmakers=new Set();
+  assistmakers=new Set();
   document.querySelectorAll('.formatie-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='4-3-3'));
   renderOpstellingVeld();
   renderDoelpuntenGrid();
+  renderAssistsGrid();
   renderSpeelminGrid();
   oModal('addWedOverlay');
 }
@@ -2284,7 +2330,7 @@ function submitWedstrijd(){
     const el = document.getElementById('sm_' + s.id);
     if (el) { const v = parseInt(el.value) || 0; if (v > 0) speelminuten[s.id] = v; }
   });
-  const nieuwW={datum,tegenstander:tegen,thuisUit:document.getElementById('wThuisUit').value,doelVoor:dv,doelTegen:dt,result,formatie:huidigFormatie,opstelling:{...opstellingData},doelpunten:[...doelpuntenmakers],notitie:document.getElementById('wNotitie').value.trim(),speelminuten};
+  const nieuwW={datum,tegenstander:tegen,thuisUit:document.getElementById('wThuisUit').value,doelVoor:dv,doelTegen:dt,result,formatie:huidigFormatie,opstelling:{...opstellingData},doelpunten:[...doelpuntenmakers],assists:[...assistmakers],notitie:document.getElementById('wNotitie').value.trim(),speelminuten};
   cModal('addWedOverlay');
   dbVoegWedstrijdToe(nieuwW).then(id => {
     nieuwW.id = id || Date.now();
@@ -2301,14 +2347,59 @@ function renderWedstrijden(){
   const w=wedstrijden.filter(x=>x.result==='win').length;
   const d=wedstrijden.filter(x=>x.result==='draw').length;
   const l=wedstrijden.filter(x=>x.result==='loss').length;
+  const totalVoor=wedstrijden.reduce((s,x)=>s+(x.doelVoor||0),0);
+  const totalTegen=wedstrijden.reduce((s,x)=>s+(x.doelTegen||0),0);
   document.getElementById('wStatGes').textContent=wedstrijden.length;
   document.getElementById('wStatW').textContent=w;
   document.getElementById('wStatD').textContent=d;
   document.getElementById('wStatL').textContent=l;
+  document.getElementById('wStatVoor').textContent=totalVoor;
+  document.getElementById('wStatTegen').textContent=totalTegen;
+
+  // ── Topscorers & assists tabel ──
+  const scorersBlok = document.getElementById('wedScorersBlok');
+  if (wedstrijden.length && spelers.length) {
+    const goalTelling = {};
+    const assistTelling = {};
+    wedstrijden.forEach(wed => {
+      (wed.doelpunten||[]).forEach(sid => { goalTelling[sid] = (goalTelling[sid]||0) + 1; });
+      (wed.assists||[]).forEach(sid => { assistTelling[sid] = (assistTelling[sid]||0) + 1; });
+    });
+    const topScorers = Object.entries(goalTelling).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const topAssists = Object.entries(assistTelling).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+    const maakRij = (sid, num, kleur, icon) => {
+      const s = spelers.find(x=>x.id==sid||x.id===parseInt(sid));
+      if (!s) return '';
+      const c = COLORS[s.ci]||COLORS[0];
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+        <div style="width:28px;height:28px;border-radius:50%;background:${c.bg};color:${c.text};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${ini(s.naam)}</div>
+        <div style="flex:1;font-size:13px;color:var(--text)">${s.naam.split(' ')[0]}</div>
+        <div style="font-family:var(--font-display);font-size:20px;color:${kleur};letter-spacing:1px">${num}</div>
+        <div style="font-size:13px">${icon}</div>
+      </div>`;
+    };
+
+    if (topScorers.length || topAssists.length) {
+      scorersBlok.style.display = 'block';
+      document.getElementById('topscorersLijst').innerHTML = topScorers.length
+        ? topScorers.map(([sid,num]) => maakRij(sid,num,'var(--green)','⚽')).join('')
+        : '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen doelpunten</div>';
+      document.getElementById('topAssistsLijst').innerHTML = topAssists.length
+        ? topAssists.map(([sid,num]) => maakRij(sid,num,'#ffb84d','🎯')).join('')
+        : '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen assists</div>';
+    } else {
+      scorersBlok.style.display = 'none';
+    }
+  } else {
+    scorersBlok.style.display = 'none';
+  }
+
   if(!wedstrijden.length){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   list.innerHTML=wedstrijden.map(w=>{
     const doelNamen=w.doelpunten.map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam.split(' ')[0]:null;}).filter(Boolean);
+    const assistNamen=(w.assists||[]).map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam.split(' ')[0]:null;}).filter(Boolean);
     return`<div class="wed-card ${w.result}" onclick="openWedDetail(${w.id})">
       <div class="wed-datum-block">
         <div class="wed-dag">${fmtDag(w.datum)}</div>
@@ -2316,7 +2407,7 @@ function renderWedstrijden(){
       </div>
       <div>
         <div class="wed-teams">${w.thuisUit==='thuis'?'🏠':''} vs ${w.tegenstander}</div>
-        <div class="wed-meta">${w.formatie}${doelNamen.length?' · ⚽ '+doelNamen.join(', '):''}</div>
+        <div class="wed-meta">${w.formatie}${doelNamen.length?' · ⚽ '+doelNamen.join(', '):''}${assistNamen.length?' · 🎯 '+assistNamen.join(', '):''}</div>
       </div>
       <div style="text-align:right">
         <div class="wed-score ${w.result}">${w.doelVoor}–${w.doelTegen}</div>
@@ -2343,6 +2434,7 @@ function openWedDetail(id){
   });
   veldHtml+='</div>';
   const doelNamen=w.doelpunten.map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam:null;}).filter(Boolean);
+  const assistNamen=(w.assists||[]).map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam:null;}).filter(Boolean);
   document.getElementById('wedDetailBody').innerHTML=`
     <div class="modal-header-block" style="background:var(--dark2)">
       <div style="flex:1">
@@ -2357,6 +2449,7 @@ function openWedDetail(id){
       <div class="sec-label">Formatie · ${w.formatie}</div>
       ${veldHtml}
       ${doelNamen.length?`<div class="sec-label">Doelpuntenmakers</div><div style="display:flex;gap:8px;flex-wrap:wrap">${doelNamen.map(n=>`<span class="training-tag">⚽ ${n}</span>`).join('')}</div>`:''}
+      ${assistNamen.length?`<div class="sec-label">Assists</div><div style="display:flex;gap:8px;flex-wrap:wrap">${assistNamen.map(n=>`<span class="training-tag" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">🎯 ${n}</span>`).join('')}</div>`:''}
       ${w.notitie?`<div class="sec-label">Notities</div><div class="sec-text" style="font-style:italic">${w.notitie}</div>`:''}
       <button class="del-btn" onclick="delWed(${id})">Wedstrijd verwijderen</button>
     </div>`;
@@ -3440,7 +3533,7 @@ async function laadAlleData() {
         id: w.id, datum: w.datum, tegenstander: w.tegenstander,
         thuisUit: w.thuis_uit, doelVoor: w.doel_voor, doelTegen: w.doel_tegen,
         result: w.result, formatie: w.formatie, opstelling: w.opstelling || {},
-        doelpunten: w.doelpunten || [], notitie: w.notitie || '',
+        doelpunten: w.doelpunten || [], assists: w.assists || [], notitie: w.notitie || '',
         speelminuten: w.speelminuten || {}
       }));
     }
@@ -3540,7 +3633,7 @@ async function dbVoegWedstrijdToe(w) {
     user_id: huidigUser.id, datum: w.datum, tegenstander: w.tegenstander,
     thuis_uit: w.thuisUit, doel_voor: w.doelVoor, doel_tegen: w.doelTegen,
     result: w.result, formatie: w.formatie, opstelling: w.opstelling,
-    doelpunten: w.doelpunten, notitie: w.notitie,
+    doelpunten: w.doelpunten, assists: w.assists || [], notitie: w.notitie,
     speelminuten: w.speelminuten || {}
   }).select().single();
   if (error) { console.error(error); return null; }
