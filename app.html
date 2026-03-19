@@ -614,7 +614,30 @@
     .aanw-empty h3 { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
     .aanw-empty p { font-size: 13px; color: var(--text-secondary); }
 
-    /* ── TACTISCH BORD ── */
+    /* ── COMMUNITY ── */
+    .community-feed { display: flex; flex-direction: column; gap: 12px; margin-top: 1.5rem; }
+    .bericht-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 16px; padding: 1.25rem; transition: border-color 0.2s; }
+    .bericht-card:hover { border-color: var(--border-strong); }
+    .bericht-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .bericht-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--green-dim); border: 0.5px solid rgba(0,224,84,0.2); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 15px; color: var(--green); flex-shrink: 0; }
+    .bericht-naam { font-size: 14px; font-weight: 600; color: var(--text); }
+    .bericht-tijd { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+    .bericht-inhoud { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+    .bericht-del { margin-left: auto; background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 14px; padding: 4px; transition: color 0.15s; flex-shrink: 0; }
+    .bericht-del:hover { color: #ff6b6b; }
+    .community-input-wrap { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; transition: border-color 0.2s; }
+    .community-input-wrap:focus-within { border-color: rgba(0,224,84,0.3); }
+    .community-textarea { width: 100%; background: transparent; border: none; color: var(--text); font-size: 14px; font-family: var(--font-body); resize: none; outline: none; line-height: 1.6; min-height: 80px; }
+    .community-textarea::placeholder { color: var(--text-tertiary); }
+    .community-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--border); }
+    .community-hint { font-size: 12px; color: var(--text-tertiary); }
+    .community-empty { text-align: center; padding: 3rem; color: var(--text-tertiary); }
+    .community-empty-icon { font-size: 40px; margin-bottom: 1rem; }
+    .loading-dots { display: inline-flex; gap: 4px; }
+    .loading-dots span { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: dotPulse 1.2s ease infinite; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
     .tact-page { display: flex; flex-direction: column; padding: 0; max-width: 100%; }
     .tact-toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 1.5rem; background: var(--dark); border-bottom: 0.5px solid var(--border); flex-wrap: wrap; }
     .tact-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border-strong); background: var(--dark2); color: var(--text-secondary); font-family: var(--font-body); transition: all 0.15s; white-space: nowrap; }
@@ -902,6 +925,7 @@
     <button class="nav-tab" onclick="showPage('wedstrijden',this)">Wedstrijden</button>
     <button class="nav-tab" onclick="showPage('tactisch',this)">✎ Tactisch bord</button>
     <button class="nav-tab" onclick="showPage('ai',this)" style="color:var(--green)">✦ AI Plan</button>
+    <button class="nav-tab" onclick="showPage('community',this)">💬 Community</button>
     <button class="nav-tab" id="adminTab" onclick="showPage('admin',this)" style="display:none;color:#ffb84d">⚙ Beheer</button>
   </div>
   <button class="add-btn" onclick="handleAddBtn()">
@@ -928,9 +952,9 @@
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
     <span>Tactisch</span>
   </button>
-  <button class="mobile-tab" id="mtab-ai" onclick="showPage('ai',this);setMobileTab('ai')" style="color:var(--green)">
-    <svg viewBox="0 0 24 24"><path d="M12 2l3 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-    <span>AI Plan</span>
+  <button class="mobile-tab" id="mtab-community" onclick="showPage('community',this);setMobileTab('community')">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <span>Community</span>
   </button>
   <button class="mobile-tab" id="mtab-meer" onclick="toggleMeerMenu()">
     <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
@@ -940,6 +964,7 @@
 
 <!-- MEER MENU -->
 <div class="mobile-meer-menu" id="meerMenu">
+  <button class="mobile-meer-btn" onclick="showPage('ai',null);setMobileTab('ai');sluitMeer()" style="color:var(--green)">✦ AI Plan</button>
   <button class="mobile-meer-btn" onclick="showPage('resultaten',null);setMobileTab('resultaten');sluitMeer()">📋 Resultaten</button>
   <button class="mobile-meer-btn" onclick="showPage('aanwezigheid',null);setMobileTab('aanwezigheid');sluitMeer()">✅ Aanwezigheid</button>
   <button class="mobile-meer-btn" onclick="showPage('wedstrijden',null);setMobileTab('wedstrijden');sluitMeer()">⚽ Wedstrijden</button>
@@ -1435,13 +1460,14 @@ function showPage(page,el){
   curPage=page;
   setMobileTab(page);
   sluitMeer();
-  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',admin:'+ Oefening toevoegen'};
+  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',community:'Bericht posten',admin:'+ Oefening toevoegen'};
   document.getElementById('addBtnLabel').textContent=lbl[page]||'Toevoegen';
   if(page==='spelers')renderSpelers();
   if(page==='resultaten')renderResultaten();
   if(page==='aanwezigheid')renderAanwezigheid();
   if(page==='wedstrijden')renderWedstrijden();
   if(page==='tactisch')initTactischBord();
+  if(page==='community')laadCommunity();
   if(page==='admin')renderAdminOefeningen();
 }
 function handleAddBtn(){
@@ -1450,6 +1476,7 @@ function handleAddBtn(){
   else if(curPage==='aanwezigheid')openNieuweTrainingAanw();
   else if(curPage==='wedstrijden')openAddWedstrijd();
   else if(curPage==='tactisch')resetBord();
+  else if(curPage==='community')document.getElementById('communityInput').focus();
   else if(curPage==='admin')openAdminOefening();
   else openAddOef();
 }
@@ -3102,7 +3129,114 @@ function toonLimietMelding(type, limiet) {
   oModal('accountOverlay');
 }
 
-// ── ADMIN BEHEER ──
+// ── COMMUNITY ──
+let communityBerichten = [];
+let communityAbonnement = null;
+
+async function laadCommunity() {
+  try {
+    const { data } = await sb.from('community_berichten')
+      .select('*')
+      .order('aangemaakt_op', { ascending: false })
+      .limit(50);
+    communityBerichten = data || [];
+    renderCommunity();
+    // Realtime updates
+    if (!communityAbonnement) {
+      communityAbonnement = sb.channel('community')
+        .on('postgres_changes', {
+          event: 'INSERT', schema: 'public', table: 'community_berichten'
+        }, payload => {
+          communityBerichten.unshift(payload.new);
+          renderCommunity();
+        })
+        .on('postgres_changes', {
+          event: 'DELETE', schema: 'public', table: 'community_berichten'
+        }, payload => {
+          communityBerichten = communityBerichten.filter(b => b.id !== payload.old.id);
+          renderCommunity();
+        })
+        .subscribe();
+    }
+  } catch(e) { console.warn('Community laden mislukt:', e); }
+  document.getElementById('communityLaad').style.display = 'none';
+}
+
+function renderCommunity() {
+  const el = document.getElementById('communityFeed');
+  if (!el) return;
+  if (!communityBerichten.length) {
+    el.innerHTML = `<div class="community-empty">
+      <div class="community-empty-icon">💬</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:8px">Nog geen berichten</div>
+      <div style="font-size:13px">Wees de eerste die iets deelt!</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = communityBerichten.map(b => {
+    const initialen = (b.naam || 'T').slice(0, 2).toUpperCase();
+    const tijd = tijdGeleden(b.aangemaakt_op);
+    const isEigen = b.user_id === huidigUser?.id;
+    return `<div class="bericht-card">
+      <div class="bericht-header">
+        <div class="bericht-avatar">${initialen}</div>
+        <div>
+          <div class="bericht-naam">${escHtml(b.naam)}</div>
+          <div class="bericht-tijd">${tijd}</div>
+        </div>
+        ${isEigen ? `<button class="bericht-del" onclick="verwijderBericht(${b.id})" title="Verwijderen">✕</button>` : ''}
+      </div>
+      <div class="bericht-inhoud">${escHtml(b.inhoud).replace(/\n/g, '<br>')}</div>
+    </div>`;
+  }).join('');
+}
+
+async function postBericht() {
+  const input = document.getElementById('communityInput');
+  const inhoud = input.value.trim();
+  if (!inhoud) return;
+  if (inhoud.length > 500) { alert('Maximaal 500 tekens.'); return; }
+  if (!huidigUser) { toonAuthScherm(); return; }
+
+  const naam = huidigUser.user_metadata?.naam || huidigUser.email.split('@')[0];
+  const { error } = await sb.from('community_berichten').insert({
+    user_id: huidigUser.id, naam, inhoud
+  });
+  if (error) { alert('Fout: ' + error.message); return; }
+  input.value = '';
+  document.getElementById('communityCharCount').textContent = '0 / 500 tekens';
+}
+
+async function verwijderBericht(id) {
+  if (!confirm('Bericht verwijderen?')) return;
+  await sb.from('community_berichten').delete().eq('id', id);
+}
+
+function tijdGeleden(ts) {
+  const diff = (Date.now() - new Date(ts).getTime()) / 1000;
+  if (diff < 60) return 'Zojuist';
+  if (diff < 3600) return Math.floor(diff/60) + ' min geleden';
+  if (diff < 86400) return Math.floor(diff/3600) + ' uur geleden';
+  if (diff < 604800) return Math.floor(diff/86400) + ' dagen geleden';
+  return new Date(ts).toLocaleDateString('nl-NL');
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Teken teller
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('communityInput');
+  if (inp) inp.addEventListener('input', () => {
+    const len = inp.value.length;
+    const el = document.getElementById('communityCharCount');
+    if (el) {
+      el.textContent = `${len} / 500 tekens`;
+      el.style.color = len > 450 ? '#ff6b6b' : 'var(--text-tertiary)';
+    }
+  });
+});
 const ADMIN_ID = '9d2f10e2-0f27-4be8-9805-46b89c5be8d9';
 let isAdmin = false;
 let publiekeOefeningen = [];
@@ -3436,6 +3570,36 @@ async function doInstall() {
         <button class="btn-primary" onclick="submitNieuweTrainingAanw()">Aanmaken</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- PAGE: COMMUNITY -->
+<div class="page" id="page-community">
+  <div class="main">
+    <div class="hero-block" style="background:linear-gradient(135deg,rgba(91,184,255,0.06),transparent);border-color:rgba(91,184,255,0.15)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-size:24px">💬</span>
+        <div class="hero-title" style="font-size:32px;color:#5bb8ff">Trainers Community</div>
+      </div>
+      <div class="hero-sub">Stel vragen, deel oefeningen en sparren met andere trainers.</div>
+    </div>
+
+    <!-- Nieuw bericht -->
+    <div class="community-input-wrap">
+      <textarea class="community-textarea" id="communityInput" placeholder="Deel een tip, stel een vraag of bespreek een oefening..."></textarea>
+      <div class="community-actions">
+        <span class="community-hint" id="communityCharCount">0 / 500 tekens</span>
+        <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="postBericht()">
+          Posten
+        </button>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div id="communityLaad" style="text-align:center;padding:2rem">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+    <div class="community-feed" id="communityFeed"></div>
   </div>
 </div>
 
