@@ -2858,7 +2858,12 @@ function renderOefeningen(){
 
   // Gratis: alleen oefeningen zichtbaar die admin heeft vrijgegeven via gratis_zichtbaar toggle
 
-  grid.innerHTML=list.map(o=>{
+  // Gratis zichtbare oefeningen bovenaan
+  const gesorteerd = !isPro()
+    ? [...list].sort((a,b) => (b.gratis_zichtbaar ? 1 : 0) - (a.gratis_zichtbaar ? 1 : 0))
+    : list;
+
+  grid.innerHTML=gesorteerd.map(o=>{
     const t=thumb(o.video);
     const th=t
       ?`<div class="card-thumb"><img src="${t}" alt=""><div class="play-overlay"><svg viewBox="0 0 12 14" fill="#0a0a0a"><path d="M1 1l10 6-10 6V1z"/></svg></div></div>`
