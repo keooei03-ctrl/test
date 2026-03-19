@@ -3196,13 +3196,15 @@ async function laadAlleData() {
   if (huidigUser.id === 'preview') { renderOefeningen(); return; }
   try {
     const uid = huidigUser.id;
-    const [sp, oe, tr, we, aa, bo] = await Promise.all([
+    const [sp, oe, tr, we, aa, bo, pl, sc] = await Promise.all([
       sb.from('spelers').select('*').eq('user_id', uid).order('aangemaakt_op'),
       sb.from('eigen_oefeningen').select('*').eq('user_id', uid).order('aangemaakt_op', {ascending:false}),
       sb.from('trainingen').select('*').eq('user_id', uid).order('datum', {ascending:false}),
       sb.from('wedstrijden').select('*').eq('user_id', uid).order('datum', {ascending:false}),
       sb.from('aanwezigheid').select('*').eq('user_id', uid).order('datum', {ascending:false}),
       sb.from('tactische_borden').select('*').eq('user_id', uid).order('aangemaakt_op'),
+      sb.from('seizoensplanning').select('*').eq('user_id', uid).order('datum', {ascending:true}),
+      sb.from('seizoen_schema').select('*').eq('user_id', uid).eq('actief', true),
     ]);
 
     // Spelers
@@ -3268,6 +3270,12 @@ async function laadAlleData() {
     renderResultaten();
     renderWedstrijden();
     renderAanwezigheid();
+
+    // Seizoensplanning
+    planItems = pl.data || [];
+
+    // Seizoen schema (herhalend)
+    seizoenSchema = sc.data || [];
 
     // Ook localStorage bijwerken als backup
     slaLokaalOp();
@@ -3572,11 +3580,13 @@ async function doLogout() {
   trainingen = [];
   wedstrijden = [];
   aanwSessies = [];
-  oefeningen = [...defaultOefeningen]; // herstel standaard oefeningen
+  oefeningen = [...defaultOefeningen];
   tactBordInit = false;
   tactBorden = [];
   tactObjecten = [];
   tactHistory = [];
+  planItems = [];
+  seizoenSchema = [];
   huidigUser = null;
   huidigPlan = 'gratis';
   cModal('accountOverlay');
@@ -3667,14 +3677,7 @@ const DAG_NAMEN = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterda
 
 async function laadPlanning() {
   if (!huidigUser || huidigUser.id === 'preview') { renderKalender(); return; }
-  try {
-    const [planData, schemaData] = await Promise.all([
-      sb.from('seizoensplanning').select('*').eq('user_id', huidigUser.id).order('datum', { ascending: true }),
-      sb.from('seizoen_schema').select('*').eq('user_id', huidigUser.id).eq('actief', true)
-    ]);
-    planItems = planData.data || [];
-    seizoenSchema = schemaData.data || [];
-  } catch(e) { console.warn('Planning laden mislukt:', e); }
+  // Data is al geladen bij inloggen via laadAlleData — gewoon renderen
   renderKalender();
 }
 
