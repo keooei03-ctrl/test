@@ -3017,16 +3017,24 @@ async function laadPubliekeOefeningen() {
   } catch(e) { console.warn('Publieke oefeningen laden mislukt:', e); }
 }
 
-function openAdminOefening() {
-  document.getElementById('aoTitle').value = '';
-  document.getElementById('aoDesc').value = '';
-  document.getElementById('aoDuur').value = '';
-  document.getElementById('aoSpelers').value = '';
-  document.getElementById('aoMat').value = '';
-  document.getElementById('aoDoel').value = '';
-  document.getElementById('aoVideo').value = '';
+let adminBewerkId = null; // null = nieuw, getal = bewerken
+
+function openAdminOefening(o = null) {
+  adminBewerkId = o ? o.id : null;
+  document.getElementById('aoTitle').value = o?.title || '';
+  document.getElementById('aoDesc').value = o?.beschrijving || '';
+  document.getElementById('aoDuur').value = o?.duur !== '–' ? o?.duur || '' : '';
+  document.getElementById('aoSpelers').value = o?.spelers_aantal !== '–' ? o?.spelers_aantal || '' : '';
+  document.getElementById('aoMat').value = o?.materiaal || '';
+  document.getElementById('aoDoel').value = o?.doel || '';
+  document.getElementById('aoVideo').value = o?.video || '';
+  document.getElementById('aoAge').value = o?.age || 'alle';
+  document.getElementById('aoCat').value = o?.cat || 'passing';
   document.getElementById('errAoTitle').style.display = 'none';
   document.getElementById('errAoDesc').style.display = 'none';
+  // Verander knoptekst
+  document.getElementById('aoSubmitBtn').textContent = o ? 'Wijzigingen opslaan' : 'Opslaan voor iedereen';
+  document.querySelector('#adminOefOverlay .form-title').textContent = o ? 'Oefening bewerken' : 'Publieke oefening toevoegen';
   oModal('adminOefOverlay');
 }
 
@@ -3038,7 +3046,7 @@ async function submitAdminOefening() {
   if (!title || !desc) return;
 
   const vid = document.getElementById('aoVideo').value.trim();
-  const { data, error } = await sb.from('publieke_oefeningen').insert({
+  const payload = {
     title, age: document.getElementById('aoAge').value,
     cat: document.getElementById('aoCat').value,
     duur: document.getElementById('aoDuur').value.trim() || '–',
@@ -3047,19 +3055,35 @@ async function submitAdminOefening() {
     doel: document.getElementById('aoDoel').value.trim(),
     materiaal: document.getElementById('aoMat').value.trim(),
     video: vid || null
-  }).select().single();
-
-  if (error) { alert('Fout bij opslaan: ' + error.message); return; }
-
-  // Voeg direct toe aan lokale array
-  const nieuw = {
-    id: 'pub_' + data.id, title, age: data.age, cat: data.cat,
-    duur: data.duur, spelers: data.spelers_aantal, desc: data.beschrijving,
-    doel: data.doel, materiaal: data.materiaal, video: data.video,
-    eigen: false, publiek: true
   };
-  oefeningen.unshift(nieuw);
-  publiekeOefeningen.unshift(data);
+
+  if (adminBewerkId) {
+    // ── BEWERKEN ──
+    const { error } = await sb.from('publieke_oefeningen').update(payload).eq('id', adminBewerkId);
+    if (error) { alert('Fout bij opslaan: ' + error.message); return; }
+    // Update lokale arrays
+    const idx = publiekeOefeningen.findIndex(o => o.id === adminBewerkId);
+    if (idx >= 0) publiekeOefeningen[idx] = { ...publiekeOefeningen[idx], ...payload };
+    const oIdx = oefeningen.findIndex(o => o.id === 'pub_' + adminBewerkId);
+    if (oIdx >= 0) oefeningen[oIdx] = {
+      ...oefeningen[oIdx],
+      title, age: payload.age, cat: payload.cat,
+      duur: payload.duur, spelers: payload.spelers_aantal,
+      desc: payload.beschrijving, doel: payload.doel,
+      materiaal: payload.materiaal, video: payload.video
+    };
+  } else {
+    // ── NIEUW TOEVOEGEN ──
+    const { data, error } = await sb.from('publieke_oefeningen').insert(payload).select().single();
+    if (error) { alert('Fout bij opslaan: ' + error.message); return; }
+    publiekeOefeningen.unshift(data);
+    oefeningen.unshift({
+      id: 'pub_' + data.id, title, age: data.age, cat: data.cat,
+      duur: data.duur, spelers: data.spelers_aantal, desc: data.beschrijving,
+      doel: data.doel, materiaal: data.materiaal, video: data.video,
+      eigen: false, publiek: true
+    });
+  }
 
   cModal('adminOefOverlay');
   renderAdminOefeningen();
@@ -3085,15 +3109,25 @@ function renderAdminOefeningen() {
   el.innerHTML = publiekeOefeningen.map(o => `
     <div class="card">
       <div class="card-top">
-        <div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
           <div class="card-badge">${o.age || 'Alle'}</div>
           <div class="card-badge" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">${o.cat || 'overig'}</div>
         </div>
-        <button onclick="verwijderPubliekeOef(${o.id})" style="background:none;border:none;color:#555;cursor:pointer;font-size:16px;transition:color 0.15s" onmouseover="this.style.color='#ff6b6b'" onmouseout="this.style.color='#555'">✕</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button onclick="openAdminOefening(${JSON.stringify(o).replace(/"/g, '&quot;')})" 
+            style="background:none;border:none;color:#555;cursor:pointer;font-size:14px;transition:color 0.15s;padding:2px 6px;border-radius:6px;border:0.5px solid rgba(255,255,255,0.08)"
+            onmouseover="this.style.color='#00e054';this.style.borderColor='rgba(0,224,84,0.3)'" 
+            onmouseout="this.style.color='#555';this.style.borderColor='rgba(255,255,255,0.08)'">✎ Bewerken</button>
+          <button onclick="verwijderPubliekeOef(${o.id})" 
+            style="background:none;border:none;color:#555;cursor:pointer;font-size:16px;transition:color 0.15s"
+            onmouseover="this.style.color='#ff6b6b'" 
+            onmouseout="this.style.color='#555'">✕</button>
+        </div>
       </div>
       <div class="card-title">${o.title}</div>
       <div class="card-meta">${o.duur || '–'} · ${o.spelers_aantal || '–'} spelers</div>
-      <div class="card-desc">${o.beschrijving || ''}</div>
+      <div class="card-desc">${(o.beschrijving || '').slice(0, 100)}${(o.beschrijving || '').length > 100 ? '...' : ''}</div>
+      ${o.video ? `<div style="margin-top:8px;font-size:11px;color:#00e054">▶ Video gekoppeld</div>` : ''}
     </div>
   `).join('');
 }
@@ -3326,7 +3360,7 @@ async function doInstall() {
       </div>
       <div class="form-actions">
         <button class="btn-cancel" onclick="cModal('adminOefOverlay')">Annuleren</button>
-        <button class="btn-primary" onclick="submitAdminOefening()">Opslaan voor iedereen</button>
+        <button class="btn-primary" id="aoSubmitBtn" onclick="submitAdminOefening()">Opslaan voor iedereen</button>
       </div>
     </div>
   </div>
