@@ -2588,27 +2588,35 @@ function openDetail(id){
   function maakMateriaalIcons(mat) {
     if (!mat || mat === '–') return '<div style="font-size:13px;color:var(--text-tertiary)">Geen materiaal nodig</div>';
     const items = mat.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-    return `<div class="materiaal-grid">${items.map(item => {
+    const gesorteerdeKeys = Object.keys(MAT_ICONS).sort((a,b) => b.length - a.length);
+    const verwerkt = items.map(item => {
       const lower = item.toLowerCase();
       const numMatch = lower.match(/^(\d+)\s*x?\s*/);
-      const aantal = numMatch ? numMatch[1] : null;
-      const zoekTekst = aantal ? lower.replace(/^\d+\s*x?\s*/, '') : lower;
+      const aantal = numMatch ? parseInt(numMatch[1]) : 1;
+      const zoekTekst = numMatch ? lower.replace(/^\d+\s*x?\s*/, '').trim() : lower;
       let icon = '📦'; let label = zoekTekst;
-      for (const [key, val] of Object.entries(MAT_ICONS)) {
-        if (zoekTekst.includes(key)) { icon = val.icon; label = val.label; break; }
+      for (const key of gesorteerdeKeys) {
+        if (zoekTekst.includes(key)) { icon = MAT_ICONS[key].icon; label = MAT_ICONS[key].label; break; }
       }
-      label = label.charAt(0).toUpperCase() + label.slice(1);
-      return `<div class="materiaal-item">
-        <div class="materiaal-icon" style="position:relative">
-          ${icon}
-          ${aantal ? `<span style="position:absolute;top:-6px;right:-6px;background:#00e054;color:#0a0a0a;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-body)">${aantal}</span>` : ''}
-        </div>
-        <div class="materiaal-label">${label}</div>
-      </div>`;
-    }).join('')}</div>`;
+      return { icon, label: label.charAt(0).toUpperCase() + label.slice(1), aantal };
+    });
+    const gegroepeerd = [];
+    for (const item of verwerkt) {
+      const bestaand = gegroepeerd.find(g => g.icon === item.icon && g.label === item.label);
+      if (bestaand) bestaand.aantal += item.aantal;
+      else gegroepeerd.push({ ...item });
+    }
+    return '<div class="materiaal-grid">' + gegroepeerd.map(({ icon, label, aantal }) =>
+      '<div class="materiaal-item">' +
+      '<div class="materiaal-icon" style="position:relative">' + icon +
+      (aantal > 1 ? '<span style="position:absolute;top:-6px;right:-6px;background:#00e054;color:#0a0a0a;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-body)">' + aantal + '</span>' : '') +
+      '</div>' +
+      '<div class="materiaal-label">' + label + '</div>' +
+      '</div>'
+    ).join('') + '</div>';
   }
 
-  // ── Moeilijkheid sterren ──
+    // ── Moeilijkheid sterren ──
   function maakSterren(n) {
     n = n || 3;
     return `<div class="moeilijk-sterren">${[1,2,3,4,5].map(i =>
@@ -4241,7 +4249,7 @@ async function doInstall() {
           <span style="font-size:12px;color:var(--text-secondary)">stuks bij volgende klik</span>
         </div>
         <input class="form-input" id="aoMat" type="text" placeholder="bijv. 8 pionnen, 2 doelen, 1 bal">
-        <div class="form-hint">Gebruik aantallen voor het cijfertje: "8 pionnen, 2 doelen"</div>
+        <div class="form-hint">Schrijf aantallen vóór het item: "8 pionnen" → pion icoon met badge 8. Dubbele items worden automatisch samengevoegd.</div>
       </div>
       <div class="form-group"><label class="form-label">Beschrijving *</label><textarea class="form-input" id="aoDesc" placeholder="Beschrijf de oefening stap voor stap..."></textarea><div class="form-error" id="errAoDesc">Vul een beschrijving in.</div></div>
       <div class="form-group"><label class="form-label">Trainingsdoel</label><input class="form-input" id="aoDoel" type="text" placeholder="Wat leren spelers van deze oefening?"></div>
