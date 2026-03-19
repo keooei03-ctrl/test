@@ -334,7 +334,6 @@
     .cat-pill[data-cat="positiespel"].active{ background: #0a2a1a; color: #00e054; border-color: #1a5a2a; }
     .cat-pill[data-cat="dribbelen"].active  { background: #2a1a00; color: #ffb84d; border-color: #5a3a00; }
     .cat-pill[data-cat="warming-up"].active { background: #2a0a1a; color: #ff80b3; border-color: #5a1a3a; }
-    .cat-pill[data-cat="favorieten"].active { background: rgba(255,184,77,0.15); color: #ffb84d; border-color: rgba(255,184,77,0.5); }
 
     .search-wrap { display: flex; align-items: center; gap: 10px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 9px 14px; background: var(--dark2); margin-bottom: 1.5rem; transition: border-color 0.2s; }
     .search-wrap:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow2); }
@@ -692,88 +691,6 @@
     .speelmin-input:focus { border-color: var(--green); outline: none; }
     .totaal-min { font-family: var(--font-display); font-size: 28px; letter-spacing: 1px; color: var(--green); }
     .totaal-min-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; }
-    /* ── SEIZOENSPLANNING ── */
-    .plan-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:10px; }
-    .plan-maand-titel { font-family:var(--font-display); font-size:28px; letter-spacing:1px; color:var(--text); }
-    .plan-nav-btns { display:flex; gap:8px; align-items:center; }
-    .plan-nav-btn { width:36px; height:36px; border-radius:50%; border:0.5px solid var(--border); background:var(--dark3); color:var(--text); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; font-family:var(--font-body); }
-    .plan-nav-btn:hover { border-color:rgba(0,224,84,0.3); color:var(--green); }
-    .plan-vandaag-btn { padding:6px 14px; border-radius:20px; border:0.5px solid var(--border); background:var(--dark3); color:var(--text-secondary); font-size:12px; cursor:pointer; font-family:var(--font-body); transition:all 0.15s; }
-    .plan-vandaag-btn:hover { border-color:rgba(0,224,84,0.3); color:var(--green); }
-
-    /* Weekdagen header */
-    .plan-week-header { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:4px; }
-    .plan-week-dag { text-align:center; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-tertiary); padding:6px 0; }
-
-    /* Kalender grid */
-    .plan-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
-    .plan-dag { min-height:90px; background:var(--dark2); border-radius:8px; border:0.5px solid var(--border); padding:6px; cursor:pointer; transition:all 0.15s; position:relative; }
-    .plan-dag:hover { border-color:rgba(0,224,84,0.25); }
-    .plan-dag.vandaag { border-color:rgba(0,224,84,0.5); background:rgba(0,224,84,0.04); }
-    .plan-dag.andere-maand { opacity:0.35; }
-    .plan-dag.heeft-items { background:var(--dark2); }
-    .plan-dag-num { font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:4px; }
-    .plan-dag.vandaag .plan-dag-num { color:var(--green); }
-    .plan-item { border-radius:4px; padding:2px 5px; font-size:10px; font-weight:600; margin-bottom:2px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; cursor:pointer; }
-    .plan-item.training  { background:rgba(0,224,84,0.15); color:#00e054; }
-    .plan-item.wedstrijd { background:rgba(255,107,107,0.15); color:#ff6b6b; }
-    .plan-item.toernooi  { background:rgba(255,184,77,0.15); color:#ffb84d; }
-    .plan-item.vrij      { background:rgba(255,255,255,0.06); color:#888; }
-    .plan-item.overig    { background:rgba(91,184,255,0.12); color:#5bb8ff; }
-    .plan-meer { font-size:9px; color:var(--text-tertiary); padding:1px 3px; }
-
-    /* Legenda */
-    .plan-legenda { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:1rem; }
-    .plan-legenda-item { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-secondary); }
-    .plan-legenda-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
-
-    /* Weeklijst onder kalender */
-    .plan-aankomend { margin-top:1.5rem; }
-    .plan-aankomend-titel { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-tertiary); margin-bottom:10px; }
-    .plan-lijst-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:0.5px solid var(--border); }
-    .plan-lijst-item:last-child { border-bottom:none; }
-    .plan-lijst-datum { min-width:80px; }
-    .plan-lijst-dag { font-size:11px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.04em; }
-    .plan-lijst-nr { font-family:var(--font-display); font-size:22px; color:var(--text); letter-spacing:1px; line-height:1; }
-    .plan-lijst-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
-    .plan-lijst-info { flex:1; }
-    .plan-lijst-titel { font-size:14px; font-weight:600; color:var(--text); }
-    .plan-lijst-meta { font-size:12px; color:var(--text-tertiary); margin-top:1px; }
-    .plan-lijst-del { background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:14px; padding:4px; transition:color 0.15s; }
-    .plan-lijst-del:hover { color:#ff6b6b; }
-    @media(max-width:700px){ .plan-dag { min-height:60px; padding:4px; } .plan-dag-num { font-size:11px; } .plan-item { font-size:9px; } }
-
-    /* ── OEFENWEDSTRIJDEN PRIKBORD ── */
-    .ow-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 14px; margin-top: 1.5rem; }
-    .ow-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 16px; padding: 1.25rem; transition: all 0.2s; position: relative; overflow: hidden; }
-    .ow-card:hover { border-color: rgba(0,224,84,0.2); transform: translateY(-2px); }
-    .ow-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--green),transparent); opacity:0; transition:opacity 0.2s; }
-    .ow-card:hover::before { opacity:1; }
-    .ow-card-eigen { border-color: rgba(0,224,84,0.15); }
-    .ow-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
-    .ow-club { font-family: var(--font-display); font-size: 20px; letter-spacing:1px; color: var(--text); }
-    .ow-datum { font-size: 13px; font-weight: 600; color: var(--green); }
-    .ow-badges { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
-    .ow-badge { padding:3px 9px; border-radius:6px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
-    .ow-badge-leeftijd { background:rgba(91,184,255,0.1); color:#5bb8ff; border:0.5px solid rgba(91,184,255,0.2); }
-    .ow-badge-niveau { background:rgba(255,184,77,0.1); color:#ffb84d; border:0.5px solid rgba(255,184,77,0.2); }
-    .ow-badge-regio { background:rgba(255,255,255,0.05); color:#888; border:0.5px solid rgba(255,255,255,0.08); }
-    .ow-info { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
-    .ow-info-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-secondary); }
-    .ow-info-icon { font-size:14px; width:20px; flex-shrink:0; text-align:center; }
-    .ow-opmerking { font-size:13px; color:var(--text-tertiary); font-style:italic; border-top:0.5px solid var(--border); padding-top:10px; margin-top:4px; line-height:1.6; }
-    .ow-footer { display:flex; gap:8px; margin-top:12px; }
-    .ow-btn-interesse { flex:1; padding:10px; border-radius:10px; background:var(--green); color:#0a0a0a; font-weight:700; font-size:13px; border:none; cursor:pointer; font-family:var(--font-body); transition:opacity 0.15s; }
-    .ow-btn-interesse:hover { opacity:0.85; }
-    .ow-btn-del { padding:10px 14px; border-radius:10px; background:none; border:0.5px solid rgba(255,107,107,0.2); color:#ff6b6b; font-size:13px; cursor:pointer; font-family:var(--font-body); transition:all 0.15s; }
-    .ow-btn-del:hover { background:rgba(255,107,107,0.08); }
-    .ow-verlopen { opacity:0.4; pointer-events:none; }
-    .ow-verlopen-tag { position:absolute; top:12px; right:12px; font-size:10px; padding:2px 8px; border-radius:4px; background:rgba(255,107,107,0.12); color:#ff6b6b; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
-    .ow-empty { text-align:center; padding:4rem 1rem; color:var(--text-tertiary); }
-    .ow-filter-pill { padding:6px 14px; border-radius:20px; border:0.5px solid var(--border); background:var(--dark3); color:var(--text-secondary); font-size:12px; cursor:pointer; transition:all 0.15s; font-family:var(--font-body); }
-    .ow-filter-pill.active { background:rgba(0,224,84,0.1); color:var(--green); border-color:rgba(0,224,84,0.3); }
-    @media(max-width:700px){ .ow-grid { grid-template-columns:1fr; } }
-
     .community-feed { display: flex; flex-direction: column; gap: 12px; margin-top: 1.5rem; }
     .bericht-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 16px; padding: 1.25rem; transition: border-color 0.2s; }
     .bericht-card:hover { border-color: var(--border-strong); }
@@ -813,8 +730,7 @@
     /* ── WEDSTRIJDEN ── */
     .wed-hero { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
     .wed-hero::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:radial-gradient(circle,rgba(255,184,77,0.08) 0%,transparent 70%); pointer-events:none; }
-    .wed-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 1.5rem; }
-    @media(max-width:700px){ .wed-stats { grid-template-columns: repeat(3,1fr); } }
+    .wed-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 1.5rem; }
     .wed-stat { background: var(--dark3); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
     .wed-stat-num { font-family: var(--font-display); font-size: 26px; letter-spacing: 1px; }
     .wed-stat-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
@@ -1079,13 +995,13 @@
   </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('oefeningen',this)">Oefeningen</button>
-    <button class="nav-tab" onclick="showPage('spelers',this)">👥 Mijn Team</button>
+    <button class="nav-tab" onclick="showPage('spelers',this)">Spelers</button>
+    <button class="nav-tab" onclick="showPage('resultaten',this)">Resultaten</button>
+    <button class="nav-tab" onclick="showPage('aanwezigheid',this)">Aanwezigheid</button>
     <button class="nav-tab" onclick="showPage('wedstrijden',this)">Wedstrijden</button>
     <button class="nav-tab" onclick="showPage('tactisch',this)">✎ Tactisch bord</button>
     <button class="nav-tab" onclick="showPage('ai',this)" style="color:var(--green)">✦ AI Plan</button>
     <button class="nav-tab" onclick="showPage('community',this)">💬 Community</button>
-    <button class="nav-tab" onclick="showPage('planning',this)">📅 Planning</button>
-    <button class="nav-tab" onclick="showPage('oefenwedstrijden',this)">🤝 Oefenwedstrijden</button>
     <button class="nav-tab" id="adminTab" onclick="showPage('admin',this)" style="display:none;color:#ffb84d">⚙ Beheer</button>
   </div>
   <button class="add-btn" onclick="handleAddBtn()">
@@ -1124,9 +1040,9 @@
 
 <!-- MEER MENU -->
 <div class="mobile-meer-menu" id="meerMenu">
-  <button class="mobile-meer-btn" onclick="showPage('oefenwedstrijden',null);setMobileTab('oefenwedstrijden');sluitMeer()">🤝 Oefenwedstrijden</button>
-  <button class="mobile-meer-btn" onclick="showPage('planning',null);setMobileTab('planning');sluitMeer()">📅 Planning</button>
   <button class="mobile-meer-btn" onclick="showPage('ai',null);setMobileTab('ai');sluitMeer()" style="color:var(--green)">✦ AI Plan</button>
+  <button class="mobile-meer-btn" onclick="showPage('resultaten',null);setMobileTab('resultaten');sluitMeer()">📋 Resultaten</button>
+  <button class="mobile-meer-btn" onclick="showPage('aanwezigheid',null);setMobileTab('aanwezigheid');sluitMeer()">✅ Aanwezigheid</button>
   <button class="mobile-meer-btn" onclick="showPage('wedstrijden',null);setMobileTab('wedstrijden');sluitMeer()">⚽ Wedstrijden</button>
   <button class="mobile-meer-btn" id="meerAdminBtn" onclick="showPage('admin',null);setMobileTab('admin');sluitMeer()" style="display:none">⚙ Beheer</button>
 </div>
@@ -1172,7 +1088,6 @@
       <div class="cat-pill" data-cat="positiespel">Positiespel</div>
       <div class="cat-pill" data-cat="dribbelen">Dribbelen</div>
       <div class="cat-pill" data-cat="warming-up">Warming-up</div>
-      <div class="cat-pill" data-cat="favorieten" style="border-color:rgba(255,184,77,0.25);color:#ffb84d">★ Favorieten</div>
     </div>
     <div class="search-wrap">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#555" stroke-width="1.5"/><path d="M10 10L14 14" stroke="#555" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -1196,30 +1111,7 @@
 <!-- PAGE: SPELERS -->
 <div class="page" id="page-spelers">
   <div class="main">
-    <!-- Team statistieken -->
-    <div id="teamStatsBlok" style="display:none;background:var(--dark2);border:0.5px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1.5rem">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:14px">Team overzicht dit seizoen</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px" id="teamStatsGrid">
-        <div style="text-align:center;padding:10px;background:var(--dark3);border-radius:10px">
-          <div style="font-family:var(--font-display);font-size:26px;color:var(--green)" id="tStatSpelers">0</div>
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">Spelers</div>
-        </div>
-        <div style="text-align:center;padding:10px;background:var(--dark3);border-radius:10px">
-          <div style="font-family:var(--font-display);font-size:26px;color:#5bb8ff" id="tStatTrainingen">0</div>
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">Trainingen</div>
-        </div>
-        <div style="text-align:center;padding:10px;background:var(--dark3);border-radius:10px">
-          <div style="font-family:var(--font-display);font-size:26px;color:#ffb84d" id="tStatGemAanw">–</div>
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">Gem. aanw.</div>
-        </div>
-        <div style="text-align:center;padding:10px;background:var(--dark3);border-radius:10px">
-          <div style="font-family:var(--font-display);font-size:20px;color:var(--green)" id="tStatBeste">–</div>
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">Trouwste bezoeker</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-title" id="spelersTitle">Mijn Team <span>0</span></div>
+    <div class="section-title" id="spelersTitle">Spelers <span>0</span></div>
     <div class="spelers-grid" id="spelersGrid"></div>
     <div class="empty-block" id="spelersEmpty" style="display:none">
       <div class="empty-block-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="var(--text-tertiary)" stroke-width="1.5"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-linecap="round"/></svg></div>
@@ -1253,22 +1145,6 @@
         <div class="wed-stat"><div class="wed-stat-num" id="wStatW" style="color:var(--green)">0</div><div class="wed-stat-label">Gewonnen</div></div>
         <div class="wed-stat"><div class="wed-stat-num" id="wStatD" style="color:#ffb84d">0</div><div class="wed-stat-label">Gelijk</div></div>
         <div class="wed-stat"><div class="wed-stat-num" id="wStatL" style="color:#ff6b6b">0</div><div class="wed-stat-label">Verloren</div></div>
-        <div class="wed-stat"><div class="wed-stat-num" id="wStatVoor" style="color:var(--green)">0</div><div class="wed-stat-label">Goals voor</div></div>
-        <div class="wed-stat"><div class="wed-stat-num" id="wStatTegen" style="color:#ff6b6b">0</div><div class="wed-stat-label">Goals tegen</div></div>
-      </div>
-    </div>
-
-    <!-- Topscorers & assists tabel -->
-    <div id="wedScorersBlok" style="display:none;margin-bottom:1.5rem">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div style="background:var(--dark2);border:0.5px solid var(--border);border-radius:14px;padding:1rem">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:10px">⚽ Topscorers</div>
-          <div id="topscorersLijst"></div>
-        </div>
-        <div style="background:var(--dark2);border:0.5px solid var(--border);border-radius:14px;padding:1rem">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:10px">🎯 Meeste assists</div>
-          <div id="topAssistsLijst"></div>
-        </div>
       </div>
     </div>
 
@@ -1346,12 +1222,6 @@
         <label class="form-label">Doelpuntenmakers</label>
         <div class="speler-select-grid" id="doelpuntenGrid"></div>
         <div class="form-hint">Selecteer de spelers die gescoord hebben.</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Assists</label>
-        <div class="speler-select-grid" id="assistsGrid"></div>
-        <div class="form-hint">Selecteer de spelers die een assist gaven.</div>
       </div>
 
       <div class="form-group">
@@ -1544,15 +1414,7 @@
   </div>
 </div>
 
-<div class="overlay" id="detailOverlay" onclick="oClick(event,'detailOverlay')">
-  <div class="modal">
-    <div style="display:flex;align-items:center;gap:8px;padding:12px 16px 0">
-      <button id="detailTerugBtn" onclick="sluitDetailNaarTraining()" style="display:none;background:none;border:0.5px solid var(--border);color:var(--text-secondary);padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--font-body)">← Terug naar training</button>
-      <button class="modal-close" style="margin-left:auto" onclick="cModal('detailOverlay')">✕</button>
-    </div>
-    <div id="detailBody"></div>
-  </div>
-</div>
+<div class="overlay" id="detailOverlay" onclick="oClick(event,'detailOverlay')"><div class="modal"><button class="modal-close" onclick="cModal('detailOverlay')">✕</button><div id="detailBody"></div></div></div>
 <div class="overlay" id="addOefOverlay" onclick="oClick(event,'addOefOverlay')">
   <div class="modal">
     <button class="modal-close" onclick="cModal('addOefOverlay')">✕</button>
@@ -1678,23 +1540,23 @@ function showPage(page,el){
   curPage=page;
   setMobileTab(page);
   sluitMeer();
-  const lbl={oefeningen:'Toevoegen',spelers:'+ Speler toevoegen',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',community:'Bericht posten',planning:'+ Toevoegen',oefenwedstrijden:'+ Verzoek plaatsen',admin:'+ Oefening toevoegen'};
+  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',community:'Bericht posten',admin:'+ Oefening toevoegen'};
   document.getElementById('addBtnLabel').textContent=lbl[page]||'Toevoegen';
   if(page==='spelers')renderSpelers();
+  if(page==='resultaten')renderResultaten();
+  if(page==='aanwezigheid')renderAanwezigheid();
   if(page==='wedstrijden')renderWedstrijden();
   if(page==='tactisch')initTactischBord();
   if(page==='community')laadCommunity();
-  if(page==='planning')laadPlanning();
-  if(page==='oefenwedstrijden')laadOefenwedstrijden();
   if(page==='admin')renderAdminOefeningen();
 }
 function handleAddBtn(){
   if(curPage==='spelers')openAddSpeler();
+  else if(curPage==='resultaten')openAddTraining();
+  else if(curPage==='aanwezigheid')openNieuweTrainingAanw();
   else if(curPage==='wedstrijden')openAddWedstrijd();
   else if(curPage==='tactisch')resetBord();
   else if(curPage==='community')document.getElementById('communityInput').focus();
-  else if(curPage==='planning')openNieuwPlanItem();
-  else if(curPage==='oefenwedstrijden')openNieuwVerzoek();
   else if(curPage==='admin')openAdminOefening();
   else openAddOef();
 }
@@ -2159,7 +2021,6 @@ let huidigFormatie='4-3-3';
 let opstellingData={}; // {positieKey: spelerId|null}
 let huidigePosKey=null;
 let doelpuntenmakers=new Set();
-let assistmakers=new Set();
 
 const FORMATIES={
   '4-3-3': [[1],[4,3,2,1],[3,2,1],[3,2,1]],          // keeper, def, mid, fwd
@@ -2258,30 +2119,10 @@ function renderDoelpuntenGrid(){
   }).join('');
 }
 
-function renderAssistsGrid(){
-  const grid=document.getElementById('assistsGrid');
-  if(!grid)return;
-  if(!spelers.length){grid.innerHTML='<div style="font-size:13px;color:var(--text-secondary);padding:8px">Voeg eerst spelers toe.</div>';return;}
-  grid.innerHTML=spelers.map(s=>{
-    const c=COLORS[s.ci]||COLORS[0];
-    const sel=assistmakers.has(s.id);
-    return`<div class="speler-select-item${sel?' selected':''}" style="${sel?'border-color:rgba(255,184,77,0.4);background:rgba(255,184,77,0.08)':''}" onclick="toggleAssist(${s.id})">
-      <div class="mini-av" style="background:${c.bg};color:${c.text}">${ini(s.naam)}</div>
-      <div class="mini-naam">${s.naam}</div>
-    </div>`;
-  }).join('');
-}
-
 function toggleDoel(sid){
   if(doelpuntenmakers.has(sid))doelpuntenmakers.delete(sid);
   else doelpuntenmakers.add(sid);
   renderDoelpuntenGrid();
-}
-
-function toggleAssist(sid){
-  if(assistmakers.has(sid))assistmakers.delete(sid);
-  else assistmakers.add(sid);
-  renderAssistsGrid();
 }
 
 function openAddWedstrijd(){
@@ -2296,11 +2137,9 @@ function openAddWedstrijd(){
   opstellingData={};
   getPosities(huidigFormatie).forEach(p=>opstellingData[p]=null);
   doelpuntenmakers=new Set();
-  assistmakers=new Set();
   document.querySelectorAll('.formatie-btn').forEach(b=>b.classList.toggle('active',b.dataset.f==='4-3-3'));
   renderOpstellingVeld();
   renderDoelpuntenGrid();
-  renderAssistsGrid();
   renderSpeelminGrid();
   oModal('addWedOverlay');
 }
@@ -2323,6 +2162,7 @@ function renderSpeelminGrid() {
 
 function submitWedstrijd(){
   if (checkDemoEnToon('Wedstrijd opslaan', 'Maak een gratis account aan om wedstrijden bij te houden.', '⚽')) return;
+  if (!isPro() && wedstrijden.length >= 5) { checkPro('wedstrijden'); return; }
   const datum=document.getElementById('wDatum').value;
   const tegen=document.getElementById('wTegenstander').value.trim();
   let ok=true;
@@ -2338,7 +2178,7 @@ function submitWedstrijd(){
     const el = document.getElementById('sm_' + s.id);
     if (el) { const v = parseInt(el.value) || 0; if (v > 0) speelminuten[s.id] = v; }
   });
-  const nieuwW={datum,tegenstander:tegen,thuisUit:document.getElementById('wThuisUit').value,doelVoor:dv,doelTegen:dt,result,formatie:huidigFormatie,opstelling:{...opstellingData},doelpunten:[...doelpuntenmakers],assists:[...assistmakers],notitie:document.getElementById('wNotitie').value.trim(),speelminuten};
+  const nieuwW={datum,tegenstander:tegen,thuisUit:document.getElementById('wThuisUit').value,doelVoor:dv,doelTegen:dt,result,formatie:huidigFormatie,opstelling:{...opstellingData},doelpunten:[...doelpuntenmakers],notitie:document.getElementById('wNotitie').value.trim(),speelminuten};
   cModal('addWedOverlay');
   dbVoegWedstrijdToe(nieuwW).then(id => {
     nieuwW.id = id || Date.now();
@@ -2355,59 +2195,14 @@ function renderWedstrijden(){
   const w=wedstrijden.filter(x=>x.result==='win').length;
   const d=wedstrijden.filter(x=>x.result==='draw').length;
   const l=wedstrijden.filter(x=>x.result==='loss').length;
-  const totalVoor=wedstrijden.reduce((s,x)=>s+(x.doelVoor||0),0);
-  const totalTegen=wedstrijden.reduce((s,x)=>s+(x.doelTegen||0),0);
   document.getElementById('wStatGes').textContent=wedstrijden.length;
   document.getElementById('wStatW').textContent=w;
   document.getElementById('wStatD').textContent=d;
   document.getElementById('wStatL').textContent=l;
-  document.getElementById('wStatVoor').textContent=totalVoor;
-  document.getElementById('wStatTegen').textContent=totalTegen;
-
-  // ── Topscorers & assists tabel ──
-  const scorersBlok = document.getElementById('wedScorersBlok');
-  if (wedstrijden.length && spelers.length) {
-    const goalTelling = {};
-    const assistTelling = {};
-    wedstrijden.forEach(wed => {
-      (wed.doelpunten||[]).forEach(sid => { goalTelling[sid] = (goalTelling[sid]||0) + 1; });
-      (wed.assists||[]).forEach(sid => { assistTelling[sid] = (assistTelling[sid]||0) + 1; });
-    });
-    const topScorers = Object.entries(goalTelling).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    const topAssists = Object.entries(assistTelling).sort((a,b)=>b[1]-a[1]).slice(0,5);
-
-    const maakRij = (sid, num, kleur, icon) => {
-      const s = spelers.find(x=>x.id==sid||x.id===parseInt(sid));
-      if (!s) return '';
-      const c = COLORS[s.ci]||COLORS[0];
-      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border)">
-        <div style="width:28px;height:28px;border-radius:50%;background:${c.bg};color:${c.text};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${ini(s.naam)}</div>
-        <div style="flex:1;font-size:13px;color:var(--text)">${s.naam.split(' ')[0]}</div>
-        <div style="font-family:var(--font-display);font-size:20px;color:${kleur};letter-spacing:1px">${num}</div>
-        <div style="font-size:13px">${icon}</div>
-      </div>`;
-    };
-
-    if (topScorers.length || topAssists.length) {
-      scorersBlok.style.display = 'block';
-      document.getElementById('topscorersLijst').innerHTML = topScorers.length
-        ? topScorers.map(([sid,num]) => maakRij(sid,num,'var(--green)','⚽')).join('')
-        : '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen doelpunten</div>';
-      document.getElementById('topAssistsLijst').innerHTML = topAssists.length
-        ? topAssists.map(([sid,num]) => maakRij(sid,num,'#ffb84d','🎯')).join('')
-        : '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen assists</div>';
-    } else {
-      scorersBlok.style.display = 'none';
-    }
-  } else {
-    scorersBlok.style.display = 'none';
-  }
-
   if(!wedstrijden.length){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   list.innerHTML=wedstrijden.map(w=>{
     const doelNamen=w.doelpunten.map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam.split(' ')[0]:null;}).filter(Boolean);
-    const assistNamen=(w.assists||[]).map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam.split(' ')[0]:null;}).filter(Boolean);
     return`<div class="wed-card ${w.result}" onclick="openWedDetail(${w.id})">
       <div class="wed-datum-block">
         <div class="wed-dag">${fmtDag(w.datum)}</div>
@@ -2415,7 +2210,7 @@ function renderWedstrijden(){
       </div>
       <div>
         <div class="wed-teams">${w.thuisUit==='thuis'?'🏠':''} vs ${w.tegenstander}</div>
-        <div class="wed-meta">${w.formatie}${doelNamen.length?' · ⚽ '+doelNamen.join(', '):''}${assistNamen.length?' · 🎯 '+assistNamen.join(', '):''}</div>
+        <div class="wed-meta">${w.formatie}${doelNamen.length?' · ⚽ '+doelNamen.join(', '):''}</div>
       </div>
       <div style="text-align:right">
         <div class="wed-score ${w.result}">${w.doelVoor}–${w.doelTegen}</div>
@@ -2442,7 +2237,6 @@ function openWedDetail(id){
   });
   veldHtml+='</div>';
   const doelNamen=w.doelpunten.map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam:null;}).filter(Boolean);
-  const assistNamen=(w.assists||[]).map(sid=>{const s=spelers.find(x=>x.id===sid);return s?s.naam:null;}).filter(Boolean);
   document.getElementById('wedDetailBody').innerHTML=`
     <div class="modal-header-block" style="background:var(--dark2)">
       <div style="flex:1">
@@ -2457,7 +2251,6 @@ function openWedDetail(id){
       <div class="sec-label">Formatie · ${w.formatie}</div>
       ${veldHtml}
       ${doelNamen.length?`<div class="sec-label">Doelpuntenmakers</div><div style="display:flex;gap:8px;flex-wrap:wrap">${doelNamen.map(n=>`<span class="training-tag">⚽ ${n}</span>`).join('')}</div>`:''}
-      ${assistNamen.length?`<div class="sec-label">Assists</div><div style="display:flex;gap:8px;flex-wrap:wrap">${assistNamen.map(n=>`<span class="training-tag" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">🎯 ${n}</span>`).join('')}</div>`:''}
       ${w.notitie?`<div class="sec-label">Notities</div><div class="sec-text" style="font-style:italic">${w.notitie}</div>`:''}
       <button class="del-btn" onclick="delWed(${id})">Wedstrijd verwijderen</button>
     </div>`;
@@ -2609,6 +2402,7 @@ function setExample(txt){ document.getElementById('aiExtra').value=txt; }
 
 async function generatePlan(){
   if (checkDemoEnToon('AI Trainingsplan', 'Maak een gratis account aan om AI trainingsplannen te genereren.', '✦')) return;
+  if (!checkPro('ai')) return;
   const btn=document.getElementById('aiGenBtn');
   const resultEl=document.getElementById('aiResult');
   const age=document.getElementById('aiAge').value;
@@ -2617,68 +2411,52 @@ async function generatePlan(){
   const spelers=document.getElementById('aiSpelers').value;
   const extra=document.getElementById('aiExtra').value.trim();
 
-  // Oefeningen uit bibliotheek meegeven als context met ID
-  const oefContext = oefeningen.map(o =>
-    `- ID:${o.id} | ${o.title} (${o.cat}, ${o.duur||'?'}): ${(o.desc||'').slice(0,80)}`
-  ).join('\n');
+  // Oefeningen uit bibliotheek meegeven als context
+  const oefContext=oefeningen.map(o=>`- ${o.title} (${o.cat}, ${aL(o.age)}, ${o.duur||'?'}): ${o.desc.slice(0,80)}`).join('\n');
 
-  const totalMin = parseInt(duur) || 60;
-  const warmupMin = Math.min(10, Math.round(totalMin * 0.1));
-  const coolMin = Math.min(5, Math.round(totalMin * 0.08));
-  const kernMin = totalMin - warmupMin - coolMin;
-
-  const prompt=`Je bent een ervaren jeugdvoetbaltrainer in Nederland. Stel een concreet trainingsplan op.
+  const prompt=`Je bent een ervaren jeugdvoetbaltrainer in Nederland. Stel een concreet trainingsplan op voor de volgende situatie:
 
 Leeftijdsgroep: ${age}
-Totale duur: ${totalMin} minuten
+Duur: ${duur}
 Hoofdfocus: ${focus}
 Aantal spelers: ${spelers}
 ${extra?`Extra wensen: ${extra}`:''}
 
-STRIKTE TIJDSVERDELING (houd je hier EXACT aan):
-- Warming-up: ${warmupMin} minuten (1 oefening, activering en mobilisatie)
-- Techniek/passing/trap vormen: 10-15 minuten (1-2 oefeningen, kleine vormen)
-- Grotere spelvorm: 15-20 minuten (1 oefening, meer spelers betrokken)
-- Partijvorm / wedstrijdvorm: 15-20 minuten (1 oefening, zo wedstrijdecht mogelijk)
-- Cooling-down: ${coolMin} minuten (1 oefening, rustig afsluiten)
-Totaal moet exact ${totalMin} minuten zijn.
-
-Beschikbare oefeningen uit de bibliotheek (gebruik de ID als die past):
+Beschikbare oefeningen uit de bibliotheek:
 ${oefContext}
 
-Geef een trainingsplan terug als JSON (geen markdown, geen uitleg, alleen JSON):
+Geef een trainingsplan terug als JSON (geen markdown, geen uitleg, alleen JSON) in dit exacte formaat:
 {
-  "titel": "Korte pakkende titel",
-  "samenvatting": "Twee zinnen over het doel",
+  "titel": "Korte pakkende titel van het plan",
+  "samenvatting": "Twee zinnen over het doel van deze training",
   "onderdelen": [
     {
       "naam": "Naam van onderdeel",
       "duur": "X min",
-      "beschrijving": "Concrete instructie (2-3 zinnen)",
-      "type": "warming-up|techniek|spelvorm|cooling-down",
-      "oefening_id": "ID uit bibliotheek of null als eigen oefening"
+      "beschrijving": "Concrete instructie voor de trainer (2-3 zinnen)",
+      "type": "warming-up|techniek|spelvorm|cooling-down"
     }
   ],
-  "trainerstip": "Één concrete tip voor deze training"
+  "trainerstip": "Één concrete tip voor deze specifieke training"
 }
 
-Gebruik oefeningen uit de bibliotheek waar mogelijk — zet dan het exacte ID in oefening_id. Antwoord ALLEEN met valid JSON.`;
+Gebruik bestaande oefeningen uit de bibliotheek waar mogelijk. Vul aan met eigen onderdelen waar nodig. Zorg dat de totale duur klopt met ${duur}. Antwoord ALLEEN met valid JSON.`;
 
   btn.disabled=true;
   btn.innerHTML=`<div class="ai-spinner"></div> Plan wordt gegenereerd...`;
   resultEl.style.display='none';
 
   try {
-    const res = await fetch('https://green-rice-a428trainershub-ai.keooei03.workers.dev', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
+    const res=await fetch('/functions/ai-training',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'API fout');
-    const raw = data.content.map(c => c.text||'').join('');
-    const clean = raw.replace(/```json|```/g,'').trim();
-    const plan = JSON.parse(clean);
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Onbekende fout');
+    const raw=data.content.map(c=>c.text||'').join('');
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const plan=JSON.parse(clean);
     renderAIPlan(plan, age, duur, focus);
   } catch(err){
     resultEl.style.display='block';
@@ -2703,34 +2481,17 @@ function renderAIPlan(plan, age, duur, focus){
     'cooling-down':'rgba(192,132,252,0.25)'
   };
   const typeLabels={'warming-up':'Warming-up','techniek':'Techniek','spelvorm':'Spelvorm','cooling-down':'Cooling-down'};
-  const typeIcons={'warming-up':'🔥','techniek':'⚽','spelvorm':'🎯','cooling-down':'🧘'};
 
-  const onderdelen = plan.onderdelen.map((o,i) => {
-    // Zoek gekoppelde oefening
-    const oef = o.oefening_id ? oefeningen.find(x =>
-      String(x.id) === String(o.oefening_id) ||
-      x.id === 'pub_' + o.oefening_id ||
-      String(x.id) === 'pub_' + o.oefening_id
-    ) : null;
-
-    const oefLink = oef ? `
-      <div onclick="openDetailVanAI('${oef.id}')" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 12px;background:rgba(0,224,84,0.08);border:0.5px solid rgba(0,224,84,0.2);border-radius:8px;cursor:pointer;font-size:12px;color:var(--green);font-weight:600;transition:all 0.15s" onmouseover="this.style.background='rgba(0,224,84,0.15)'" onmouseout="this.style.background='rgba(0,224,84,0.08)'">
-        📖 Bekijk oefening: ${oef.title}
-      </div>` : '';
-
-    return `<div class="ai-oef-item" style="background:${typeColors[o.type]||'var(--dark3)'};border-color:${typeBorders[o.type]||'var(--border)'}">
-      <div class="ai-oef-num">${typeIcons[o.type]||'📌'}</div>
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <span style="font-size:10px;padding:2px 8px;border-radius:6px;background:${typeBorders[o.type]||'var(--border)'};color:var(--text-secondary)">${typeLabels[o.type]||o.type}</span>
-          <span style="font-size:11px;color:var(--text-tertiary)">⏱ ${o.duur}</span>
-        </div>
+  const onderdelen=plan.onderdelen.map((o,i)=>`
+    <div class="ai-oef-item" style="background:${typeColors[o.type]||'var(--dark3)'};border-color:${typeBorders[o.type]||'var(--border)'}">
+      <div class="ai-oef-num">${String(i+1).padStart(2,'0')}</div>
+      <div>
         <div class="ai-oef-name">${o.naam}</div>
         <div class="ai-oef-desc">${o.beschrijving}</div>
-        ${oefLink}
+        <div style="margin-top:5px"><span style="font-size:10px;padding:2px 8px;border-radius:6px;background:${typeBorders[o.type]||'var(--border)'};color:var(--text-secondary)">${typeLabels[o.type]||o.type}</span></div>
       </div>
-    </div>`;
-  }).join('');
+      <div class="ai-oef-duur">⏱ ${o.duur}</div>
+    </div>`).join('');
 
   const resultEl=document.getElementById('aiResult');
   resultEl.style.display='block';
@@ -2757,82 +2518,11 @@ function renderAIPlan(plan, age, duur, focus){
           <div class="ai-block-label">Trainerstip</div>
           <div class="ai-tip"><strong>💡 Tip:</strong> ${plan.trainerstip}</div>
         </div>`:''}
-        <button class="btn-primary" style="width:100%;padding:14px;font-size:15px;margin-top:8px" onclick="startTrainingVanPlan()">
-          ▶ Training starten — bekijk alle oefeningen
-        </button>
+        <button class="ai-save-btn" onclick="savePlanAsTraining()">+ Dit plan opslaan als training</button>
       </div>
     </div>`;
   resultEl.scrollIntoView({behavior:'smooth',block:'start'});
-  window._lastPlan = plan;
-}
-
-function openDetailVanAI(oefId) {
-  // Sluit trainingsOverlay tijdelijk en open de oefening detail
-  // Sla op welke overlay open was zodat we kunnen terugkeren
-  window._vorigeOverlay = 'trainingsOverlay';
-  cModal('trainingsOverlay');
-  setTimeout(() => openDetail(oefId), 150);
-}
-
-function startTrainingVanPlan() {
-  const plan = window._lastPlan;
-  if (!plan) return;
-
-  // Bouw een trainingspagina met alle oefeningen
-  const typeColors = {
-    'warming-up':'rgba(255,184,77,0.12)',
-    'techniek':'rgba(91,184,255,0.1)',
-    'spelvorm':'rgba(0,224,84,0.08)',
-    'cooling-down':'rgba(192,132,252,0.1)'
-  };
-  const typeBorders = {
-    'warming-up':'rgba(255,184,77,0.3)',
-    'techniek':'rgba(91,184,255,0.25)',
-    'spelvorm':'rgba(0,224,84,0.25)',
-    'cooling-down':'rgba(192,132,252,0.25)'
-  };
-  const typeLabels = {'warming-up':'🔥 Warming-up','techniek':'⚽ Techniek','spelvorm':'🎯 Spelvorm','cooling-down':'🧘 Cooling-down'};
-
-  const secties = plan.onderdelen.map((o, i) => {
-    const oef = o.oefening_id ? oefeningen.find(x =>
-      String(x.id) === String(o.oefening_id) ||
-      x.id === 'pub_' + o.oefening_id ||
-      String(x.id) === 'pub_' + o.oefening_id
-    ) : null;
-
-    const embedV = oef?.video ? embedUrl(oef.video) : null;
-    const videoHtml = embedV
-      ? `<div style="aspect-ratio:16/9;border-radius:12px;overflow:hidden;margin-top:12px"><iframe src="${embedV}" style="width:100%;height:100%;border:none" allowfullscreen></iframe></div>`
-      : '';
-
-    const matHtml = oef?.materiaal ? `<div style="font-size:12px;color:var(--text-tertiary);margin-top:6px">📦 ${oef.materiaal}</div>` : '';
-    const doelHtml = oef?.doel ? `<div style="font-size:13px;color:var(--text-secondary);margin-top:8px;padding:10px;background:var(--dark3);border-radius:8px;border-left:2px solid var(--green)">🎯 <em>${oef.doel}</em></div>` : '';
-
-    return `<div style="background:var(--dark2);border:0.5px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:12px;border-top:3px solid ${typeBorders[o.type]||'var(--border)'}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)">${typeLabels[o.type]||o.type} — Onderdeel ${i+1}</span>
-        <span style="font-size:13px;font-weight:700;color:var(--green)">⏱ ${o.duur}</span>
-      </div>
-      <div style="font-family:var(--font-display);font-size:22px;letter-spacing:1px;color:var(--text);margin-bottom:8px">${o.naam}</div>
-      <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">${o.beschrijving}</div>
-      ${oef ? `
-        ${matHtml}
-        ${doelHtml}
-        ${videoHtml}
-        ${oef.coaching_punten ? `<div style="margin-top:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:6px">Coachingspunten</div>${oef.coaching_punten.split('\n').filter(s=>s.trim()).map(s=>`<div style="font-size:13px;color:var(--text-secondary);padding:4px 0;border-bottom:0.5px solid var(--border)">→ ${s}</div>`).join('')}</div>` : ''}
-      ` : ''}
-    </div>`;
-  }).join('');
-
-  // Toon in een fullscreen overlay
-  document.getElementById('trainingsOverlayBody').innerHTML = `
-    <div style="padding:1.5rem">
-      <div style="font-family:var(--font-display);font-size:28px;letter-spacing:1px;color:var(--text);margin-bottom:4px">${plan.titel}</div>
-      <div style="font-size:13px;color:var(--text-tertiary);margin-bottom:1.5rem">${plan.samenvatting}</div>
-      ${secties}
-      ${plan.trainerstip ? `<div style="background:rgba(0,224,84,0.06);border:0.5px solid rgba(0,224,84,0.2);border-radius:12px;padding:1rem;margin-top:8px"><strong style="color:var(--green)">💡 Trainerstip:</strong> <span style="color:var(--text-secondary)">${plan.trainerstip}</span></div>` : ''}
-    </div>`;
-  oModal('trainingsOverlay');
+  window._lastPlan=plan;
 }
 
 function savePlanAsTraining(){
@@ -2846,14 +2536,7 @@ function setSter(v){sterRating=v;document.querySelectorAll('.ster-btn').forEach(
 
 function renderOefeningen(){
   const q=document.getElementById('searchInput').value.toLowerCase();
-  const list=oefeningen.filter(o=>{
-    if(fAge!=='alle'&&o.age!==fAge)return false;
-    if(fCat==='favorieten')return(favorieten||[]).includes(String(o.id));
-    if(fCat!=='alle'&&o.cat!==fCat)return false;
-    const q2=q||'';
-    if(q2&&!o.title.toLowerCase().includes(q2)&&!o.cat.toLowerCase().includes(q2)&&!(o.desc||'').toLowerCase().includes(q2))return false;
-    return true;
-  });
+  const list=oefeningen.filter(o=>(fAge==='alle'||o.age===fAge)&&(fCat==='alle'||o.cat===fCat)&&(!q||o.title.toLowerCase().includes(q)||o.cat.toLowerCase().includes(q)||o.desc.toLowerCase().includes(q)));
   document.getElementById('countEl').textContent=list.length+' oefening'+(list.length!==1?'en':'');
   document.getElementById('statOef').textContent=oefeningen.length;
   const empty=document.getElementById('emptyEl'),grid=document.getElementById('cardsEl');
@@ -2869,21 +2552,8 @@ function renderOefeningen(){
   }).join('');
 }
 
-function sluitDetailNaarTraining() {
-  cModal('detailOverlay');
-  // Verberg terug knop
-  const btn = document.getElementById('detailTerugBtn');
-  if (btn) btn.style.display = 'none';
-  // Heropenen training overlay
-  setTimeout(() => oModal('trainingsOverlay'), 150);
-  window._vorigeOverlay = null;
-}
-
 function openDetail(id){
   const o=oefeningen.find(x=>x.id==id||x.id==='pub_'+id);if(!o)return;
-  // Toon terugknop als we vanuit AI plan komen
-  const terugBtn = document.getElementById('detailTerugBtn');
-  if (terugBtn) terugBtn.style.display = window._vorigeOverlay ? 'inline-block' : 'none';
   const e=embedUrl(o.video);
 
   // ── Materiaal iconen ──
@@ -2892,54 +2562,30 @@ function openDetail(id){
     'ballen': {icon:'⚽', label:'Ballen'},
     'pion': {icon:'🔺', label:'Pion'},
     'pionnen': {icon:'🔺', label:'Pionnen'},
-    'pionnetje': {icon:'🔺', label:'Pion'},
-    'kegel': {icon:'🔺', label:'Kegel'},
     'hesje': {icon:'🦺', label:'Hesje'},
     'hesjes': {icon:'🦺', label:'Hesjes'},
     'doel': {icon:'🥅', label:'Doel'},
     'doelen': {icon:'🥅', label:'Doelen'},
-    'klein doel': {icon:'🥅', label:'Klein doel'},
-    'kleine doelen': {icon:'🥅', label:'Klein doel'},
-    'mini doel': {icon:'🥅', label:'Mini doel'},
     'keeper': {icon:'🧤', label:'Keeper'},
     'hoekvlag': {icon:'🚩', label:'Hoekvlag'},
-    'lat': {icon:'📏', label:'Lat'},
-    'stang': {icon:'📏', label:'Stang'},
-    'lint': {icon:'🎗️', label:'Lint'},
+    'pionnetje': {icon:'🔺', label:'Pion'},
+    'kleine doelen': {icon:'🥅', label:'Klein doel'},
+    'klein doel': {icon:'🥅', label:'Klein doel'},
   };
 
   function maakMateriaalIcons(mat) {
     if (!mat || mat === '–') return '<div style="font-size:13px;color:var(--text-tertiary)">Geen materiaal nodig</div>';
-    const items = mat.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-    const gesorteerdeKeys = Object.keys(MAT_ICONS).sort((a,b) => b.length - a.length);
-    const verwerkt = items.map(item => {
-      const lower = item.toLowerCase();
-      const numMatch = lower.match(/^(\d+)\s*x?\s*/);
-      const aantal = numMatch ? parseInt(numMatch[1]) : 1;
-      const zoekTekst = numMatch ? lower.replace(/^\d+\s*x?\s*/, '').trim() : lower;
-      let icon = '📦'; let label = zoekTekst;
-      for (const key of gesorteerdeKeys) {
-        if (zoekTekst.includes(key)) { icon = MAT_ICONS[key].icon; label = MAT_ICONS[key].label; break; }
+    const items = mat.toLowerCase().split(/[,;]+/).map(s=>s.trim()).filter(Boolean);
+    return `<div class="materiaal-grid">${items.map(item => {
+      let icon = '📦'; let label = item;
+      for (const [key, val] of Object.entries(MAT_ICONS)) {
+        if (item.includes(key)) { icon = val.icon; label = val.label; break; }
       }
-      return { icon, label: label.charAt(0).toUpperCase() + label.slice(1), aantal };
-    });
-    const gegroepeerd = [];
-    for (const item of verwerkt) {
-      const bestaand = gegroepeerd.find(g => g.icon === item.icon && g.label === item.label);
-      if (bestaand) bestaand.aantal += item.aantal;
-      else gegroepeerd.push({ ...item });
-    }
-    return '<div class="materiaal-grid">' + gegroepeerd.map(({ icon, label, aantal }) =>
-      '<div class="materiaal-item">' +
-      '<div class="materiaal-icon" style="position:relative">' + icon +
-      (aantal > 1 ? '<span style="position:absolute;top:-6px;right:-6px;background:#00e054;color:#0a0a0a;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-body)">' + aantal + '</span>' : '') +
-      '</div>' +
-      '<div class="materiaal-label">' + label + '</div>' +
-      '</div>'
-    ).join('') + '</div>';
+      return `<div class="materiaal-item"><div class="materiaal-icon">${icon}</div><div class="materiaal-label">${label}</div></div>`;
+    }).join('')}</div>`;
   }
 
-    // ── Moeilijkheid sterren ──
+  // ── Moeilijkheid sterren ──
   function maakSterren(n) {
     n = n || 3;
     return `<div class="moeilijk-sterren">${[1,2,3,4,5].map(i =>
@@ -3038,35 +2684,13 @@ function openDetail(id){
       </div>
 
       <div class="oef-sectie">
-        <div class="oef-sectie-titel" style="display:flex;justify-content:space-between;align-items:center">
-          Coachingspunten
-          ${(isAdmin||o.eigen||o.publiek)?`<button onclick="bewerkCoaching('${id}')" style="background:none;border:0.5px solid var(--border);color:var(--text-tertiary);font-size:11px;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:var(--font-body)">✎ Aanpassen</button>`:''}
-        </div>
-        <div id="coachingWeergave_${id}">${maakCoachingsPunten(o.coaching_punten||o.coachingPunten)}</div>
-        <div id="coachingEdit_${id}" style="display:none">
-          <textarea id="coachingTekst_${id}" style="width:100%;min-height:100px;background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px;font-family:var(--font-body);resize:vertical;margin-top:8px;box-sizing:border-box">${(o.coaching_punten||'').replace(/`/g,"'")}</textarea>
-          <div class="form-hint" style="margin-top:4px">Één punt per regel.</div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button onclick="slaCoachingOp('${id}')" class="btn-primary" style="padding:8px 16px;font-size:13px">Opslaan</button>
-            <button onclick="document.getElementById('coachingEdit_${id}').style.display='none';document.getElementById('coachingWeergave_${id}').style.display='block'" class="btn-cancel" style="padding:8px 16px;font-size:13px">Annuleren</button>
-          </div>
-        </div>
+        <div class="oef-sectie-titel">Coachingspunten</div>
+        ${maakCoachingsPunten(o.coaching_punten||o.coachingPunten)}
       </div>
 
       <div class="oef-sectie">
-        <div class="oef-sectie-titel" style="display:flex;justify-content:space-between;align-items:center">
-          Variaties
-          ${(isAdmin||o.eigen||o.publiek)?`<button onclick="bewerkVariaties('${id}')" style="background:none;border:0.5px solid var(--border);color:var(--text-tertiary);font-size:11px;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:var(--font-body)">✎ Aanpassen</button>`:''}
-        </div>
-        <div id="variatiesWeergave_${id}">${maakVariaties(o.variaties)}</div>
-        <div id="variatiesEdit_${id}" style="display:none">
-          <textarea id="variatiesTekst_${id}" style="width:100%;min-height:100px;background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px;font-family:var(--font-body);resize:vertical;margin-top:8px;box-sizing:border-box">${(o.variaties||'').replace(/`/g,"'")}</textarea>
-          <div class="form-hint" style="margin-top:4px">Begin met "Makkelijker:" of "Moeilijker:" voor labels.</div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button onclick="slaVariatiesOp('${id}')" class="btn-primary" style="padding:8px 16px;font-size:13px">Opslaan</button>
-            <button onclick="document.getElementById('variatiesEdit_${id}').style.display='none';document.getElementById('variatiesWeergave_${id}').style.display='block'" class="btn-cancel" style="padding:8px 16px;font-size:13px">Annuleren</button>
-          </div>
-        </div>
+        <div class="oef-sectie-titel">Variaties</div>
+        ${maakVariaties(o.variaties)}
       </div>
 
       <div class="oef-actions">
@@ -3093,6 +2717,7 @@ function openAddOef(){
 }
 function submitOefening(){
   if (checkDemoEnToon('Oefening opslaan', 'Maak een gratis account aan om eigen oefeningen toe te voegen.', '🎯')) return;
+  if (!isPro() && oefeningen.filter(function(o){return o.eigen;}).length >= 3) { checkPro('oefeningen'); return; }
   const title=document.getElementById('fTitle').value.trim(),desc=document.getElementById('fDesc').value.trim(),vid=document.getElementById('fVideo').value.trim();
   let ok=true;
   document.getElementById('errTitle').style.display=title?'none':'block';if(!title)ok=false;
@@ -3110,30 +2735,7 @@ function submitOefening(){
 
 function renderSpelers(){
   const grid=document.getElementById('spelersGrid'),empty=document.getElementById('spelersEmpty');
-  document.getElementById('spelersTitle').innerHTML=`Mijn Team <span>${spelers.length}</span>`;
-
-  // ── Team statistieken ──
-  const statsBlok = document.getElementById('teamStatsBlok');
-  if (spelers.length && aanwSessies.length) {
-    statsBlok.style.display = 'block';
-    document.getElementById('tStatSpelers').textContent = spelers.length;
-    document.getElementById('tStatTrainingen').textContent = aanwSessies.length;
-    const pcts = spelers.map(s => aanwPct(s.id)).filter(p => p !== null);
-    const gem = pcts.length ? Math.round(pcts.reduce((a,b) => a+b, 0) / pcts.length) : null;
-    document.getElementById('tStatGemAanw').textContent = gem !== null ? gem + '%' : '–';
-    document.getElementById('tStatGemAanw').style.color = gem >= 80 ? 'var(--green)' : gem >= 60 ? '#ffb84d' : '#ff6b6b';
-    const beste = spelers.map(s => ({ naam: s.naam.split(' ')[0], pct: aanwPct(s.id) })).filter(x => x.pct !== null).sort((a,b) => b.pct - a.pct)[0];
-    document.getElementById('tStatBeste').textContent = beste ? beste.naam : '–';
-  } else if (spelers.length) {
-    statsBlok.style.display = 'block';
-    document.getElementById('tStatSpelers').textContent = spelers.length;
-    document.getElementById('tStatTrainingen').textContent = 0;
-    document.getElementById('tStatGemAanw').textContent = '–';
-    document.getElementById('tStatBeste').textContent = '–';
-  } else {
-    statsBlok.style.display = 'none';
-  }
-
+  document.getElementById('spelersTitle').innerHTML=`Spelers <span>${spelers.length}</span>`;
   if(!spelers.length){grid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   grid.innerHTML=spelers.map(s=>{
@@ -3238,207 +2840,9 @@ function openSpeler(id){
 
       <div class="sec-label">Recente trainingen</div>
       ${th}
-      <div style="display:flex;gap:8px;margin-top:1.5rem">
-        <button class="btn-primary" style="flex:1;padding:12px" onclick="genereerSpelerRapport(${id})">📄 Rapport genereren</button>
-        <button class="del-btn" onclick="delSpeler(${id})">Verwijderen</button>
-      </div>
+      <button class="del-btn" onclick="delSpeler(${id})">Speler verwijderen</button>
     </div>`;
   oModal('spelerDetailOverlay');
-}
-function genereerSpelerRapport(id) {
-  const s = spelers.find(x => x.id === id); if (!s) return;
-  const leeftijd = s.jaar ? new Date().getFullYear() - s.jaar : null;
-  const st = trainingen.filter(t => t.sid === id).sort((a,b) => new Date(a.datum)-new Date(b.datum));
-  const pct = aanwPct(id);
-  const wedMetMin = wedstrijden.filter(w => w.speelminuten && w.speelminuten[id] > 0);
-  const totaalMin = wedMetMin.reduce((sum,w) => sum + (w.speelminuten[id]||0), 0);
-  const teamNaam = huidigUser?.user_metadata?.naam || huidigUser?.email?.split('@')[0] || 'Trainer';
-  const vandaag = new Date().toLocaleDateString('nl-NL', { day:'numeric', month:'long', year:'numeric' });
-
-  // Aanwezigheid per maand voor grafiek
-  const maandData = {};
-  aanwSessies.forEach(sess => {
-    const maand = sess.datum?.slice(0,7);
-    if (!maand) return;
-    if (!maandData[maand]) maandData[maand] = { aanwezig:0, totaal:0 };
-    if (sess.aanwezig[id] !== undefined && sess.aanwezig[id] !== null) {
-      maandData[maand].totaal++;
-      if (sess.aanwezig[id] === 'aanwezig' || sess.aanwezig[id] === true) maandData[maand].aanwezig++;
-    }
-  });
-  const maanden = Object.keys(maandData).sort().slice(-6);
-
-  // SVG aanwezigheidsgrafiek
-  const grafiekW = 500, grafiekH = 80;
-  let grafiekSvg = '';
-  if (maanden.length >= 2) {
-    const maxPct = 100;
-    const pts = maanden.map((m, i) => {
-      const d = maandData[m];
-      const p = d.totaal ? Math.round(d.aanwezig/d.totaal*100) : 0;
-      const x = 20 + (i/(maanden.length-1))*(grafiekW-40);
-      const y = grafiekH - 10 - (p/maxPct)*(grafiekH-20);
-      return {x, y, p, m};
-    });
-    const line = pts.map((p,i) => `${i===0?'M':'L'}${p.x},${p.y}`).join(' ');
-    const area = `${line} L${pts[pts.length-1].x},${grafiekH} L${pts[0].x},${grafiekH} Z`;
-    grafiekSvg = `<svg width="${grafiekW}" height="${grafiekH}" viewBox="0 0 ${grafiekW} ${grafiekH}" style="width:100%">
-      <path d="${area}" fill="rgba(0,168,84,0.1)"/>
-      <path d="${line}" fill="none" stroke="#00a854" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      ${pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#00a854"/>`).join('')}
-      ${pts.map(p => `<text x="${p.x}" y="${grafiekH-1}" text-anchor="middle" font-size="9" fill="#666">${p.m.slice(5)}</text>`).join('')}
-      ${pts.map(p => `<text x="${p.x}" y="${p.y-7}" text-anchor="middle" font-size="9" fill="#00a854" font-weight="bold">${p.p}%</text>`).join('')}
-    </svg>`;
-  }
-
-  // Recente trainingsnotities
-  const notities = st.slice(-8).reverse().filter(t => t.notitie).map(t =>
-    `<tr><td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;color:#666;font-size:12px;white-space:nowrap">${fmtD(t.datum)}</td>
-     <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px">
-       ${'★'.repeat(t.ster||0)}${'☆'.repeat(5-(t.ster||0))} ${t.notitie}
-     </td></tr>`
-  ).join('');
-
-  // Wedstrijden overzicht
-  const wedRijen = wedMetMin.slice(-6).reverse().map(w =>
-    `<tr><td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:12px;white-space:nowrap">${fmtD(w.datum)}</td>
-     <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px">${w.tegenstander||'–'}</td>
-     <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;text-align:center">${w.doelVoor}–${w.doelTegen}</td>
-     <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;text-align:center;font-weight:bold;color:#00a854">${w.speelminuten[id]}'</td></tr>`
-  ).join('');
-
-  const aanwKleur = pct >= 80 ? '#00a854' : pct >= 60 ? '#f59e0b' : '#ef4444';
-
-  const html = `<!DOCTYPE html>
-<html lang="nl">
-<head>
-<meta charset="UTF-8">
-<title>Spelersrapport — ${s.naam}</title>
-<style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family: Arial, Helvetica, sans-serif; color: #1a1a1a; background:#fff; padding:40px; max-width:800px; margin:0 auto; }
-  @media print { body { padding:20px; } .no-print { display:none; } }
-
-  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; padding-bottom:20px; border-bottom:3px solid #00a854; }
-  .logo-blok { display:flex; align-items:center; gap:12px; }
-  .logo-cirkel { width:48px; height:48px; background:#00a854; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:22px; font-weight:900; flex-shrink:0; }
-  .logo-naam { font-size:22px; font-weight:900; letter-spacing:2px; color:#111; }
-  .logo-sub { font-size:11px; color:#888; letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
-  .rapport-datum { font-size:12px; color:#888; text-align:right; }
-
-  .speler-blok { display:flex; align-items:center; gap:20px; background:#f8faf8; border:1px solid #e0f0e8; border-radius:16px; padding:24px; margin-bottom:28px; }
-  .avatar { width:72px; height:72px; border-radius:50%; background:#00a854; color:white; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:900; flex-shrink:0; }
-  .speler-naam { font-size:28px; font-weight:900; color:#111; margin-bottom:4px; }
-  .speler-sub { font-size:14px; color:#666; }
-
-  .stats-rij { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
-  .stat-blok { background:#f8f8f8; border-radius:12px; padding:16px; text-align:center; border:1px solid #eee; }
-  .stat-num { font-size:28px; font-weight:900; color:#111; line-height:1; }
-  .stat-label { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:.06em; margin-top:4px; }
-
-  .sectie { margin-bottom:28px; }
-  .sectie-titel { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#888; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid #eee; }
-
-  table { width:100%; border-collapse:collapse; }
-  th { background:#f5f5f5; padding:8px 10px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#888; }
-
-  .notitie-blok { background:#fff8e6; border-left:3px solid #f59e0b; border-radius:0 8px 8px 0; padding:12px 16px; margin-bottom:8px; font-size:13px; line-height:1.6; }
-  .footer { margin-top:40px; padding-top:16px; border-top:1px solid #eee; display:flex; justify-content:space-between; font-size:11px; color:#aaa; }
-  .print-btn { background:#00a854; color:white; border:none; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; margin-bottom:24px; }
-</style>
-</head>
-<body>
-
-<button class="print-btn no-print" onclick="window.print()">🖨 Rapport printen / opslaan als PDF</button>
-
-<div class="header">
-  <div class="logo-blok">
-    <div class="logo-cirkel">T</div>
-    <div>
-      <div class="logo-naam">TRAINERSHUB</div>
-      <div class="logo-sub">Spelersrapport · Seizoen ${new Date().getFullYear()}</div>
-    </div>
-  </div>
-  <div class="rapport-datum">
-    Gegenereerd op<br><strong>${vandaag}</strong><br><br>
-    Trainer: ${teamNaam}
-  </div>
-</div>
-
-<div class="speler-blok">
-  <div class="avatar">${ini(s.naam)}</div>
-  <div>
-    <div class="speler-naam">${s.naam}</div>
-    <div class="speler-sub">
-      ${s.positie || 'Positie onbekend'}${leeftijd ? ' · ' + leeftijd + ' jaar' : ''}${s.jaar ? ' (geb. ' + s.jaar + ')' : ''}${s.voet ? ' · Sterkste voet: ' + s.voet : ''}${s.nummer ? ' · Rugnummer #' + s.nummer : ''}
-    </div>
-  </div>
-</div>
-
-<div class="stats-rij">
-  <div class="stat-blok">
-    <div class="stat-num">${st.length}</div>
-    <div class="stat-label">Trainingen</div>
-  </div>
-  <div class="stat-blok">
-    <div class="stat-num" style="color:${aanwKleur}">${pct !== null ? pct + '%' : '–'}</div>
-    <div class="stat-label">Aanwezigheid</div>
-  </div>
-  <div class="stat-blok">
-    <div class="stat-num" style="color:#00a854">${totaalMin > 0 ? totaalMin + "'" : '–'}</div>
-    <div class="stat-label">Speelminuten</div>
-  </div>
-  <div class="stat-blok">
-    <div class="stat-num">${wedMetMin.length}</div>
-    <div class="stat-label">Wedstrijden</div>
-  </div>
-</div>
-
-${maanden.length >= 2 ? `
-<div class="sectie">
-  <div class="sectie-titel">Aanwezigheid per maand</div>
-  ${grafiekSvg}
-</div>` : ''}
-
-${notities ? `
-<div class="sectie">
-  <div class="sectie-titel">Trainingsnotities van de trainer</div>
-  <table>
-    <tr><th>Datum</th><th>Notitie</th></tr>
-    ${notities}
-  </table>
-</div>` : ''}
-
-${wedRijen ? `
-<div class="sectie">
-  <div class="sectie-titel">Speelminuten overzicht</div>
-  <table>
-    <tr><th>Datum</th><th>Tegenstander</th><th>Uitslag</th><th>Minuten</th></tr>
-    ${wedRijen}
-  </table>
-</div>` : ''}
-
-${s.notities ? `
-<div class="sectie">
-  <div class="sectie-titel">Algemene notities</div>
-  <div class="notitie-blok">${s.notities}</div>
-</div>` : ''}
-
-<div class="footer">
-  <div>TrainersHub · trainershub.nl</div>
-  <div>${s.naam} · Seizoen ${new Date().getFullYear()}</div>
-</div>
-
-</body>
-</html>`;
-
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
-}
-
-function genereerTeamRapport() {
-  // Toekomst: rapport voor heel team
 }
 function delSpeler(id){
   spelers=spelers.filter(s=>s.id!==id);
@@ -3612,15 +3016,13 @@ async function laadAlleData() {
   if (huidigUser.id === 'preview') { renderOefeningen(); return; }
   try {
     const uid = huidigUser.id;
-    const [sp, oe, tr, we, aa, bo, pl, sc] = await Promise.all([
+    const [sp, oe, tr, we, aa, bo] = await Promise.all([
       sb.from('spelers').select('*').eq('user_id', uid).order('aangemaakt_op'),
       sb.from('eigen_oefeningen').select('*').eq('user_id', uid).order('aangemaakt_op', {ascending:false}),
       sb.from('trainingen').select('*').eq('user_id', uid).order('datum', {ascending:false}),
       sb.from('wedstrijden').select('*').eq('user_id', uid).order('datum', {ascending:false}),
       sb.from('aanwezigheid').select('*').eq('user_id', uid).order('datum', {ascending:false}),
       sb.from('tactische_borden').select('*').eq('user_id', uid).order('aangemaakt_op'),
-      sb.from('seizoensplanning').select('*').eq('user_id', uid).order('datum', {ascending:true}),
-      sb.from('seizoen_schema').select('*').eq('user_id', uid).eq('actief', true),
     ]);
 
     // Spelers
@@ -3658,7 +3060,7 @@ async function laadAlleData() {
         id: w.id, datum: w.datum, tegenstander: w.tegenstander,
         thuisUit: w.thuis_uit, doelVoor: w.doel_voor, doelTegen: w.doel_tegen,
         result: w.result, formatie: w.formatie, opstelling: w.opstelling || {},
-        doelpunten: w.doelpunten || [], assists: w.assists || [], notitie: w.notitie || '',
+        doelpunten: w.doelpunten || [], notitie: w.notitie || '',
         speelminuten: w.speelminuten || {}
       }));
     }
@@ -3686,12 +3088,6 @@ async function laadAlleData() {
     renderResultaten();
     renderWedstrijden();
     renderAanwezigheid();
-
-    // Seizoensplanning
-    planItems = pl.data || [];
-
-    // Seizoen schema (herhalend)
-    seizoenSchema = sc.data || [];
 
     // Ook localStorage bijwerken als backup
     slaLokaalOp();
@@ -3758,7 +3154,7 @@ async function dbVoegWedstrijdToe(w) {
     user_id: huidigUser.id, datum: w.datum, tegenstander: w.tegenstander,
     thuis_uit: w.thuisUit, doel_voor: w.doelVoor, doel_tegen: w.doelTegen,
     result: w.result, formatie: w.formatie, opstelling: w.opstelling,
-    doelpunten: w.doelpunten, assists: w.assists || [], notitie: w.notitie,
+    doelpunten: w.doelpunten, notitie: w.notitie,
     speelminuten: w.speelminuten || {}
   }).select().single();
   if (error) { console.error(error); return null; }
@@ -3996,13 +3392,11 @@ async function doLogout() {
   trainingen = [];
   wedstrijden = [];
   aanwSessies = [];
-  oefeningen = [...defaultOefeningen];
+  oefeningen = [...defaultOefeningen]; // herstel standaard oefeningen
   tactBordInit = false;
   tactBorden = [];
   tactObjecten = [];
   tactHistory = [];
-  planItems = [];
-  seizoenSchema = [];
   huidigUser = null;
   huidigPlan = 'gratis';
   cModal('accountOverlay');
@@ -4072,615 +3466,41 @@ function toonLimietMelding(type, limiet) {
   oModal('accountOverlay');
 }
 
-// ── SEIZOENSPLANNING ──
-let planItems = [];
-let seizoenSchema = [];
-let planJaar = new Date().getFullYear();
-let planMaand = new Date().getMonth();
-let planGekozenDatum = null;
-let planBewerkId = null;
-
-const PLAN_KLEUREN = {
-  training:  { bg:'rgba(0,224,84,0.15)',   text:'#00e054' },
-  wedstrijd: { bg:'rgba(255,107,107,0.15)', text:'#ff6b6b' },
-  toernooi:  { bg:'rgba(255,184,77,0.15)',  text:'#ffb84d' },
-  vrij:      { bg:'rgba(255,255,255,0.06)', text:'#888' },
-  overig:    { bg:'rgba(91,184,255,0.12)',  text:'#5bb8ff' },
-};
-const PLAN_TYPE_LABELS = { training:'Training', wedstrijd:'Wedstrijd', toernooi:'Toernooi', vrij:'Vrije dag', overig:'Overig' };
-const MAANDEN = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
-const DAG_NAMEN = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
-
-async function laadPlanning() {
-  if (!huidigUser || huidigUser.id === 'preview') { renderKalender(); return; }
-  // Data is al geladen bij inloggen via laadAlleData — gewoon renderen
-  renderKalender();
+function isPro() {
+  return huidigPlan === 'pro' || huidigPlan === 'club' || huidigPlan === 'admin';
 }
 
-// Genereer virtuele schema-items voor de kalender
-function getSchemaItemsVoorMaand(jaar, maand) {
-  if (!seizoenSchema.length) return [];
-  const items = [];
-  const dagenInMaand = new Date(jaar, maand + 1, 0).getDate();
-
-  // Seizoen loopt tot juni — als we al voorbij juni zijn, tot juni volgend jaar
-  const nu = new Date();
-  const eindeJaar = (nu.getMonth() >= 6) ? nu.getFullYear() + 1 : nu.getFullYear();
-  const seizoenEinde = new Date(eindeJaar, 5, 30); // 30 juni
-
-  for (let dag = 1; dag <= dagenInMaand; dag++) {
-    const datum = new Date(jaar, maand, dag);
-    if (datum > seizoenEinde) break;
-    const dagIdx = datum.getDay() === 0 ? 6 : datum.getDay() - 1; // ma=0, zo=6
-    const datumStr = `${jaar}-${String(maand+1).padStart(2,'0')}-${String(dag).padStart(2,'0')}`;
-    seizoenSchema.forEach(schema => {
-      if (schema.dag_van_week === dagIdx) {
-        items.push({
-          id: `schema_${schema.id}_${datumStr}`,
-          datum: datumStr,
-          type: schema.type,
-          titel: schema.titel,
-          tijd: schema.tijd,
-          schema_id: schema.id,
-          isSchema: true
-        });
-      }
-    });
-  }
-  return items;
-}
-
-function renderKalender() {
-  document.getElementById('planMaandTitel').textContent = `${MAANDEN[planMaand]} ${planJaar}`;
-  const grid = document.getElementById('planGrid');
-  const vandaag = new Date(); vandaag.setHours(0,0,0,0);
-
-  const eerstedag = new Date(planJaar, planMaand, 1);
-  let startDag = eerstedag.getDay();
-  startDag = startDag === 0 ? 6 : startDag - 1;
-
-  const dagenInMaand = new Date(planJaar, planMaand + 1, 0).getDate();
-  const dagenVorigeMaand = new Date(planJaar, planMaand, 0).getDate();
-  const schemaItems = getSchemaItemsVoorMaand(planJaar, planMaand);
-  const alleItems = [...planItems, ...schemaItems];
-
-  let html = '';
-  const totalDagen = Math.ceil((startDag + dagenInMaand) / 7) * 7;
-
-  for (let i = 0; i < totalDagen; i++) {
-    let dag, maand, jaar, andereMaand = false;
-    if (i < startDag) {
-      dag = dagenVorigeMaand - startDag + i + 1; maand = planMaand - 1; jaar = planJaar;
-      if (maand < 0) { maand = 11; jaar--; } andereMaand = true;
-    } else if (i >= startDag + dagenInMaand) {
-      dag = i - startDag - dagenInMaand + 1; maand = planMaand + 1; jaar = planJaar;
-      if (maand > 11) { maand = 0; jaar++; } andereMaand = true;
-    } else {
-      dag = i - startDag + 1; maand = planMaand; jaar = planJaar;
-    }
-
-    const datumStr = `${jaar}-${String(maand+1).padStart(2,'0')}-${String(dag).padStart(2,'0')}`;
-    const dagDatum = new Date(jaar, maand, dag);
-    const isVandaag = dagDatum.getTime() === vandaag.getTime();
-    const dagItems = alleItems.filter(p => p.datum === datumStr).sort((a,b) => (a.tijd||'99').localeCompare(b.tijd||'99'));
-
-    let itemsHtml = dagItems.slice(0, 2).map(item => {
-      const k = PLAN_KLEUREN[item.type] || PLAN_KLEUREN.overig;
-      const escapedId = item.id.replace(/'/g, "\\'");
-      if (item.isSchema) {
-        return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text};border-left:2px solid ${k.text}" onclick="event.stopPropagation();openAanwVanAgenda('${datumStr}','${item.schema_id}','1')">${item.titel}</div>`;
-      } else {
-        return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text}" onclick="event.stopPropagation();openPlanItem('${item.id}')">${item.titel}</div>`;
-      }
-    }).join('');
-    if (dagItems.length > 2) itemsHtml += `<div class="plan-meer">+${dagItems.length - 2} meer</div>`;
-
-    html += `<div class="plan-dag${isVandaag?' vandaag':''}${andereMaand?' andere-maand':''}${dagItems.length?' heeft-items':''}" onclick="klikOpDag('${datumStr}')">
-      <div class="plan-dag-num">${dag}</div>${itemsHtml}</div>`;
-  }
-  grid.innerHTML = html;
-  renderPlanLijst();
-}
-
-function renderPlanLijst() {
-  const el = document.getElementById('planLijst');
-  const vandaag = new Date().toISOString().split('T')[0];
-  const beginMaand = `${planJaar}-${String(planMaand+1).padStart(2,'0')}-01`;
-  const eindeMaand = `${planJaar}-${String(planMaand+2).padStart(2,'0')}-01`;
-  const schemaItems = getSchemaItemsVoorMaand(planJaar, planMaand);
-  const alleItems = [...planItems.filter(p => p.datum >= beginMaand && p.datum < eindeMaand), ...schemaItems].sort((a,b) => a.datum.localeCompare(b.datum) || (a.tijd||'').localeCompare(b.tijd||''));
-
-  if (!alleItems.length) { el.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary);padding:1rem 0">Geen items gepland deze maand.</div>'; return; }
-
-  el.innerHTML = alleItems.map(item => {
-    const k = PLAN_KLEUREN[item.type] || PLAN_KLEUREN.overig;
-    const d = new Date(item.datum + 'T12:00:00');
-    const dagNaam = ['zo','ma','di','wo','do','vr','za'][d.getDay()];
-    const isPast = item.datum < vandaag;
-    const isTraining = item.type === 'training';
-    return `<div class="plan-lijst-item" style="${isPast?'opacity:0.5':''}">
-      <div class="plan-lijst-datum">
-        <div class="plan-lijst-dag">${dagNaam}</div>
-        <div class="plan-lijst-nr">${d.getDate()}</div>
-      </div>
-      <div class="plan-lijst-dot" style="background:${k.text}${item.isSchema?';opacity:0.5':''}"></div>
-      <div class="plan-lijst-info">
-        <div class="plan-lijst-titel">${item.titel}${item.isSchema?'<span style="font-size:10px;color:var(--text-tertiary);margin-left:6px">Herhalend</span>':''}</div>
-        <div class="plan-lijst-meta">${PLAN_TYPE_LABELS[item.type]||'–'}${item.tijd?' · '+item.tijd:''}</div>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        ${isTraining ? `<button onclick="openAanwVanAgenda('${item.datum}','${item.isSchema ? item.schema_id : ''}','${item.isSchema ? '1' : '0'}')" style="background:rgba(0,224,84,0.1);border:0.5px solid rgba(0,224,84,0.2);color:var(--green);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);font-weight:700">✓ Aanwezigheid</button>` : ''}
-        ${!item.isSchema ? `<button class="plan-lijst-del" onclick="verwijderPlanItem(${item.id})">✕</button>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function wisselMaand(richting) {
-  planMaand += richting;
-  if (planMaand > 11) { planMaand = 0; planJaar++; }
-  if (planMaand < 0) { planMaand = 11; planJaar--; }
-  renderKalender();
-}
-
-function gaNaarVandaag() {
-  planMaand = new Date().getMonth(); planJaar = new Date().getFullYear(); renderKalender();
-}
-
-function klikOpDag(datum) {
-  planGekozenDatum = datum; planBewerkId = null;
-  resetPlanForm();
-  document.getElementById('planDatum').value = datum;
-  document.getElementById('planItemTitel').textContent = 'Item toevoegen';
-  oModal('planItemOverlay');
-}
-
-function openNieuwPlanItem() {
-  planGekozenDatum = new Date().toISOString().split('T')[0]; planBewerkId = null;
-  resetPlanForm();
-  document.getElementById('planDatum').value = planGekozenDatum;
-  document.getElementById('planItemTitel').textContent = 'Item toevoegen';
-  oModal('planItemOverlay');
-}
-
-function openPlanItem(id) {
-  const item = planItems.find(p => String(p.id) === String(id)); if (!item) return;
-  planBewerkId = id; resetPlanForm();
-  document.getElementById('planItemTitel').textContent = 'Item bewerken';
-  document.getElementById('planTitel').value = item.titel || '';
-  document.getElementById('planDatum').value = item.datum || '';
-  document.getElementById('planTijd').value = item.tijd || '';
-  document.getElementById('planDuur').value = item.duur || '';
-  document.getElementById('planNotitie').value = item.notitie || '';
-  document.getElementById('planType').value = item.type || 'training';
-  document.querySelectorAll('.plan-type-btn').forEach(btn => {
-    const active = btn.dataset.type === item.type;
-    const k = PLAN_KLEUREN[btn.dataset.type] || PLAN_KLEUREN.overig;
-    btn.style.background = active ? k.bg : 'var(--dark3)';
-    btn.style.borderColor = active ? k.text : 'rgba(255,255,255,0.08)';
-    btn.style.color = active ? k.text : 'var(--text-secondary)';
-    btn.classList.toggle('active', active);
-  });
-  oModal('planItemOverlay');
-}
-
-function resetPlanForm() {
-  ['planTitel','planDatum','planTijd','planDuur','planNotitie'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('planType').value = 'training';
-  ['errPlanTitel','errPlanDatum'].forEach(id => document.getElementById(id).style.display = 'none');
-  document.querySelectorAll('.plan-type-btn').forEach(btn => {
-    const isTraining = btn.dataset.type === 'training';
-    btn.style.background = isTraining ? 'rgba(0,224,84,0.1)' : 'var(--dark3)';
-    btn.style.borderColor = isTraining ? '#00e054' : 'rgba(255,255,255,0.08)';
-    btn.style.color = isTraining ? '#00e054' : 'var(--text-secondary)';
-    btn.classList.toggle('active', isTraining);
-  });
-}
-
-function selectPlanType(btn) {
-  document.getElementById('planType').value = btn.dataset.type;
-  const k = PLAN_KLEUREN[btn.dataset.type] || PLAN_KLEUREN.overig;
-  document.querySelectorAll('.plan-type-btn').forEach(b => {
-    b.style.background='var(--dark3)'; b.style.borderColor='rgba(255,255,255,0.08)'; b.style.color='var(--text-secondary)'; b.classList.remove('active');
-  });
-  btn.style.background=k.bg; btn.style.borderColor=k.text; btn.style.color=k.text; btn.classList.add('active');
-}
-
-async function submitPlanItem() {
-  if (checkDemoEnToon && checkDemoEnToon('Planning opslaan', 'Maak een gratis account aan om je seizoen te plannen.', '📅')) return;
-  const titel = document.getElementById('planTitel').value.trim();
-  const datum = document.getElementById('planDatum').value;
-  document.getElementById('errPlanTitel').style.display = titel ? 'none' : 'block';
-  document.getElementById('errPlanDatum').style.display = datum ? 'none' : 'block';
-  if (!titel || !datum) return;
-  const payload = { user_id: huidigUser.id, titel, datum, type: document.getElementById('planType').value, tijd: document.getElementById('planTijd').value || null, duur: document.getElementById('planDuur').value.trim() || null, notitie: document.getElementById('planNotitie').value.trim() || null };
-  if (planBewerkId) {
-    const { error } = await sb.from('seizoensplanning').update(payload).eq('id', planBewerkId);
-    if (error) { alert('Fout: ' + error.message); return; }
-    const idx = planItems.findIndex(p => String(p.id) === String(planBewerkId));
-    if (idx >= 0) planItems[idx] = { ...planItems[idx], ...payload };
-  } else {
-    const { data, error } = await sb.from('seizoensplanning').insert(payload).select().single();
-    if (error) { alert('Fout: ' + error.message); return; }
-    planItems.push(data); planItems.sort((a,b) => a.datum.localeCompare(b.datum));
-  }
-  cModal('planItemOverlay'); renderKalender();
-}
-
-async function verwijderPlanItem(id) {
-  if (!confirm('Item verwijderen?')) return;
-  await sb.from('seizoensplanning').delete().eq('id', id);
-  planItems = planItems.filter(p => p.id !== id); renderKalender();
-}
-
-// ── HERHALEND SCHEMA ──
-async function openSchemaInstellingen() {
-  oModal('schemaOverlay');
-  renderSchemaLijst();
-}
-
-function renderSchemaLijst() {
-  const el = document.getElementById('schemaLijst');
-  if (!seizoenSchema.length) {
-    el.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary);padding:1rem 0">Nog geen herhalend schema. Voeg toe via de knoppen hieronder.</div>';
-    return;
-  }
-  el.innerHTML = seizoenSchema.map(s => {
-    const k = PLAN_KLEUREN[s.type] || PLAN_KLEUREN.overig;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
-      <div style="width:10px;height:10px;border-radius:3px;background:${k.text};flex-shrink:0"></div>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;color:var(--text)">${DAG_NAMEN[s.dag_van_week]} — ${s.titel}</div>
-        <div style="font-size:12px;color:var(--text-tertiary)">${PLAN_TYPE_LABELS[s.type]||s.type}${s.tijd?' · '+s.tijd:''}</div>
-      </div>
-      <button onclick="verwijderSchema(${s.id})" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:14px;padding:4px" onmouseover="this.style.color='#ff6b6b'" onmouseout="this.style.color='var(--text-tertiary)'">✕</button>
-    </div>`;
-  }).join('');
-}
-
-async function voegSchemaToe() {
-  const dag = parseInt(document.getElementById('schemaDag').value);
-  const type = document.getElementById('schemaType').value;
-  const titel = document.getElementById('schemaTitel').value.trim();
-  const tijd = document.getElementById('schemaTijd').value;
-  if (!titel) { alert('Vul een titel in.'); return; }
-  const { data, error } = await sb.from('seizoen_schema').insert({ user_id: huidigUser.id, dag_van_week: dag, type, titel, tijd: tijd || null, actief: true }).select().single();
-  if (error) { alert('Fout: ' + error.message); return; }
-  seizoenSchema.push(data);
-  document.getElementById('schemaTitel').value = '';
-  document.getElementById('schemaTijd').value = '';
-  renderSchemaLijst();
-  renderKalender();
-}
-
-async function verwijderSchema(id) {
-  if (!confirm('Schema-item verwijderen? Herhalende items verdwijnen uit de kalender.')) return;
-  await sb.from('seizoen_schema').delete().eq('id', id);
-  seizoenSchema = seizoenSchema.filter(s => s.id !== id);
-  renderSchemaLijst(); renderKalender();
-}
-
-// ── AANWEZIGHEID VANUIT AGENDA ──
-let aanwAgendaDatum = null;
-let aanwAgendaSchemaId = null;
-let aanwAgendaPlanId = null;
-
-async function openAanwVanAgenda(datum, schemaId, isSchema) {
-  aanwAgendaDatum = datum;
-  aanwAgendaSchemaId = schemaId || null;
-
-  const d = new Date(datum + 'T12:00:00');
-  const datumMooi = d.toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long' });
-  document.getElementById('aanwAgendaDatumTitel').textContent = datumMooi;
-
-  // Laad bestaande aanwezigheid voor deze datum
-  let bestaand = {};
-  try {
-    const { data } = await sb.from('aanwezigheid').select('*').eq('user_id', huidigUser.id).eq('datum', datum).limit(1);
-    if (data?.length) bestaand = data[0].aanwezig || {};
-  } catch(e) {}
-
-  // Render spelers
-  const el = document.getElementById('aanwAgendaLijst');
-  if (!spelers.length) { el.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary)">Voeg eerst spelers toe aan je team.</div>'; }
-  else {
-    el.innerHTML = spelers.map(s => {
-      const status = bestaand[s.id] || null;
-      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)" id="aanwRow_${s.id}">
-        <div style="flex:1">
-          <div style="font-size:14px;font-weight:600;color:var(--text)">${s.naam}</div>
-          <div style="font-size:12px;color:var(--text-tertiary)">${s.positie||'–'}</div>
-        </div>
-        <div style="display:flex;gap:6px">
-          <button onclick="setAanwStatus(${s.id},'aanwezig')" id="aanwBtn_a_${s.id}" class="aanw-status-btn${status==='aanwezig'?' actief-aanwezig':''}" style="padding:6px 10px;border-radius:7px;border:0.5px solid ${status==='aanwezig'?'rgba(0,224,84,0.4)':'var(--border)'};background:${status==='aanwezig'?'rgba(0,224,84,0.12)':'var(--dark3)'};color:${status==='aanwezig'?'var(--green)':'var(--text-tertiary)'};cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font-body)">✓</button>
-          <button onclick="setAanwStatus(${s.id},'afwezig')" id="aanwBtn_af_${s.id}" style="padding:6px 10px;border-radius:7px;border:0.5px solid ${status==='afwezig'?'rgba(255,107,107,0.4)':'var(--border)'};background:${status==='afwezig'?'rgba(255,107,107,0.12)':'var(--dark3)'};color:${status==='afwezig'?'#ff6b6b':'var(--text-tertiary)'};cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font-body)">✗</button>
-          <button onclick="setAanwStatus(${s.id},'geblesseerd')" id="aanwBtn_g_${s.id}" style="padding:6px 10px;border-radius:7px;border:0.5px solid ${status==='geblesseerd'?'rgba(255,184,77,0.4)':'var(--border)'};background:${status==='geblesseerd'?'rgba(255,184,77,0.12)':'var(--dark3)'};color:${status==='geblesseerd'?'#ffb84d':'var(--text-tertiary)'};cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font-body)">🤕</button>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  // Sla huidige aanwezigheid op in tijdelijk object
-  window._aanwTijdelijk = { ...bestaand };
-  oModal('aanwAgendaOverlay');
-}
-
-function setAanwStatus(spelerId, status) {
-  if (!window._aanwTijdelijk) window._aanwTijdelijk = {};
-  const huidig = window._aanwTijdelijk[spelerId];
-  // Toggle — klik nogmaals om te deselecteren
-  window._aanwTijdelijk[spelerId] = huidig === status ? null : status;
-  const s = window._aanwTijdelijk[spelerId];
-  // Update knoppen visueel
-  const btns = { aanwezig: document.getElementById(`aanwBtn_a_${spelerId}`), afwezig: document.getElementById(`aanwBtn_af_${spelerId}`), geblesseerd: document.getElementById(`aanwBtn_g_${spelerId}`) };
-  const kleuren = { aanwezig: ['rgba(0,224,84,0.4)','rgba(0,224,84,0.12)','var(--green)'], afwezig: ['rgba(255,107,107,0.4)','rgba(255,107,107,0.12)','#ff6b6b'], geblesseerd: ['rgba(255,184,77,0.4)','rgba(255,184,77,0.12)','#ffb84d'] };
-  Object.entries(btns).forEach(([type, btn]) => {
-    if (!btn) return;
-    const actief = s === type;
-    const k = kleuren[type];
-    btn.style.borderColor = actief ? k[0] : 'var(--border)';
-    btn.style.background = actief ? k[1] : 'var(--dark3)';
-    btn.style.color = actief ? k[2] : 'var(--text-tertiary)';
-  });
-}
-
-async function slaAanwOp() {
-  if (!aanwAgendaDatum || !huidigUser) return;
-  const aanwezig = window._aanwTijdelijk || {};
-  try {
-    // Upsert — check of er al een sessie is voor deze datum
-    const { data: bestaand } = await sb.from('aanwezigheid').select('id').eq('user_id', huidigUser.id).eq('datum', aanwAgendaDatum).limit(1);
-    if (bestaand?.length) {
-      await sb.from('aanwezigheid').update({ aanwezig }).eq('id', bestaand[0].id);
-      const idx = aanwSessies.findIndex(s => s.datum === aanwAgendaDatum);
-      if (idx >= 0) aanwSessies[idx].aanwezig = aanwezig;
-    } else {
-      const { data } = await sb.from('aanwezigheid').insert({ user_id: huidigUser.id, datum: aanwAgendaDatum, aanwezig, notitie: '' }).select().single();
-      if (data) aanwSessies.unshift({ id: data.id, datum: aanwAgendaDatum, aanwezig, notitie: '' });
-    }
-    cModal('aanwAgendaOverlay');
-    // Refresh spelers aanwezigheidspercentages
-    if (curPage === 'spelers') renderSpelers();
-  } catch(e) { alert('Fout bij opslaan: ' + e.message); }
-}
-
-// ── OEFENWEDSTRIJDEN ──
-let owVerzoeken = [];
-let owAgeFilter = 'alle';
-let owHuidigId = null;
-
-async function laadOefenwedstrijden() {
-  document.getElementById('owLaad').style.display = 'block';
-  document.getElementById('owGrid').innerHTML = '';
-  document.getElementById('owEmpty').style.display = 'none';
-  try {
-    const vandaag = new Date().toISOString().split('T')[0];
-    const { data } = await sb.from('oefenwedstrijden')
-      .select('id,user_id,clubnaam,teamnaam,leeftijdsgroep,niveau,regio,datum,tijdstip,locatie,thuis_uit,opmerking,aangemaakt_op')
-      .gte('datum', vandaag)
-      .order('datum', { ascending: true });
-    owVerzoeken = data || [];
-    // Verwijder automatisch verlopen verzoeken van eigen account
-    renderOwGrid();
-    updateOwStats();
-  } catch(e) { console.warn('Oefenwedstrijden laden mislukt:', e); }
-  document.getElementById('owLaad').style.display = 'none';
-}
-
-function updateOwStats() {
-  document.getElementById('owStatOpen').textContent = owVerzoeken.length;
-  const clubs = new Set(owVerzoeken.map(v => v.clubnaam));
-  document.getElementById('owStatTeams').textContent = clubs.size;
-}
-
-function setOwAge(el) {
-  document.querySelectorAll('.ow-filter-pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  owAgeFilter = el.dataset.owAge;
-  renderOwGrid();
-}
-
-function renderOwGrid() {
-  const grid = document.getElementById('owGrid');
-  const empty = document.getElementById('owEmpty');
-  const vandaag = new Date().toISOString().split('T')[0];
-
-  let lijst = owVerzoeken;
-  if (owAgeFilter !== 'alle') lijst = lijst.filter(v => v.leeftijdsgroep === owAgeFilter);
-
-  if (!lijst.length) {
-    grid.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
-
-  grid.innerHTML = lijst.map(v => {
-    const isEigen = v.user_id === huidigUser?.id;
-    const verlopen = v.datum < vandaag;
-    const datumStr = new Date(v.datum).toLocaleDateString('nl-NL', { weekday:'short', day:'numeric', month:'long' });
-    const tijdStr = v.tijdstip ? ' · ' + v.tijdstip : '';
-
-    return `<div class="ow-card${isEigen?' ow-card-eigen':''}${verlopen?' ow-verlopen':''}">
-      ${verlopen ? '<div class="ow-verlopen-tag">Verlopen</div>' : ''}
-      <div class="ow-header">
-        <div>
-          <div class="ow-club">${escOwHtml(v.clubnaam)}</div>
-          ${v.teamnaam ? `<div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">${escOwHtml(v.teamnaam)}</div>` : ''}
-        </div>
-        <div class="ow-datum">${datumStr}${tijdStr}</div>
-      </div>
-      <div class="ow-badges">
-        <span class="ow-badge ow-badge-leeftijd">${v.leeftijdsgroep||'–'}</span>
-        ${v.niveau ? `<span class="ow-badge ow-badge-niveau">${escOwHtml(v.niveau)}</span>` : ''}
-        ${v.regio ? `<span class="ow-badge ow-badge-regio">📍 ${escOwHtml(v.regio)}</span>` : ''}
-      </div>
-      <div class="ow-info">
-        <div class="ow-info-row"><span class="ow-info-icon">🏟</span>${v.thuis_uit === 'thuis' ? 'Thuiswedstrijd' : v.thuis_uit === 'uit' ? 'Uitwedstrijd' : 'Thuis of uit — maakt niet uit'}</div>
-        ${v.tijdstip ? `<div class="ow-info-row"><span class="ow-info-icon">🕐</span>${v.tijdstip} uur</div>` : ''}
-      </div>
-      ${v.opmerking ? `<div class="ow-opmerking">"${escOwHtml(v.opmerking)}"</div>` : ''}
-      <div class="ow-footer">
-        ${!isEigen ? `<button class="ow-btn-interesse" onclick="openInteresse(${v.id})">🤝 Interesse tonen</button>` : `<span style="font-size:12px;color:var(--green);padding:10px 0;flex:1">✓ Jouw verzoek</span>`}
-        ${isEigen ? `<button class="ow-btn-del" onclick="verwijderOwVerzoek(${v.id})">Verwijderen</button>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openNieuwVerzoek() {
-  if (checkDemoEnToon('Verzoek plaatsen', 'Maak een gratis account aan om oefenwedstrijden te zoeken.', '🤝')) return;
-  document.getElementById('owClub').value = '';
-  document.getElementById('owTeam').value = '';
-  document.getElementById('owNiveau').value = '';
-  document.getElementById('owRegio').value = '';
-  document.getElementById('owOpmerking').value = '';
-  document.getElementById('owTijdstip').value = '';
-  document.getElementById('owDatum').value = '';
-  document.getElementById('owEmail').value = huidigUser?.email || '';
-  ['errOwClub','errOwTeam','errOwDatum','errOwEmail'].forEach(id => document.getElementById(id).style.display = 'none');
-  oModal('owVerzoekOverlay');
-}
-
-async function submitOwVerzoek() {
-  const club = document.getElementById('owClub').value.trim();
-  const team = document.getElementById('owTeam').value.trim();
-  const datum = document.getElementById('owDatum').value;
-  const email = document.getElementById('owEmail').value.trim();
-  let ok = true;
-  document.getElementById('errOwClub').style.display = club ? 'none' : 'block'; if(!club) ok=false;
-  document.getElementById('errOwTeam').style.display = team ? 'none' : 'block'; if(!team) ok=false;
-  document.getElementById('errOwDatum').style.display = datum ? 'none' : 'block'; if(!datum) ok=false;
-  document.getElementById('errOwEmail').style.display = email ? 'none' : 'block'; if(!email) ok=false;
-  if (!ok) return;
-
-  const { data, error } = await sb.from('oefenwedstrijden').insert({
-    user_id: huidigUser.id,
-    clubnaam: club,
-    teamnaam: team,
-    leeftijdsgroep: document.getElementById('owLeeftijd').value,
-    niveau: document.getElementById('owNiveau').value.trim() || null,
-    regio: document.getElementById('owRegio').value.trim() || null,
-    datum,
-    tijdstip: document.getElementById('owTijdstip').value || null,
-    thuis_uit: document.getElementById('owThuisUit').value,
-    opmerking: document.getElementById('owOpmerking').value.trim() || null,
-    email
-  }).select().single();
-
-  if (error) { alert('Fout: ' + error.message); return; }
-  owVerzoeken.unshift(data);
-  cModal('owVerzoekOverlay');
-  renderOwGrid();
-  updateOwStats();
-}
-
-function openInteresse(id) {
-  owHuidigId = id;
-  const v = owVerzoeken.find(x => x.id === id);
-  if (!v) return;
-  const datumStr = new Date(v.datum).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-  document.getElementById('owInteresseInfo').innerHTML = `
-    <strong style="color:var(--text)">${escOwHtml(v.clubnaam)}</strong>${v.teamnaam ? ` — <span style="color:var(--text-secondary)">${escOwHtml(v.teamnaam)}</span>` : ''}<br>
-    ${v.leeftijdsgroep} ${v.niveau ? '· ' + escOwHtml(v.niveau) : ''}<br>
-    📅 ${datumStr}${v.tijdstip ? ' om ' + v.tijdstip : ''}
-    ${v.regio ? '<br>📍 ' + escOwHtml(v.regio) : ''}`;
-  document.getElementById('owEmailResultaat').style.display = 'none';
-  document.getElementById('owInteresseBtns').style.display = 'flex';
-  oModal('owInteresseOverlay');
-}
-
-async function toonOwEmail() {
-  const v = owVerzoeken.find(x => x.id === owHuidigId);
-  if (!v) return;
-  // Haal email op uit database (niet eerder meegestuurd voor privacy)
-  const { data } = await sb.from('oefenwedstrijden').select('email').eq('id', owHuidigId).single();
-  if (!data?.email) { alert('E-mailadres niet gevonden.'); return; }
-  document.getElementById('owEmailTekst').textContent = data.email;
-  document.getElementById('owEmailLink').href = `mailto:${data.email}?subject=Oefenwedstrijd ${v.leeftijdsgroep} - ${new Date(v.datum).toLocaleDateString('nl-NL')}`;
-  document.getElementById('owEmailResultaat').style.display = 'block';
-  document.getElementById('owInteresseBtns').style.display = 'none';
-}
-
-async function verwijderOwVerzoek(id) {
-  if (!confirm('Verzoek verwijderen?')) return;
-  await sb.from('oefenwedstrijden').delete().eq('id', id);
-  owVerzoeken = owVerzoeken.filter(v => v.id !== id);
-  renderOwGrid();
-  updateOwStats();
-}
-
-function escOwHtml(str) {
-  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function checkPro(functie) {
+  if (isPro()) return true;
+  var berichten = {
+    'ai': 'De AI trainingsplan generator is een Pro functie.',
+    'rapport': 'Speler rapporten genereren is een Pro functie.',
+    'oefeningen': 'Je hebt het maximum van 3 eigen oefeningen bereikt op het gratis plan.',
+    'wedstrijden': 'Je hebt het maximum van 5 wedstrijden bereikt op het gratis plan.',
+    'schema': 'Het herhalend trainingsschema is een Pro functie.',
+    'community': 'Berichten posten in de community is een Pro functie.',
+    'oefenwedstrijden': 'Oefenwedstrijden aanvragen is een Pro functie.'
+  };
+  var msg = berichten[functie] || 'Deze functie is beschikbaar in het Pro plan.';
+  var feats = ['Onbeperkt spelers & wedstrijden','AI trainingsplan generator','Speler rapport als PDF','Herhalend trainingsschema','Onbeperkt eigen oefeningen','Community berichten posten','Oefenwedstrijden aanvragen'];
+  var html = '<div style="text-align:center;padding:1rem 0">'
+    + '<div style="font-size:40px;margin-bottom:1rem">&#11088;</div>'
+    + '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:1px;color:#f0f0f0;margin-bottom:8px">Pro functie</div>'
+    + '<div style="font-size:14px;color:#888;margin-bottom:1rem;line-height:1.6">' + msg + '</div>'
+    + '<div style="background:var(--dark3);border-radius:12px;padding:1rem;margin-bottom:1.5rem;text-align:left">'
+    + '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Pro plan bevat:</div>'
+    + feats.map(function(f) { return '<div style="font-size:13px;color:#aaa;padding:3px 0">&#10003; ' + f + '</div>'; }).join('')
+    + '</div>'
+    + '<button onclick="openUpgrade();cModal(\'accountOverlay\')" style="width:100%;padding:14px;border-radius:12px;background:#00e054;color:#0a0a0a;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">Upgraden naar Pro &middot; &euro;7/maand</button>'
+    + '<button onclick="cModal(\'accountOverlay\')" style="width:100%;padding:10px;border-radius:12px;background:none;color:#555;border:0.5px solid #333;font-size:13px;cursor:pointer">Verder met gratis plan</button>'
+    + '</div>';
+  document.getElementById('accountModalBody').innerHTML = html;
+  oModal('accountOverlay');
+  return false;
 }
 
 // ── FAVORIETEN ──
 let favorieten = JSON.parse(localStorage.getItem('trainershub_favorieten') || '[]');
-
-function voegMatToe(item) {
-  const aantal = parseInt(document.getElementById('aoMatAantal')?.value||'1');
-  const huidig = document.getElementById('aoMat').value.trim();
-  const toevoegen = aantal > 1 ? `${aantal} ${item}` : item;
-  document.getElementById('aoMat').value = huidig ? huidig + ', ' + toevoegen : toevoegen;
-}
-
-function bewerkCoaching(rawId) {
-  document.getElementById('coachingWeergave_' + rawId).style.display = 'none';
-  document.getElementById('coachingEdit_' + rawId).style.display = 'block';
-}
-
-async function slaCoachingOp(rawId) {
-  const tekst = document.getElementById('coachingTekst_' + rawId).value.trim();
-  const o = oefeningen.find(x => String(x.id) === String(rawId) || x.id === 'pub_' + rawId);
-  if (!o) return;
-  const dbId = String(rawId).replace('pub_','');
-  const tabel = o.publiek ? 'publieke_oefeningen' : 'eigen_oefeningen';
-  const { error } = await sb.from(tabel).update({ coaching_punten: tekst }).eq('id', dbId);
-  if (error) { alert('Fout: ' + error.message); return; }
-  o.coaching_punten = tekst;
-  const weergave = document.getElementById('coachingWeergave_' + rawId);
-  if (weergave) weergave.innerHTML = maakCoachingsPuntenGlobaal(tekst);
-  document.getElementById('coachingEdit_' + rawId).style.display = 'none';
-  if (weergave) weergave.style.display = 'block';
-}
-
-function bewerkVariaties(rawId) {
-  document.getElementById('variatiesWeergave_' + rawId).style.display = 'none';
-  document.getElementById('variatiesEdit_' + rawId).style.display = 'block';
-}
-
-async function slaVariatiesOp(rawId) {
-  const tekst = document.getElementById('variatiesTekst_' + rawId).value.trim();
-  const o = oefeningen.find(x => String(x.id) === String(rawId) || x.id === 'pub_' + rawId);
-  if (!o) return;
-  const dbId = String(rawId).replace('pub_','');
-  const tabel = o.publiek ? 'publieke_oefeningen' : 'eigen_oefeningen';
-  const { error } = await sb.from(tabel).update({ variaties: tekst }).eq('id', dbId);
-  if (error) { alert('Fout: ' + error.message); return; }
-  o.variaties = tekst;
-  const weergave = document.getElementById('variatiesWeergave_' + rawId);
-  if (weergave) weergave.innerHTML = maakVariatiesGlobaal(tekst);
-  document.getElementById('variatiesEdit_' + rawId).style.display = 'none';
-  if (weergave) weergave.style.display = 'block';
-}
-
-function maakCoachingsPuntenGlobaal(txt) {
-  if (!txt) return '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen coachingspunten toegevoegd.</div>';
-  return txt.split('\n').filter(s=>s.trim()).map(s=>`<div class="coaching-punt">${s.trim()}</div>`).join('');
-}
-
-function maakVariatiesGlobaal(txt) {
-  if (!txt) return '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen variaties toegevoegd.</div>';
-  return txt.split('\n').filter(s=>s.trim()).map((s,i)=>{
-    const lower = s.toLowerCase();
-    const isMakkelijk = lower.startsWith('makkelijk')||lower.startsWith('eenvoudig');
-    const isMoeilijk = lower.startsWith('moeilijk')||lower.startsWith('uitdaging');
-    const tag = isMakkelijk?'<span class="variatie-tag makkelijk">Makkelijker</span>':
-                isMoeilijk?'<span class="variatie-tag moeilijk">Uitdagender</span>':
-                `<span class="variatie-tag makkelijk" style="background:rgba(91,184,255,0.1);color:#5bb8ff">Variant ${i+1}</span>`;
-    return `<div class="variatie-item">${tag}<span>${s.trim()}</span></div>`;
-  }).join('');
-}
 
 function toggleFavoriet(id, btn) {
   id = String(id);
@@ -4793,6 +3613,7 @@ function renderCommunity() {
 }
 
 async function postBericht() {
+  if (!checkPro('community')) return;
   const input = document.getElementById('communityInput');
   const inhoud = input.value.trim();
   if (!inhoud) return;
@@ -5203,326 +4024,6 @@ async function doInstall() {
   </div>
 </div>
 
-<!-- PAGE: SEIZOENSPLANNING -->
-<div class="page" id="page-planning">
-  <div class="main">
-
-    <!-- Nav -->
-    <div class="plan-nav">
-      <div class="plan-maand-titel" id="planMaandTitel">Januari 2026</div>
-      <div class="plan-nav-btns">
-        <button class="plan-vandaag-btn" onclick="openSchemaInstellingen()" style="border-color:rgba(0,224,84,0.25);color:var(--green)">⚙ Herhalend schema</button>
-        <button class="plan-vandaag-btn" onclick="gaNaarVandaag()">Vandaag</button>
-        <button class="plan-nav-btn" onclick="wisselMaand(-1)">‹</button>
-        <button class="plan-nav-btn" onclick="wisselMaand(1)">›</button>
-      </div>
-    </div>
-
-    <!-- Legenda -->
-    <div class="plan-legenda">
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(0,224,84,0.5)"></div>Training</div>
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,107,107,0.5)"></div>Wedstrijd</div>
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,184,77,0.5)"></div>Toernooi</div>
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(91,184,255,0.5)"></div>Overig</div>
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,255,255,0.15)"></div>Vrije dag</div>
-      <div class="plan-legenda-item" style="border-left:2px solid rgba(0,224,84,0.5);padding-left:6px;color:var(--text-tertiary);font-size:11px">Herhalend schema</div>
-    </div>
-
-    <!-- Weekdagen -->
-    <div class="plan-week-header">
-      <div class="plan-week-dag">Ma</div>
-      <div class="plan-week-dag">Di</div>
-      <div class="plan-week-dag">Wo</div>
-      <div class="plan-week-dag">Do</div>
-      <div class="plan-week-dag">Vr</div>
-      <div class="plan-week-dag">Za</div>
-      <div class="plan-week-dag">Zo</div>
-    </div>
-
-    <!-- Kalender -->
-    <div class="plan-grid" id="planGrid"></div>
-
-    <!-- Aankomende items -->
-    <div class="plan-aankomend">
-      <div class="plan-aankomend-titel">Aankomend deze maand</div>
-      <div id="planLijst"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- OVERLAY: NIEUW PLAN ITEM -->
-<div class="overlay" id="planItemOverlay" onclick="oClick(event,'planItemOverlay')">
-  <div class="modal">
-    <button class="modal-close" onclick="cModal('planItemOverlay')">✕</button>
-    <div class="form-title" id="planItemTitel">Item toevoegen</div>
-    <div class="form-group">
-      <label class="form-label">Type</label>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px">
-        <div class="plan-type-btn active" data-type="training" onclick="selectPlanType(this)" style="background:rgba(0,224,84,0.1);border:0.5px solid rgba(0,224,84,0.3);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:#00e054">⚽<br>Training</div>
-        <div class="plan-type-btn" data-type="wedstrijd" onclick="selectPlanType(this)" style="background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-secondary)">🏆<br>Wedstrijd</div>
-        <div class="plan-type-btn" data-type="toernooi" onclick="selectPlanType(this)" style="background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-secondary)">🥇<br>Toernooi</div>
-        <div class="plan-type-btn" data-type="vrij" onclick="selectPlanType(this)" style="background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-secondary)">🏖<br>Vrij</div>
-        <div class="plan-type-btn" data-type="overig" onclick="selectPlanType(this)" style="background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-secondary)">📌<br>Overig</div>
-      </div>
-      <input type="hidden" id="planType" value="training">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Titel *</label>
-      <input class="form-input" id="planTitel" type="text" placeholder="bijv. Training techniek, Thuiswedstrijd vs Ajax...">
-      <div class="form-error" id="errPlanTitel">Vul een titel in.</div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Datum *</label>
-        <input class="form-input" id="planDatum" type="date">
-        <div class="form-error" id="errPlanDatum">Kies een datum.</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Tijd</label>
-        <input class="form-input" id="planTijd" type="time">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Duur</label>
-      <input class="form-input" id="planDuur" type="text" placeholder="bijv. 90 min">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notitie</label>
-      <textarea class="form-input" id="planNotitie" placeholder="Bijzonderheden, locatie, tegenstander..." style="min-height:60px"></textarea>
-    </div>
-    <div class="form-actions">
-      <button class="btn-cancel" onclick="cModal('planItemOverlay')">Annuleren</button>
-      <button class="btn-primary" onclick="submitPlanItem()">Opslaan</button>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY: HERHALEND SCHEMA -->
-<div class="overlay" id="schemaOverlay" onclick="oClick(event,'schemaOverlay')" style="display:none">
-  <div class="modal">
-    <button class="modal-close" onclick="cModal('schemaOverlay')">✕</button>
-    <div class="form-title">⚙ Herhalend schema</div>
-    <div style="background:rgba(0,224,84,0.06);border:0.5px solid rgba(0,224,84,0.15);border-radius:10px;padding:12px;margin-bottom:1.25rem">
-      <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">
-        Stel hier je vaste trainings- en wedstrijddagen in. <strong style="color:var(--green)">Ze verschijnen automatisch elke week</strong> in je kalender — je hoeft nooit meer handmatig in te vullen. Het schema loopt automatisch door tot einde van het seizoen (juni).
-      </div>
-    </div>
-
-    <!-- Bestaand schema -->
-    <div id="schemaLijst" style="margin-bottom:1.5rem"></div>
-
-    <!-- Nieuw toevoegen -->
-    <div style="background:var(--dark3);border-radius:12px;padding:1rem;border:0.5px solid var(--border)">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:12px">Nieuwe dag toevoegen</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Dag</label>
-          <select class="form-input" id="schemaDag">
-            <option value="0">Maandag</option>
-            <option value="1">Dinsdag</option>
-            <option value="2">Woensdag</option>
-            <option value="3">Donderdag</option>
-            <option value="4">Vrijdag</option>
-            <option value="5">Zaterdag</option>
-            <option value="6">Zondag</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Type</label>
-          <select class="form-input" id="schemaType">
-            <option value="training">Training</option>
-            <option value="wedstrijd">Wedstrijd</option>
-            <option value="toernooi">Toernooi</option>
-            <option value="overig">Overig</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Titel</label>
-          <input class="form-input" id="schemaTitel" type="text" placeholder="bijv. Training, Thuiswedstrijd">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tijd</label>
-          <input class="form-input" id="schemaTijd" type="time">
-        </div>
-      </div>
-      <button class="btn-primary" onclick="voegSchemaToe()" style="width:100%">+ Toevoegen aan schema</button>
-    </div>
-
-    <div class="form-actions" style="margin-top:1rem">
-      <button class="btn-primary" onclick="cModal('schemaOverlay')" style="width:100%">Klaar</button>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY: AANWEZIGHEID VANUIT AGENDA -->
-<div class="overlay" id="aanwAgendaOverlay" onclick="oClick(event,'aanwAgendaOverlay')">
-  <div class="modal">
-    <button class="modal-close" onclick="cModal('aanwAgendaOverlay')">✕</button>
-    <div class="form-title">✓ Aanwezigheid</div>
-    <div id="aanwAgendaDatumTitel" style="font-size:15px;color:var(--text-secondary);margin-bottom:1.25rem;text-transform:capitalize"></div>
-    <div id="aanwAgendaLijst"></div>
-    <div class="form-actions" style="margin-top:1rem">
-      <button class="btn-cancel" onclick="cModal('aanwAgendaOverlay')">Annuleren</button>
-      <button class="btn-primary" onclick="slaAanwOp()">Opslaan</button>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY: TRAINING STARTEN -->
-<div class="overlay" id="trainingsOverlay" onclick="oClick(event,'trainingsOverlay')">
-  <div class="modal" style="max-width:680px;max-height:90vh;overflow-y:auto">
-    <button class="modal-close" onclick="cModal('trainingsOverlay')">✕</button>
-    <div id="trainingsOverlayBody"></div>
-  </div>
-</div>
-
-<!-- PAGE: OEFENWEDSTRIJDEN -->
-<div class="page" id="page-oefenwedstrijden">
-  <div class="main">
-    <div class="hero" style="background:linear-gradient(135deg,rgba(0,224,84,0.06),transparent);border-color:rgba(0,224,84,0.12)">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-        <span style="font-size:28px">🤝</span>
-        <div class="hero-title" style="font-size:30px">Oefenwedstrijden</div>
-      </div>
-      <div class="hero-sub">Vind een tegenstander op jouw niveau, leeftijdsgroep en datum.</div>
-      <div class="hero-stats" style="margin-top:1rem">
-        <div class="hero-stat"><div class="hero-stat-num" id="owStatOpen">–</div><div class="hero-stat-label">Open verzoeken</div></div>
-        <div class="hero-stat"><div class="hero-stat-num" id="owStatTeams">–</div><div class="hero-stat-label">Clubs actief</div></div>
-      </div>
-    </div>
-
-    <!-- Filters -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
-      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)">Lichting</span>
-      <button class="ow-filter-pill active" data-ow-age="alle" onclick="setOwAge(this)">Alle</button>
-      <button class="ow-filter-pill" data-ow-age="U7" onclick="setOwAge(this)">U7</button>
-      <button class="ow-filter-pill" data-ow-age="U8" onclick="setOwAge(this)">U8</button>
-      <button class="ow-filter-pill" data-ow-age="U9" onclick="setOwAge(this)">U9</button>
-      <button class="ow-filter-pill" data-ow-age="U10" onclick="setOwAge(this)">U10</button>
-      <button class="ow-filter-pill" data-ow-age="U11" onclick="setOwAge(this)">U11</button>
-      <button class="ow-filter-pill" data-ow-age="U12" onclick="setOwAge(this)">U12</button>
-      <button class="ow-filter-pill" data-ow-age="U13" onclick="setOwAge(this)">U13</button>
-      <button class="ow-filter-pill" data-ow-age="U14" onclick="setOwAge(this)">U14</button>
-      <button class="ow-filter-pill" data-ow-age="U15" onclick="setOwAge(this)">U15</button>
-      <button class="ow-filter-pill" data-ow-age="U16" onclick="setOwAge(this)">U16</button>
-      <button class="ow-filter-pill" data-ow-age="U17" onclick="setOwAge(this)">U17</button>
-      <button class="ow-filter-pill" data-ow-age="senioren" onclick="setOwAge(this)">Senioren</button>
-    </div>
-
-    <!-- Laadscherm -->
-    <div id="owLaad" style="text-align:center;padding:2rem">
-      <div class="loading-dots"><span></span><span></span><span></span></div>
-    </div>
-
-    <!-- Grid -->
-    <div class="ow-grid" id="owGrid"></div>
-    <div class="ow-empty" id="owEmpty" style="display:none">
-      <div style="font-size:40px;margin-bottom:1rem">🤝</div>
-      <div style="font-family:var(--font-display);font-size:20px;letter-spacing:1px;margin-bottom:8px">Geen open verzoeken</div>
-      <div style="font-size:13px">Wees de eerste — plaats een verzoek via de + knop!</div>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY: NIEUW VERZOEK -->
-<div class="overlay" id="owVerzoekOverlay" onclick="oClick(event,'owVerzoekOverlay')">
-  <div class="modal">
-    <button class="modal-close" onclick="cModal('owVerzoekOverlay')">✕</button>
-    <div class="form-title">Oefenwedstrijd zoeken</div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Clubnaam *</label>
-        <input class="form-input" id="owClub" type="text" placeholder="bijv. SV Oranje">
-        <div class="form-error" id="errOwClub">Vul je clubnaam in.</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Team *</label>
-        <input class="form-input" id="owTeam" type="text" placeholder="bijv. SV Oranje U11-1">
-        <div class="form-error" id="errOwTeam">Vul je teamnaam in.</div>
-        <select class="form-input" id="owLeeftijd">
-          <option value="U7">U7</option>
-          <option value="U8">U8</option>
-          <option value="U9">U9</option>
-          <option value="U10">U10</option>
-          <option value="U11" selected>U11</option>
-          <option value="U12">U12</option>
-          <option value="U13">U13</option>
-          <option value="U14">U14</option>
-          <option value="U15">U15</option>
-          <option value="U16">U16</option>
-          <option value="U17">U17</option>
-          <option value="senioren">Senioren</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Niveau / klasse</label>
-        <input class="form-input" id="owNiveau" type="text" placeholder="bijv. 3e klasse">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Datum *</label>
-        <input class="form-input" id="owDatum" type="date">
-        <div class="form-error" id="errOwDatum">Kies een datum.</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Tijdstip</label>
-        <input class="form-input" id="owTijdstip" type="time" placeholder="10:00">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Regio / stad</label>
-        <input class="form-input" id="owRegio" type="text" placeholder="bijv. Amsterdam">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Thuis / uit</label>
-        <select class="form-input" id="owThuisUit">
-          <option value="thuis">Thuis</option>
-          <option value="uit">Uit</option>
-          <option value="maakt niet uit" selected>Maakt niet uit</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Opmerking</label>
-      <textarea class="form-input" id="owOpmerking" placeholder="bijv. Zoeken naar gelijkwaardig team, bij voorkeur zelfde regio..." style="min-height:70px"></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Jouw e-mailadres *</label>
-      <input class="form-input" id="owEmail" type="email" placeholder="trainer@club.nl">
-      <div class="form-hint">Wordt getoond aan teams die interesse tonen — niet publiek zichtbaar.</div>
-      <div class="form-error" id="errOwEmail">Vul je e-mailadres in.</div>
-    </div>
-    <div class="form-actions">
-      <button class="btn-cancel" onclick="cModal('owVerzoekOverlay')">Annuleren</button>
-      <button class="btn-primary" onclick="submitOwVerzoek()">Verzoek plaatsen</button>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY: INTERESSE TONEN -->
-<div class="overlay" id="owInteresseOverlay" onclick="oClick(event,'owInteresseOverlay')">
-  <div class="modal">
-    <button class="modal-close" onclick="cModal('owInteresseOverlay')">✕</button>
-    <div class="form-title">Interesse tonen</div>
-    <div id="owInteresseInfo" style="background:var(--dark3);border-radius:12px;padding:1rem;margin-bottom:1.5rem;font-size:14px;color:var(--text-secondary);line-height:1.7"></div>
-    <p style="font-size:14px;color:var(--text-secondary);margin-bottom:1rem">Het e-mailadres van deze trainer wordt direct getoond zodat jullie contact kunnen opnemen.</p>
-    <div id="owEmailResultaat" style="display:none;background:rgba(0,224,84,0.06);border:0.5px solid rgba(0,224,84,0.2);border-radius:12px;padding:1rem;text-align:center">
-      <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">E-mailadres trainer</div>
-      <div id="owEmailTekst" style="font-size:18px;font-weight:600;color:var(--green);word-break:break-all"></div>
-      <a id="owEmailLink" href="#" style="display:inline-block;margin-top:10px;padding:8px 20px;background:var(--green);color:#0a0a0a;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none">✉ Stuur een e-mail</a>
-    </div>
-    <div id="owInteresseBtns" style="display:flex;gap:8px;margin-top:1rem">
-      <button class="btn-cancel" onclick="cModal('owInteresseOverlay')">Annuleren</button>
-      <button class="btn-primary" id="owToonEmailBtn" onclick="toonOwEmail()">📧 Toon e-mailadres</button>
-    </div>
-  </div>
-</div>
-
 <!-- PAGE: COMMUNITY -->
 <div class="page" id="page-community">
   <div class="main">
@@ -5649,24 +4150,7 @@ async function doInstall() {
           <input type="hidden" id="aoMoeilijkheid" value="3">
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Materiaal — klik om toe te voegen</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-          <div onclick="voegMatToe('bal')" style="cursor:pointer;padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:12px" onmouseover="this.style.borderColor='rgba(0,224,84,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">⚽ Bal</div>
-          <div onclick="voegMatToe('pionnen')" style="cursor:pointer;padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:12px" onmouseover="this.style.borderColor='rgba(0,224,84,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🔺 Pionnen</div>
-          <div onclick="voegMatToe('hesjes')" style="cursor:pointer;padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:12px" onmouseover="this.style.borderColor='rgba(0,224,84,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🦺 Hesjes</div>
-          <div onclick="voegMatToe('doel')" style="cursor:pointer;padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:12px" onmouseover="this.style.borderColor='rgba(0,224,84,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🥅 Doel</div>
-          <div onclick="voegMatToe('kleine doelen')" style="cursor:pointer;padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:12px" onmouseover="this.style.borderColor='rgba(0,224,84,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🥅 Klein doel</div>
-          <div onclick="voegMatToe('hoekvlag')" style="cursor:pointer;padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:12px" onmouseover="this.style.borderColor='rgba(0,224,84,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🚩 Hoekvlag</div>
-          <div onclick="voegMatToe('keeper')" style="cursor:pointer;padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:12px" onmouseover="this.style.borderColor='rgba(0,224,84,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🧤 Keeper</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
-          <input type="number" id="aoMatAantal" min="1" max="99" value="1" style="width:60px;padding:5px 8px;border-radius:7px;border:0.5px solid var(--border);background:var(--dark2);color:var(--text);font-size:13px;font-family:var(--font-body)">
-          <span style="font-size:12px;color:var(--text-secondary)">stuks bij volgende klik</span>
-        </div>
-        <input class="form-input" id="aoMat" type="text" placeholder="bijv. 8 pionnen, 2 doelen, 1 bal">
-        <div class="form-hint">Schrijf aantallen vóór het item: "8 pionnen" → pion icoon met badge 8. Dubbele items worden automatisch samengevoegd.</div>
-      </div>
+      <div class="form-group"><label class="form-label">Materiaal</label><input class="form-input" id="aoMat" type="text" placeholder="bijv. Pionnen, ballen, hesjes, doel"></div>
       <div class="form-group"><label class="form-label">Beschrijving *</label><textarea class="form-input" id="aoDesc" placeholder="Beschrijf de oefening stap voor stap..."></textarea><div class="form-error" id="errAoDesc">Vul een beschrijving in.</div></div>
       <div class="form-group"><label class="form-label">Trainingsdoel</label><input class="form-input" id="aoDoel" type="text" placeholder="Wat leren spelers van deze oefening?"></div>
       <div class="form-group">
