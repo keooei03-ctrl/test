@@ -1290,6 +1290,7 @@ const BASE=[
   {id:13,title:"Lange passing",age:"U14",cat:"passing",duur:"15 min",spelers:"8",desc:"Spelers op 25 meter afstand. Lange diagonale pass, ontvanger controleert en geeft terug.",doel:"Lange pass nauwkeurigheid.",materiaal:"Pionnen, 2 ballen",video:null,eigen:false},
 ];
 let oefeningen=[...BASE],spelers=[],trainingen=[];
+const defaultOefeningen = [...BASE]; // bewaar standaard oefeningen voor reset bij uitloggen
 let nextOId=200,nextSId=1,nextTId=1,fAge='alle',fCat='alle',curPage='oefeningen',sterRating=0;
 
 // pitch SVG voor lege kaartjes
@@ -2592,6 +2593,10 @@ async function laadAlleData() {
     if (bo.data?.length) {
       tactBorden = bo.data.map(b => ({ id: b.id, naam: b.naam, objecten: b.objecten || [] }));
       tactObjecten = JSON.parse(JSON.stringify(tactBorden[0]?.objecten || []));
+    } else {
+      // Nieuw account — begin met leeg bord
+      tactBorden = [{ naam: 'Bord 1', objecten: [] }];
+      tactObjecten = [];
     }
 
     // Alles renderen
@@ -2896,14 +2901,18 @@ function openAccount() {
 
 async function doLogout() {
   await sb.auth.signOut();
-  // Reset alle data zodat volgende gebruiker schoon begint
+  // Reset ALLE data zodat volgende gebruiker schoon begint
   spelers = [];
   trainingen = [];
   wedstrijden = [];
   aanwSessies = [];
+  oefeningen = [...defaultOefeningen]; // herstel standaard oefeningen
   tactBordInit = false;
   tactBorden = [];
   tactObjecten = [];
+  tactHistory = [];
+  huidigUser = null;
+  huidigPlan = 'gratis';
   cModal('accountOverlay');
 }
 
