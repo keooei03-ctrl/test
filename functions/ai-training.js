@@ -1,22 +1,25 @@
-exports.handler = async function(event, context) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
-
-  const headers = {
+export async function onRequestPost(context) {
+  const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
   };
 
   try {
-    const { prompt } = JSON.parse(event.body);
+    const { prompt } = await context.request.json();
+    const apiKey = context.env.ANTHROPIC_API_KEY;
+
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'API key niet gevonden' }), {
+        status: 500, headers: corsHeaders
+      });
+    }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
@@ -32,16 +35,23 @@ exports.handler = async function(event, context) {
       throw new Error(data.error?.message || 'API fout');
     }
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ content: data.content })
-    };
+    return new Response(JSON.stringify({ content: data.content }), {
+      status: 200, headers: corsHeaders
+    });
+
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: err.message })
-    };
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500, headers: corsHeaders
+    });
   }
-};
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
+}
