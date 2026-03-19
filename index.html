@@ -2041,7 +2041,7 @@ Gebruik bestaande oefeningen uit de bibliotheek waar mogelijk. Vul aan met eigen
   resultEl.style.display='none';
 
   try {
-    const res=await fetch('/.netlify/functions/ai-training',{
+    const res=await fetch('/functions/ai-training',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({prompt})
@@ -2350,10 +2350,11 @@ function setupAuth() {
     });
 
     // Check of al ingelogd — als ja, direct app tonen
-    sb.auth.getSession().then(({ data: { session } }) => {
+    sb.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         huidigUser = session.user;
-        laadPlan().then(() => toonApp());
+        laadPlan();
+        await toonApp();
       }
     }).catch(() => {}); // stil falen — loginscherm staat al
   }
@@ -2429,16 +2430,19 @@ async function laadAlleData() {
       tactObjecten = JSON.parse(JSON.stringify(tactBorden[0]?.objecten || []));
     }
 
-    // Herrender actieve pagina
+    // Alles renderen
     renderOefeningen();
-    if (curPage === 'spelers') renderSpelers();
-    if (curPage === 'resultaten') renderResultaten();
-    if (curPage === 'wedstrijden') renderWedstrijden();
-    if (curPage === 'aanwezigheid') renderAanwezigheid();
+    renderSpelers();
+    renderResultaten();
+    renderWedstrijden();
+    renderAanwezigheid();
 
-    console.log('✓ Data geladen uit Supabase');
+    // Ook localStorage bijwerken als backup
+    slaLokaalOp();
+
+    console.log('✓ Data geladen uit Supabase', { spelers: spelers.length, trainingen: trainingen.length });
   } catch(e) {
-    console.warn('Supabase laden mislukt, gebruik localStorage als backup:', e);
+    console.warn('Supabase laden mislukt:', e);
     laadLokaleData();
   }
 }
@@ -2583,12 +2587,11 @@ async function laadPlan() {
   updateUpgradeBanner();
 }
 
-function toonApp() {
+async function toonApp() {
   document.getElementById('authScreen').classList.add('hidden');
   updateAccountBtn();
   updateUpgradeBanner();
-  // Laad data uit Supabase
-  laadAlleData();
+  await laadAlleData();
 }
 
 function toonAuthScherm() {
@@ -2649,8 +2652,8 @@ async function doLogin() {
     ]);
     if (error) throw error;
     huidigUser = data.user;
-    toonApp(); // Direct app tonen — niet wachten
-    laadPlan(); // Op achtergrond laden — niet awaiten
+    laadPlan();
+    await toonApp();
   } catch(e) {
     btn.disabled = false;
     btn.textContent = 'Inloggen';
