@@ -2297,12 +2297,12 @@ function renderOefeningen(){
     const th=t
       ?`<div class="card-thumb"><img src="${t}" alt=""><div class="play-overlay"><svg viewBox="0 0 12 14" fill="#0a0a0a"><path d="M1 1l10 6-10 6V1z"/></svg></div></div>`
       :`<div class="no-thumb"><div class="no-thumb-pitch">${PITCH_SVG}</div><span class="no-thumb-label">Geen video</span></div>`;
-    return`<div class="card${o.eigen?' eigen':''}" onclick="openDetail(${o.id})">${o.eigen?'<span class="eigen-tag">Eigen</span>':''}${th}<div class="card-body"><div class="card-top"><div class="card-title">${o.title}</div><span class="badge ${aC(o.age)}">${aL(o.age)}</span></div><div class="card-desc">${o.desc.slice(0,90)}...</div><div class="card-meta"><span class="meta"><span class="dot d-${o.cat}"></span>${cL(o.cat)}</span><span class="meta">⏱ ${o.duur||'–'}</span><span class="meta">👥 ${o.spelers||'–'}</span></div></div></div>`;
+    return`<div class="card${o.eigen?' eigen':o.publiek?' publiek':''}" onclick="openDetail('${o.id}')">${o.eigen?'<span class="eigen-tag">Eigen</span>':o.publiek?'<span class="eigen-tag" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">Publiek</span>':''}${th}<div class="card-body"><div class="card-top"><div class="card-title">${o.title}</div><span class="badge ${aC(o.age)}">${aL(o.age)}</span></div><div class="card-desc">${o.desc.slice(0,90)}...</div><div class="card-meta"><span class="meta"><span class="dot d-${o.cat}"></span>${cL(o.cat)}</span><span class="meta">⏱ ${o.duur||'–'}</span><span class="meta">👥 ${o.spelers||'–'}</span></div></div></div>`;
   }).join('');
 }
 
 function openDetail(id){
-  const o=oefeningen.find(x=>x.id===id);if(!o)return;
+  const o=oefeningen.find(x=>x.id==id||x.id==='pub_'+id);if(!o)return;
   const e=embedUrl(o.video);
   const vh=e
     ?`<div class="detail-video"><iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`
