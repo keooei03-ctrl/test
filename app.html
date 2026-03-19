@@ -5384,11 +5384,24 @@ var veldTekenen = false;
 var veldStartX = 0, veldStartY = 0;
 var veldAantalA = 0, veldAantalV = 0, veldAantalN = 0;
 
+var veldDoelRichting = 'rechts';
+
+function setDoelRichting(r) {
+  veldDoelRichting = r;
+  ['rechts','links','boven','onder'].forEach(function(d) {
+    var b = document.getElementById('dr_'+d);
+    if (b) b.classList.toggle('active', d===r);
+  });
+}
+
 function setVeldTool(tool) {
   veldTool = tool;
-  document.querySelectorAll('.veld-tool-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.veld-tool-btn[id^="vt_"]').forEach(function(b){ b.classList.remove('active'); });
   var btn = document.getElementById('vt_' + tool);
   if (btn) btn.classList.add('active');
+  // Toon richtingkeuze alleen bij doelen
+  var richtingRij = document.getElementById('doelRichtingRij');
+  if (richtingRij) richtingRij.style.display = (tool==='minidoel'||tool==='grootdoel') ? 'flex' : 'none';
 }
 
 function clearVeld() {
@@ -5408,16 +5421,23 @@ function tekenVeldCanvas() {
 }
 
 function _tekenHalfveld(ctx, W, H) {
+  // Gras
   ctx.fillStyle = '#2d6b27'; ctx.fillRect(0,0,W,H);
   for (var i=0;i<6;i++) { ctx.fillStyle=i%2===0?'#2d6b27':'#316e2b'; ctx.fillRect(i*(W/6),0,W/6,H); }
   ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=1.5;
+  // Buitenlijn
   ctx.strokeRect(16,16,W-32,H-32);
-  ctx.strokeRect(W-90,H/2-60,74,120);
-  ctx.strokeRect(W-50,H/2-35,34,70);
-  ctx.beginPath(); ctx.arc(W-90,H/2,50,-Math.PI*0.6,Math.PI*0.6); ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.arc(W-68,H/2,3,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,0.9)';
-  ctx.fillRect(W-18,H/2-28,5,56); ctx.fillRect(W-18,H/2-28,22,4); ctx.fillRect(W-18,H/2+24,22,4);
+  // Strafschopgebied — GEEN cirkel, alleen rechthoeken
+  ctx.strokeRect(W-100,H/2-65,84,130);
+  ctx.strokeRect(W-52,H/2-32,36,64);
+  // Strafschopstip
+  ctx.fillStyle='rgba(255,255,255,0.6)';
+  ctx.beginPath(); ctx.arc(W-75,H/2,3,0,Math.PI*2); ctx.fill();
+  // Groot doel rechts
+  ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2;
+  ctx.strokeRect(W-16,H/2-24,16,48);
+  ctx.fillStyle='rgba(255,255,255,0.15)';
+  ctx.fillRect(W-16,H/2-24,16,48);
 }
 
 function _tekenPijlen(ctx, pijlen) {
@@ -5425,37 +5445,124 @@ function _tekenPijlen(ctx, pijlen) {
     ctx.beginPath(); ctx.setLineDash(p.type==='paslijn'?[7,4]:[]);
     ctx.moveTo(p.x1,p.y1); ctx.lineTo(p.x2,p.y2);
     ctx.strokeStyle=p.type==='paslijn'?'rgba(255,230,80,0.9)':'rgba(100,220,100,0.9)';
-    ctx.lineWidth=2; ctx.stroke(); ctx.setLineDash([]);
+    ctx.lineWidth=2.5; ctx.stroke(); ctx.setLineDash([]);
     var angle=Math.atan2(p.y2-p.y1,p.x2-p.x1);
     ctx.beginPath(); ctx.moveTo(p.x2,p.y2);
-    ctx.lineTo(p.x2-10*Math.cos(angle-0.4),p.y2-10*Math.sin(angle-0.4));
-    ctx.lineTo(p.x2-10*Math.cos(angle+0.4),p.y2-10*Math.sin(angle+0.4));
+    ctx.lineTo(p.x2-11*Math.cos(angle-0.4),p.y2-11*Math.sin(angle-0.4));
+    ctx.lineTo(p.x2-11*Math.cos(angle+0.4),p.y2-11*Math.sin(angle+0.4));
     ctx.closePath(); ctx.fillStyle=p.type==='paslijn'?'rgba(255,230,80,0.9)':'rgba(100,220,100,0.9)'; ctx.fill();
   });
+}
+
+function _tekenShirt(ctx, x, y, kleur, randKleur) {
+  // Shirt body
+  ctx.beginPath();
+  ctx.moveTo(x-10, y-4);
+  ctx.lineTo(x-13, y-11);
+  ctx.lineTo(x-7,  y-14);
+  ctx.lineTo(x-5,  y-10);
+  ctx.lineTo(x+5,  y-10);
+  ctx.lineTo(x+7,  y-14);
+  ctx.lineTo(x+13, y-11);
+  ctx.lineTo(x+10, y-4);
+  ctx.lineTo(x+10, y+11);
+  ctx.lineTo(x-10, y+11);
+  ctx.closePath();
+  ctx.fillStyle = kleur; ctx.fill();
+  ctx.strokeStyle = randKleur; ctx.lineWidth = 1.5; ctx.stroke();
 }
 
 function _tekenElementen(ctx, elementen) {
   (elementen||[]).forEach(function(el) {
     ctx.save();
-    if (el.type==='aanvaller'||el.type==='verdediger'||el.type==='neutraal') {
-      var fill = el.type==='aanvaller'?'#1b5e20':el.type==='verdediger'?'#b71c1c':'#37474f';
-      var stroke = el.type==='aanvaller'?'#69f0ae':el.type==='verdediger'?'#ff5252':'#b0bec5';
-      ctx.beginPath(); ctx.arc(el.x,el.y,14,0,Math.PI*2);
-      ctx.fillStyle=fill; ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle=stroke; ctx.stroke();
-      ctx.fillStyle='#fff'; ctx.font='bold 10px sans-serif';
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(el.label||el.type[0].toUpperCase(),el.x,el.y);
+    if (el.type==='aanvaller') {
+      _tekenShirt(ctx, el.x, el.y, '#1565c0', '#90caf9');
+    } else if (el.type==='verdediger') {
+      _tekenShirt(ctx, el.x, el.y, '#b71c1c', '#ef9a9a');
+    } else if (el.type==='neutraal') {
+      _tekenShirt(ctx, el.x, el.y, '#e65100', '#ffcc80');
     } else if (el.type==='bal') {
-      ctx.beginPath(); ctx.arc(el.x,el.y,9,0,Math.PI*2);
-      ctx.fillStyle='#fffde7'; ctx.fill(); ctx.lineWidth=1.5; ctx.strokeStyle='#f9a825'; ctx.stroke();
-      ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(el.x,el.y,3,0,Math.PI*2); ctx.fill();
+      // Echte voetbal
+      var r = 9;
+      ctx.beginPath(); ctx.arc(el.x,el.y,r,0,Math.PI*2);
+      ctx.fillStyle='#ffffff'; ctx.fill();
+      ctx.strokeStyle='#333'; ctx.lineWidth=0.8; ctx.stroke();
+      // Zwarte vlakken
+      ctx.fillStyle='#222';
+      // Centraal vijfhoekje
+      var a = Math.PI/2;
+      ctx.beginPath();
+      for(var k=0;k<5;k++){
+        var ax=el.x+3.5*Math.cos(a+k*Math.PI*2/5), ay=el.y+3.5*Math.sin(a+k*Math.PI*2/5);
+        k===0?ctx.moveTo(ax,ay):ctx.lineTo(ax,ay);
+      }
+      ctx.closePath(); ctx.fill();
+      // 5 kleine vlakjes rondom
+      for(var k=0;k<5;k++){
+        var bx=el.x+6.5*Math.cos(a+k*Math.PI*2/5+0.31), by=el.y+6.5*Math.sin(a+k*Math.PI*2/5+0.31);
+        ctx.beginPath(); ctx.arc(bx,by,2,0,Math.PI*2); ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(el.x,el.y,r,0,Math.PI*2); ctx.strokeStyle='#444'; ctx.lineWidth=1; ctx.stroke();
     } else if (el.type==='pion') {
-      ctx.beginPath(); ctx.moveTo(el.x,el.y-12); ctx.lineTo(el.x+9,el.y+6); ctx.lineTo(el.x-9,el.y+6); ctx.closePath();
-      ctx.fillStyle='#ff9800'; ctx.fill(); ctx.lineWidth=1.5; ctx.strokeStyle='#e65100'; ctx.stroke();
-      ctx.fillStyle='#e65100'; ctx.fillRect(el.x-5,el.y+6,10,4);
+      // Pion schaduw
+      ctx.fillStyle='rgba(0,0,0,0.2)';
+      ctx.beginPath(); ctx.ellipse(el.x, el.y+10, 8, 3, 0, 0, Math.PI*2); ctx.fill();
+      // Pion lichaam
+      ctx.beginPath();
+      ctx.moveTo(el.x, el.y-13);
+      ctx.bezierCurveTo(el.x+4, el.y-8, el.x+8, el.y+2, el.x+7, el.y+8);
+      ctx.lineTo(el.x-7, el.y+8); 
+      ctx.bezierCurveTo(el.x-8, el.y+2, el.x-4, el.y-8, el.x, el.y-13);
+      ctx.fillStyle='#ff6f00'; ctx.fill();
+      ctx.strokeStyle='#e65100'; ctx.lineWidth=1.2; ctx.stroke();
+      // Basis
+      ctx.fillStyle='#e65100';
+      ctx.fillRect(el.x-7, el.y+7, 14, 4);
+      ctx.beginPath(); ctx.arc(el.x, el.y+9, 7, 0, Math.PI*2);
+      ctx.fillStyle='#bf360c'; ctx.fill();
     } else if (el.type==='minidoel') {
-      ctx.fillStyle='rgba(255,255,255,0.85)';
-      ctx.fillRect(el.x-16,el.y-8,4,28); ctx.fillRect(el.x-16,el.y-8,20,4); ctx.fillRect(el.x-16,el.y+16,20,4);
+      // Mini doel — opening rechts (standaard)
+      var dir = el.richting || 'rechts';
+      ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2.5;
+      ctx.fillStyle='rgba(255,255,255,0.12)';
+      if (dir==='rechts') {
+        ctx.strokeRect(el.x, el.y-14, 18, 28);
+        ctx.fillRect(el.x, el.y-14, 18, 28);
+        ctx.fillStyle='#fff'; ctx.fillRect(el.x-3, el.y-15, 3, 30);
+      } else if (dir==='links') {
+        ctx.strokeRect(el.x-18, el.y-14, 18, 28);
+        ctx.fillRect(el.x-18, el.y-14, 18, 28);
+        ctx.fillStyle='#fff'; ctx.fillRect(el.x, el.y-15, 3, 30);
+      } else if (dir==='boven') {
+        ctx.strokeRect(el.x-14, el.y-18, 28, 18);
+        ctx.fillRect(el.x-14, el.y-18, 28, 18);
+        ctx.fillStyle='#fff'; ctx.fillRect(el.x-15, el.y-3, 30, 3);
+      } else {
+        ctx.strokeRect(el.x-14, el.y, 28, 18);
+        ctx.fillRect(el.x-14, el.y, 28, 18);
+        ctx.fillStyle='#fff'; ctx.fillRect(el.x-15, el.y, 30, 3);
+      }
+    } else if (el.type==='grootdoel') {
+      var dir = el.richting || 'rechts';
+      ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2.5;
+      ctx.fillStyle='rgba(255,255,255,0.1)';
+      if (dir==='rechts') {
+        ctx.strokeRect(el.x, el.y-28, 22, 56);
+        ctx.fillRect(el.x, el.y-28, 22, 56);
+        ctx.fillStyle='#fff'; ctx.fillRect(el.x-4, el.y-29, 4, 58);
+      } else if (dir==='links') {
+        ctx.strokeRect(el.x-22, el.y-28, 22, 56);
+        ctx.fillRect(el.x-22, el.y-28, 22, 56);
+        ctx.fillStyle='#fff'; ctx.fillRect(el.x, el.y-29, 4, 58);
+      } else if (dir==='boven') {
+        ctx.strokeRect(el.x-28, el.y-22, 56, 22);
+        ctx.fillRect(el.x-28, el.y-22, 56, 22);
+        ctx.fillStyle='#fff'; ctx.fillRect(el.x-29, el.y-4, 58, 4);
+      } else {
+        ctx.strokeRect(el.x-28, el.y, 56, 22);
+        ctx.fillRect(el.x-28, el.y, 56, 22);
+        ctx.fillStyle='#fff'; ctx.fillRect(el.x-29, el.y, 58, 4);
+      }
     }
     ctx.restore();
   });
@@ -5487,7 +5594,7 @@ function veldKlik(e) {
   if (veldTool==='aanvaller') { veldAantalA++; label='A'+veldAantalA; }
   else if (veldTool==='verdediger') { veldAantalV++; label='V'+veldAantalV; }
   else if (veldTool==='neutraal') { veldAantalN++; label='N'+veldAantalN; }
-  veldElementen.push({ type:veldTool, x:pos.x, y:pos.y, label:label });
+  veldElementen.push({ type:veldTool, x:pos.x, y:pos.y, label:label, richting: (veldTool==='minidoel'||veldTool==='grootdoel') ? veldDoelRichting : undefined });
   tekenVeldCanvas(); slaVeldOp();
 }
 
@@ -6085,17 +6192,26 @@ function renderVeldDiagramInDetail(jsonStr, container) {
         <div style="background:var(--dark3);border-radius:12px;padding:12px;border:0.5px solid var(--border)">
 
           <!-- Toolbar -->
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="veldToolbar">
-            <button type="button" onclick="setVeldTool('aanvaller')" id="vt_aanvaller" class="veld-tool-btn active" title="Aanvaller">🟢 A</button>
-            <button type="button" onclick="setVeldTool('verdediger')" id="vt_verdediger" class="veld-tool-btn" title="Verdediger">🔴 V</button>
-            <button type="button" onclick="setVeldTool('neutraal')" id="vt_neutraal" class="veld-tool-btn" title="Neutrale speler">⚫ N</button>
-            <button type="button" onclick="setVeldTool('bal')" id="vt_bal" class="veld-tool-btn" title="Bal">⚽</button>
-            <button type="button" onclick="setVeldTool('pion')" id="vt_pion" class="veld-tool-btn" title="Pion">🔺</button>
-            <button type="button" onclick="setVeldTool('minidoel')" id="vt_minidoel" class="veld-tool-btn" title="Mini doel">🥅</button>
-            <button type="button" onclick="setVeldTool('pijl')" id="vt_pijl" class="veld-tool-btn" title="Looplijn">➡️ Lijn</button>
-            <button type="button" onclick="setVeldTool('paslijn')" id="vt_paslijn" class="veld-tool-btn" title="Paslijn">- - Pass</button>
-            <button type="button" onclick="setVeldTool('gum')" id="vt_gum" class="veld-tool-btn" title="Verwijderen">🗑️</button>
-            <button type="button" onclick="clearVeld()" class="veld-tool-btn" style="margin-left:auto;color:#ff6b6b">✕ Leegmaken</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="veldToolbar">
+            <button type="button" onclick="setVeldTool('aanvaller')" id="vt_aanvaller" class="veld-tool-btn active" title="Blauw shirt">🔵 Blauw</button>
+            <button type="button" onclick="setVeldTool('verdediger')" id="vt_verdediger" class="veld-tool-btn" title="Rood shirt">🔴 Rood</button>
+            <button type="button" onclick="setVeldTool('neutraal')" id="vt_neutraal" class="veld-tool-btn" title="Oranje shirt">🟠 Oranje</button>
+            <button type="button" onclick="setVeldTool('bal')" id="vt_bal" class="veld-tool-btn" title="Bal">⚽ Bal</button>
+            <button type="button" onclick="setVeldTool('pion')" id="vt_pion" class="veld-tool-btn" title="Pion">🔺 Pion</button>
+            <button type="button" onclick="setVeldTool('minidoel')" id="vt_minidoel" class="veld-tool-btn" title="Mini doel">▭ Mini doel</button>
+            <button type="button" onclick="setVeldTool('grootdoel')" id="vt_grootdoel" class="veld-tool-btn" title="Groot doel">⬜ Groot doel</button>
+            <button type="button" onclick="setVeldTool('pijl')" id="vt_pijl" class="veld-tool-btn" title="Looplijn (sleep)">↗ Looplijn</button>
+            <button type="button" onclick="setVeldTool('paslijn')" id="vt_paslijn" class="veld-tool-btn" title="Paslijn (sleep)">⇢ Paslijn</button>
+            <button type="button" onclick="setVeldTool('gum')" id="vt_gum" class="veld-tool-btn" title="Verwijderen">🗑 Gum</button>
+            <button type="button" onclick="clearVeld()" class="veld-tool-btn" style="color:#ff6b6b;margin-left:auto">✕ Leeg</button>
+          </div>
+          <!-- Richting voor doelen -->
+          <div id="doelRichtingRij" style="display:none;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--text-secondary)">
+            Opening:
+            <button type="button" onclick="setDoelRichting('rechts')" id="dr_rechts" class="veld-tool-btn active" style="padding:3px 8px;font-size:11px">→ Rechts</button>
+            <button type="button" onclick="setDoelRichting('links')" id="dr_links" class="veld-tool-btn" style="padding:3px 8px;font-size:11px">← Links</button>
+            <button type="button" onclick="setDoelRichting('boven')" id="dr_boven" class="veld-tool-btn" style="padding:3px 8px;font-size:11px">↑ Boven</button>
+            <button type="button" onclick="setDoelRichting('onder')" id="dr_onder" class="veld-tool-btn" style="padding:3px 8px;font-size:11px">↓ Onder</button>
           </div>
 
           <!-- Canvas halfveld -->
