@@ -3115,6 +3115,42 @@ function openAddOef(){
 }
 function submitOefening(){
   if (checkDemoEnToon('Oefening opslaan', 'Maak een gratis account aan om eigen oefeningen toe te voegen.', '🎯')) return;
+
+  // Admin: stuur altijd naar publieke oefeningen
+  if (isAdmin) {
+    const title=document.getElementById('fTitle').value.trim(),desc=document.getElementById('fDesc').value.trim(),vid=document.getElementById('fVideo').value.trim();
+    let ok=true;
+    document.getElementById('errTitle').style.display=title?'none':'block';if(!title)ok=false;
+    document.getElementById('errDesc').style.display=desc?'none':'block';if(!desc)ok=false;
+    if(!ok)return;
+    const payload = {
+      title, beschrijving: desc,
+      age: document.getElementById('fAge').value,
+      cat: document.getElementById('fCat').value,
+      duur: document.getElementById('fDuur').value.trim()||'–',
+      spelers_aantal: document.getElementById('fSpelers').value.trim()||'–',
+      doel: document.getElementById('fDoel').value.trim(),
+      materiaal: document.getElementById('fMat').value.trim(),
+      video: vid||null,
+      gratis_zichtbaar: false
+    };
+    cModal('addOefOverlay');
+    sb.from('publieke_oefeningen').insert(payload).select().single().then(function(res) {
+      if (res.error) { alert('Fout: ' + res.error.message); return; }
+      var data = res.data;
+      publiekeOefeningen.unshift(data);
+      oefeningen.unshift({
+        id: 'pub_'+data.id, title, age:data.age, cat:data.cat,
+        duur:data.duur, spelers:data.spelers_aantal, desc:data.beschrijving,
+        doel:data.doel, materiaal:data.materiaal, video:data.video,
+        gratis_zichtbaar:false, veld_diagram:null,
+        eigen:false, publiek:true
+      });
+      renderOefeningen();
+    });
+    return;
+  }
+
   if (!isPro() && oefeningen.filter(function(o){return o.eigen;}).length >= 3) { checkPro('oefeningen'); return; }
   const title=document.getElementById('fTitle').value.trim(),desc=document.getElementById('fDesc').value.trim(),vid=document.getElementById('fVideo').value.trim();
   let ok=true;
