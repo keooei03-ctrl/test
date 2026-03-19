@@ -692,6 +692,57 @@
     .speelmin-input:focus { border-color: var(--green); outline: none; }
     .totaal-min { font-family: var(--font-display); font-size: 28px; letter-spacing: 1px; color: var(--green); }
     .totaal-min-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; }
+    /* ── SEIZOENSPLANNING ── */
+    .plan-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:10px; }
+    .plan-maand-titel { font-family:var(--font-display); font-size:28px; letter-spacing:1px; color:var(--text); }
+    .plan-nav-btns { display:flex; gap:8px; align-items:center; }
+    .plan-nav-btn { width:36px; height:36px; border-radius:50%; border:0.5px solid var(--border); background:var(--dark3); color:var(--text); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; font-family:var(--font-body); }
+    .plan-nav-btn:hover { border-color:rgba(0,224,84,0.3); color:var(--green); }
+    .plan-vandaag-btn { padding:6px 14px; border-radius:20px; border:0.5px solid var(--border); background:var(--dark3); color:var(--text-secondary); font-size:12px; cursor:pointer; font-family:var(--font-body); transition:all 0.15s; }
+    .plan-vandaag-btn:hover { border-color:rgba(0,224,84,0.3); color:var(--green); }
+
+    /* Weekdagen header */
+    .plan-week-header { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:4px; }
+    .plan-week-dag { text-align:center; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-tertiary); padding:6px 0; }
+
+    /* Kalender grid */
+    .plan-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+    .plan-dag { min-height:90px; background:var(--dark2); border-radius:8px; border:0.5px solid var(--border); padding:6px; cursor:pointer; transition:all 0.15s; position:relative; }
+    .plan-dag:hover { border-color:rgba(0,224,84,0.25); }
+    .plan-dag.vandaag { border-color:rgba(0,224,84,0.5); background:rgba(0,224,84,0.04); }
+    .plan-dag.andere-maand { opacity:0.35; }
+    .plan-dag.heeft-items { background:var(--dark2); }
+    .plan-dag-num { font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:4px; }
+    .plan-dag.vandaag .plan-dag-num { color:var(--green); }
+    .plan-item { border-radius:4px; padding:2px 5px; font-size:10px; font-weight:600; margin-bottom:2px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; cursor:pointer; }
+    .plan-item.training  { background:rgba(0,224,84,0.15); color:#00e054; }
+    .plan-item.wedstrijd { background:rgba(255,107,107,0.15); color:#ff6b6b; }
+    .plan-item.toernooi  { background:rgba(255,184,77,0.15); color:#ffb84d; }
+    .plan-item.vrij      { background:rgba(255,255,255,0.06); color:#888; }
+    .plan-item.overig    { background:rgba(91,184,255,0.12); color:#5bb8ff; }
+    .plan-meer { font-size:9px; color:var(--text-tertiary); padding:1px 3px; }
+
+    /* Legenda */
+    .plan-legenda { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:1rem; }
+    .plan-legenda-item { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-secondary); }
+    .plan-legenda-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+
+    /* Weeklijst onder kalender */
+    .plan-aankomend { margin-top:1.5rem; }
+    .plan-aankomend-titel { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-tertiary); margin-bottom:10px; }
+    .plan-lijst-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:0.5px solid var(--border); }
+    .plan-lijst-item:last-child { border-bottom:none; }
+    .plan-lijst-datum { min-width:80px; }
+    .plan-lijst-dag { font-size:11px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.04em; }
+    .plan-lijst-nr { font-family:var(--font-display); font-size:22px; color:var(--text); letter-spacing:1px; line-height:1; }
+    .plan-lijst-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+    .plan-lijst-info { flex:1; }
+    .plan-lijst-titel { font-size:14px; font-weight:600; color:var(--text); }
+    .plan-lijst-meta { font-size:12px; color:var(--text-tertiary); margin-top:1px; }
+    .plan-lijst-del { background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:14px; padding:4px; transition:color 0.15s; }
+    .plan-lijst-del:hover { color:#ff6b6b; }
+    @media(max-width:700px){ .plan-dag { min-height:60px; padding:4px; } .plan-dag-num { font-size:11px; } .plan-item { font-size:9px; } }
+
     /* ── OEFENWEDSTRIJDEN PRIKBORD ── */
     .ow-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 14px; margin-top: 1.5rem; }
     .ow-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 16px; padding: 1.25rem; transition: all 0.2s; position: relative; overflow: hidden; }
@@ -1034,6 +1085,7 @@
     <button class="nav-tab" onclick="showPage('tactisch',this)">✎ Tactisch bord</button>
     <button class="nav-tab" onclick="showPage('ai',this)" style="color:var(--green)">✦ AI Plan</button>
     <button class="nav-tab" onclick="showPage('community',this)">💬 Community</button>
+    <button class="nav-tab" onclick="showPage('planning',this)">📅 Planning</button>
     <button class="nav-tab" onclick="showPage('oefenwedstrijden',this)">🤝 Oefenwedstrijden</button>
     <button class="nav-tab" id="adminTab" onclick="showPage('admin',this)" style="display:none;color:#ffb84d">⚙ Beheer</button>
   </div>
@@ -1074,6 +1126,7 @@
 <!-- MEER MENU -->
 <div class="mobile-meer-menu" id="meerMenu">
   <button class="mobile-meer-btn" onclick="showPage('oefenwedstrijden',null);setMobileTab('oefenwedstrijden');sluitMeer()">🤝 Oefenwedstrijden</button>
+  <button class="mobile-meer-btn" onclick="showPage('planning',null);setMobileTab('planning');sluitMeer()">📅 Planning</button>
   <button class="mobile-meer-btn" onclick="showPage('ai',null);setMobileTab('ai');sluitMeer()" style="color:var(--green)">✦ AI Plan</button>
   <button class="mobile-meer-btn" onclick="showPage('resultaten',null);setMobileTab('resultaten');sluitMeer()">📋 Resultaten</button>
   <button class="mobile-meer-btn" onclick="showPage('aanwezigheid',null);setMobileTab('aanwezigheid');sluitMeer()">✅ Aanwezigheid</button>
@@ -1575,7 +1628,7 @@ function showPage(page,el){
   curPage=page;
   setMobileTab(page);
   sluitMeer();
-  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',community:'Bericht posten',oefenwedstrijden:'+ Verzoek plaatsen',admin:'+ Oefening toevoegen'};
+  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',community:'Bericht posten',planning:'+ Toevoegen',oefenwedstrijden:'+ Verzoek plaatsen',admin:'+ Oefening toevoegen'};
   document.getElementById('addBtnLabel').textContent=lbl[page]||'Toevoegen';
   if(page==='spelers')renderSpelers();
   if(page==='resultaten')renderResultaten();
@@ -1583,6 +1636,7 @@ function showPage(page,el){
   if(page==='wedstrijden')renderWedstrijden();
   if(page==='tactisch')initTactischBord();
   if(page==='community')laadCommunity();
+  if(page==='planning')laadPlanning();
   if(page==='oefenwedstrijden')laadOefenwedstrijden();
   if(page==='admin')renderAdminOefeningen();
 }
@@ -1593,6 +1647,7 @@ function handleAddBtn(){
   else if(curPage==='wedstrijden')openAddWedstrijd();
   else if(curPage==='tactisch')resetBord();
   else if(curPage==='community')document.getElementById('communityInput').focus();
+  else if(curPage==='planning')openNieuwPlanItem();
   else if(curPage==='oefenwedstrijden')openNieuwVerzoek();
   else if(curPage==='admin')openAdminOefening();
   else openAddOef();
@@ -3553,6 +3608,257 @@ function toonLimietMelding(type, limiet) {
   oModal('accountOverlay');
 }
 
+// ── SEIZOENSPLANNING ──
+let planItems = [];
+let planJaar = new Date().getFullYear();
+let planMaand = new Date().getMonth(); // 0-11
+let planGekozenDatum = null;
+let planBewerkId = null;
+
+const PLAN_KLEUREN = {
+  training:  { bg:'rgba(0,224,84,0.15)',  text:'#00e054' },
+  wedstrijd: { bg:'rgba(255,107,107,0.15)', text:'#ff6b6b' },
+  toernooi:  { bg:'rgba(255,184,77,0.15)', text:'#ffb84d' },
+  vrij:      { bg:'rgba(255,255,255,0.06)', text:'#888' },
+  overig:    { bg:'rgba(91,184,255,0.12)', text:'#5bb8ff' },
+};
+const PLAN_TYPE_LABELS = { training:'Training', wedstrijd:'Wedstrijd', toernooi:'Toernooi', vrij:'Vrije dag', overig:'Overig' };
+const MAANDEN = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+const DAGEN_KORT = ['ma','di','wo','do','vr','za','zo'];
+
+async function laadPlanning() {
+  if (!huidigUser || huidigUser.id === 'preview') {
+    renderKalender();
+    return;
+  }
+  try {
+    const { data } = await sb.from('seizoensplanning')
+      .select('*').eq('user_id', huidigUser.id)
+      .order('datum', { ascending: true });
+    planItems = data || [];
+  } catch(e) { console.warn('Planning laden mislukt:', e); }
+  renderKalender();
+}
+
+function renderKalender() {
+  document.getElementById('planMaandTitel').textContent = `${MAANDEN[planMaand]} ${planJaar}`;
+  const grid = document.getElementById('planGrid');
+  const vandaag = new Date();
+  vandaag.setHours(0,0,0,0);
+
+  // Eerste dag van de maand (0=zo, 1=ma ... 6=za) → omzetten naar ma=0
+  const eerstedag = new Date(planJaar, planMaand, 1);
+  let startDag = eerstedag.getDay(); // 0=zo
+  startDag = startDag === 0 ? 6 : startDag - 1; // ma=0, zo=6
+
+  const dagenInMaand = new Date(planJaar, planMaand + 1, 0).getDate();
+  const dagenVorigeMaand = new Date(planJaar, planMaand, 0).getDate();
+
+  let html = '';
+  let totalDagen = Math.ceil((startDag + dagenInMaand) / 7) * 7;
+
+  for (let i = 0; i < totalDagen; i++) {
+    let dag, maand, jaar, andereMaand = false;
+    if (i < startDag) {
+      dag = dagenVorigeMaand - startDag + i + 1;
+      maand = planMaand - 1;
+      jaar = planJaar;
+      if (maand < 0) { maand = 11; jaar--; }
+      andereMaand = true;
+    } else if (i >= startDag + dagenInMaand) {
+      dag = i - startDag - dagenInMaand + 1;
+      maand = planMaand + 1;
+      jaar = planJaar;
+      if (maand > 11) { maand = 0; jaar++; }
+      andereMaand = true;
+    } else {
+      dag = i - startDag + 1;
+      maand = planMaand;
+      jaar = planJaar;
+    }
+
+    const datumStr = `${jaar}-${String(maand+1).padStart(2,'0')}-${String(dag).padStart(2,'0')}`;
+    const dagDatum = new Date(jaar, maand, dag);
+    const isVandaag = dagDatum.getTime() === vandaag.getTime();
+
+    const dagItems = planItems.filter(p => p.datum === datumStr);
+    const maxToon = 2;
+
+    let itemsHtml = dagItems.slice(0, maxToon).map(item => {
+      const k = PLAN_KLEUREN[item.type] || PLAN_KLEUREN.overig;
+      return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text}" onclick="event.stopPropagation();openPlanItem('${item.id}')">${item.titel}</div>`;
+    }).join('');
+    if (dagItems.length > maxToon) {
+      itemsHtml += `<div class="plan-meer">+${dagItems.length - maxToon} meer</div>`;
+    }
+
+    html += `<div class="plan-dag${isVandaag?' vandaag':''}${andereMaand?' andere-maand':''}${dagItems.length?' heeft-items':''}" onclick="klikOpDag('${datumStr}')">
+      <div class="plan-dag-num">${dag}</div>
+      ${itemsHtml}
+    </div>`;
+  }
+  grid.innerHTML = html;
+  renderPlanLijst();
+}
+
+function renderPlanLijst() {
+  const el = document.getElementById('planLijst');
+  const vandaag = new Date().toISOString().split('T')[0];
+  const eindeMaand = `${planJaar}-${String(planMaand+2).padStart(2,'0')}-01`;
+  const beginMaand = `${planJaar}-${String(planMaand+1).padStart(2,'0')}-01`;
+
+  const lijst = planItems
+    .filter(p => p.datum >= beginMaand && p.datum < eindeMaand)
+    .sort((a,b) => a.datum.localeCompare(b.datum));
+
+  if (!lijst.length) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--text-tertiary);padding:1rem 0">Geen items gepland deze maand.</div>';
+    return;
+  }
+
+  el.innerHTML = lijst.map(item => {
+    const k = PLAN_KLEUREN[item.type] || PLAN_KLEUREN.overig;
+    const d = new Date(item.datum + 'T12:00:00');
+    const dagNaam = ['zo','ma','di','wo','do','vr','za'][d.getDay()];
+    const dagNr = d.getDate();
+    const isPast = item.datum < vandaag;
+    return `<div class="plan-lijst-item" style="${isPast?'opacity:0.5':''}">
+      <div class="plan-lijst-datum">
+        <div class="plan-lijst-dag">${dagNaam}</div>
+        <div class="plan-lijst-nr">${dagNr}</div>
+      </div>
+      <div class="plan-lijst-dot" style="background:${k.text}"></div>
+      <div class="plan-lijst-info">
+        <div class="plan-lijst-titel">${item.titel}</div>
+        <div class="plan-lijst-meta">${PLAN_TYPE_LABELS[item.type]||'–'}${item.tijd?' · '+item.tijd:''}${item.duur?' · '+item.duur:''}${item.notitie?'<br><span style="font-style:italic">'+item.notitie.slice(0,60)+'...</span>':''}</div>
+      </div>
+      <button class="plan-lijst-del" onclick="verwijderPlanItem(${item.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function wisselMaand(richting) {
+  planMaand += richting;
+  if (planMaand > 11) { planMaand = 0; planJaar++; }
+  if (planMaand < 0) { planMaand = 11; planJaar--; }
+  renderKalender();
+}
+
+function gaNaarVandaag() {
+  planMaand = new Date().getMonth();
+  planJaar = new Date().getFullYear();
+  renderKalender();
+}
+
+function klikOpDag(datum) {
+  planGekozenDatum = datum;
+  planBewerkId = null;
+  resetPlanForm();
+  document.getElementById('planDatum').value = datum;
+  document.getElementById('planItemTitel').textContent = 'Item toevoegen';
+  oModal('planItemOverlay');
+}
+
+function openNieuwPlanItem() {
+  planGekozenDatum = new Date().toISOString().split('T')[0];
+  planBewerkId = null;
+  resetPlanForm();
+  document.getElementById('planDatum').value = planGekozenDatum;
+  document.getElementById('planItemTitel').textContent = 'Item toevoegen';
+  oModal('planItemOverlay');
+}
+
+function openPlanItem(id) {
+  const item = planItems.find(p => String(p.id) === String(id));
+  if (!item) return;
+  planBewerkId = id;
+  resetPlanForm();
+  document.getElementById('planItemTitel').textContent = 'Item bewerken';
+  document.getElementById('planTitel').value = item.titel || '';
+  document.getElementById('planDatum').value = item.datum || '';
+  document.getElementById('planTijd').value = item.tijd || '';
+  document.getElementById('planDuur').value = item.duur || '';
+  document.getElementById('planNotitie').value = item.notitie || '';
+  document.getElementById('planType').value = item.type || 'training';
+  // Update type knoppen
+  document.querySelectorAll('.plan-type-btn').forEach(btn => {
+    const active = btn.dataset.type === item.type;
+    const k = PLAN_KLEUREN[btn.dataset.type] || PLAN_KLEUREN.overig;
+    btn.style.background = active ? k.bg : 'var(--dark3)';
+    btn.style.borderColor = active ? k.text : 'rgba(255,255,255,0.08)';
+    btn.style.color = active ? k.text : 'var(--text-secondary)';
+    btn.classList.toggle('active', active);
+  });
+  oModal('planItemOverlay');
+}
+
+function resetPlanForm() {
+  ['planTitel','planDatum','planTijd','planDuur','planNotitie'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('planType').value = 'training';
+  ['errPlanTitel','errPlanDatum'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.querySelectorAll('.plan-type-btn').forEach(btn => {
+    btn.style.background = btn.dataset.type === 'training' ? 'rgba(0,224,84,0.1)' : 'var(--dark3)';
+    btn.style.borderColor = btn.dataset.type === 'training' ? '#00e054' : 'rgba(255,255,255,0.08)';
+    btn.style.color = btn.dataset.type === 'training' ? '#00e054' : 'var(--text-secondary)';
+    btn.classList.toggle('active', btn.dataset.type === 'training');
+  });
+}
+
+function selectPlanType(btn) {
+  document.getElementById('planType').value = btn.dataset.type;
+  const k = PLAN_KLEUREN[btn.dataset.type] || PLAN_KLEUREN.overig;
+  document.querySelectorAll('.plan-type-btn').forEach(b => {
+    b.style.background = 'var(--dark3)';
+    b.style.borderColor = 'rgba(255,255,255,0.08)';
+    b.style.color = 'var(--text-secondary)';
+    b.classList.remove('active');
+  });
+  btn.style.background = k.bg;
+  btn.style.borderColor = k.text;
+  btn.style.color = k.text;
+  btn.classList.add('active');
+}
+
+async function submitPlanItem() {
+  if (checkDemoEnToon && checkDemoEnToon('Planning opslaan', 'Maak een gratis account aan om je seizoen te plannen.', '📅')) return;
+  const titel = document.getElementById('planTitel').value.trim();
+  const datum = document.getElementById('planDatum').value;
+  document.getElementById('errPlanTitel').style.display = titel ? 'none' : 'block';
+  document.getElementById('errPlanDatum').style.display = datum ? 'none' : 'block';
+  if (!titel || !datum) return;
+
+  const payload = {
+    user_id: huidigUser.id,
+    titel, datum,
+    type: document.getElementById('planType').value,
+    tijd: document.getElementById('planTijd').value || null,
+    duur: document.getElementById('planDuur').value.trim() || null,
+    notitie: document.getElementById('planNotitie').value.trim() || null,
+  };
+
+  if (planBewerkId) {
+    const { error } = await sb.from('seizoensplanning').update(payload).eq('id', planBewerkId);
+    if (error) { alert('Fout: ' + error.message); return; }
+    const idx = planItems.findIndex(p => String(p.id) === String(planBewerkId));
+    if (idx >= 0) planItems[idx] = { ...planItems[idx], ...payload };
+  } else {
+    const { data, error } = await sb.from('seizoensplanning').insert(payload).select().single();
+    if (error) { alert('Fout: ' + error.message); return; }
+    planItems.push(data);
+    planItems.sort((a,b) => a.datum.localeCompare(b.datum));
+  }
+
+  cModal('planItemOverlay');
+  renderKalender();
+}
+
+async function verwijderPlanItem(id) {
+  if (!confirm('Item verwijderen?')) return;
+  await sb.from('seizoensplanning').delete().eq('id', id);
+  planItems = planItems.filter(p => p.id !== id);
+  renderKalender();
+}
+
 // ── OEFENWEDSTRIJDEN ──
 let owVerzoeken = [];
 let owAgeFilter = 'alle';
@@ -4308,6 +4614,99 @@ async function doInstall() {
         <button class="btn-cancel" onclick="cModal('aanwOverlay')">Annuleren</button>
         <button class="btn-primary" onclick="submitNieuweTrainingAanw()">Aanmaken</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: SEIZOENSPLANNING -->
+<div class="page" id="page-planning">
+  <div class="main">
+
+    <!-- Nav -->
+    <div class="plan-nav">
+      <div class="plan-maand-titel" id="planMaandTitel">Januari 2026</div>
+      <div class="plan-nav-btns">
+        <button class="plan-vandaag-btn" onclick="gaNaarVandaag()">Vandaag</button>
+        <button class="plan-nav-btn" onclick="wisselMaand(-1)">‹</button>
+        <button class="plan-nav-btn" onclick="wisselMaand(1)">›</button>
+      </div>
+    </div>
+
+    <!-- Legenda -->
+    <div class="plan-legenda">
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(0,224,84,0.5)"></div>Training</div>
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,107,107,0.5)"></div>Wedstrijd</div>
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,184,77,0.5)"></div>Toernooi</div>
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(91,184,255,0.5)"></div>Overig</div>
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,255,255,0.15)"></div>Vrije dag</div>
+    </div>
+
+    <!-- Weekdagen -->
+    <div class="plan-week-header">
+      <div class="plan-week-dag">Ma</div>
+      <div class="plan-week-dag">Di</div>
+      <div class="plan-week-dag">Wo</div>
+      <div class="plan-week-dag">Do</div>
+      <div class="plan-week-dag">Vr</div>
+      <div class="plan-week-dag">Za</div>
+      <div class="plan-week-dag">Zo</div>
+    </div>
+
+    <!-- Kalender -->
+    <div class="plan-grid" id="planGrid"></div>
+
+    <!-- Aankomende items -->
+    <div class="plan-aankomend">
+      <div class="plan-aankomend-titel">Aankomend deze maand</div>
+      <div id="planLijst"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- OVERLAY: NIEUW PLAN ITEM -->
+<div class="overlay" id="planItemOverlay" onclick="oClick(event,'planItemOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('planItemOverlay')">✕</button>
+    <div class="form-title" id="planItemTitel">Item toevoegen</div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px">
+        <div class="plan-type-btn active" data-type="training" onclick="selectPlanType(this)" style="background:rgba(0,224,84,0.1);border:0.5px solid rgba(0,224,84,0.3);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:#00e054">⚽<br>Training</div>
+        <div class="plan-type-btn" data-type="wedstrijd" onclick="selectPlanType(this)" style="background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-secondary)">🏆<br>Wedstrijd</div>
+        <div class="plan-type-btn" data-type="toernooi" onclick="selectPlanType(this)" style="background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-secondary)">🥇<br>Toernooi</div>
+        <div class="plan-type-btn" data-type="vrij" onclick="selectPlanType(this)" style="background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-secondary)">🏖<br>Vrij</div>
+        <div class="plan-type-btn" data-type="overig" onclick="selectPlanType(this)" style="background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-secondary)">📌<br>Overig</div>
+      </div>
+      <input type="hidden" id="planType" value="training">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Titel *</label>
+      <input class="form-input" id="planTitel" type="text" placeholder="bijv. Training techniek, Thuiswedstrijd vs Ajax...">
+      <div class="form-error" id="errPlanTitel">Vul een titel in.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Datum *</label>
+        <input class="form-input" id="planDatum" type="date">
+        <div class="form-error" id="errPlanDatum">Kies een datum.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tijd</label>
+        <input class="form-input" id="planTijd" type="time">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Duur</label>
+      <input class="form-input" id="planDuur" type="text" placeholder="bijv. 90 min">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notitie</label>
+      <textarea class="form-input" id="planNotitie" placeholder="Bijzonderheden, locatie, tegenstander..." style="min-height:60px"></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="cModal('planItemOverlay')">Annuleren</button>
+      <button class="btn-primary" onclick="submitPlanItem()">Opslaan</button>
     </div>
   </div>
 </div>
