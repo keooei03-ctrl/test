@@ -2640,29 +2640,18 @@ Geef een trainingsplan terug als JSON (geen markdown, geen uitleg, alleen JSON) 
 
 Gebruik bestaande oefeningen uit de bibliotheek waar mogelijk. Vul aan met eigen onderdelen waar nodig. Zorg dat de totale duur klopt met ${duur}. Antwoord ALLEEN met valid JSON.`;
 
-  const ANTHROPIC_KEY = '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'; // vervang dit met je sk-ant-... key
-
   btn.disabled=true;
   btn.innerHTML=`<div class="ai-spinner"></div> Plan wordt gegenereerd...`;
   resultEl.style.display='none';
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://green-rice-a428trainershub-ai.keooei03.workers.dev', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'API fout');
+    if (!res.ok) throw new Error(data.error || 'API fout');
     const raw = data.content.map(c => c.text||'').join('');
     const clean = raw.replace(/```json|```/g,'').trim();
     const plan = JSON.parse(clean);
