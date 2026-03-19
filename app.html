@@ -614,7 +614,68 @@
     .aanw-empty h3 { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
     .aanw-empty p { font-size: 13px; color: var(--text-secondary); }
 
-    /* ── ONTWIKKELINGSGRAFIEK & SPEELMINUTEN ── */
+    /* ── UITGEBREIDE OEFENING DETAIL ── */
+    .oef-detail-wrap { padding: 0; }
+    .oef-hero { padding: 1.5rem; background: var(--dark2); border-bottom: 0.5px solid var(--border); }
+    .oef-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .oef-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+    .oef-badge-groen { background: rgba(0,224,84,0.1); color: #00e054; border: 0.5px solid rgba(0,224,84,0.2); }
+    .oef-badge-blauw { background: rgba(91,184,255,0.1); color: #5bb8ff; border: 0.5px solid rgba(91,184,255,0.2); }
+    .oef-badge-oranje { background: rgba(255,184,77,0.1); color: #ffb84d; border: 0.5px solid rgba(255,184,77,0.2); }
+    .oef-badge-rood { background: rgba(255,107,107,0.1); color: #ff6b6b; border: 0.5px solid rgba(255,107,107,0.2); }
+    .oef-badge-grijs { background: rgba(255,255,255,0.06); color: #999; border: 0.5px solid rgba(255,255,255,0.1); }
+    .oef-title { font-family: var(--font-display); font-size: 28px; letter-spacing: 1px; color: var(--text); margin-bottom: 8px; line-height: 1.1; }
+    .oef-meta-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+    .oef-meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
+    .oef-meta-icon { font-size: 15px; }
+
+    /* Moeilijkheid sterren */
+    .moeilijk-sterren { display: flex; gap: 3px; }
+    .moeilijk-ster { font-size: 14px; }
+    .moeilijk-ster.aan { color: #ffb84d; }
+    .moeilijk-ster.uit { color: #333; }
+
+    /* Intensiteit balk */
+    .intensiteit-wrap { display: flex; align-items: center; gap: 8px; }
+    .intensiteit-balk { display: flex; gap: 3px; }
+    .intensiteit-blok { width: 12px; height: 12px; border-radius: 2px; }
+    .intensiteit-blok.aan-laag { background: #00e054; }
+    .intensiteit-blok.aan-medium { background: #ffb84d; }
+    .intensiteit-blok.aan-hoog { background: #ff6b6b; }
+    .intensiteit-blok.uit { background: rgba(255,255,255,0.08); }
+
+    /* Materiaal iconen */
+    .materiaal-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .materiaal-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .materiaal-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--dark3); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .materiaal-label { font-size: 10px; color: var(--text-tertiary); text-align: center; max-width: 48px; }
+
+    /* Velddiagram */
+    .veld-diagram-wrap { background: #1a2a1a; border-radius: 12px; overflow: hidden; position: relative; }
+    .veld-canvas { width: 100%; display: block; cursor: crosshair; }
+
+    /* Coachingspunten */
+    .coaching-punt { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+    .coaching-punt:last-child { border-bottom: none; }
+    .coaching-punt::before { content: '→'; color: var(--green); font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+
+    /* Variaties */
+    .variatie-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+    .variatie-item:last-child { border-bottom: none; }
+    .variatie-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+    .variatie-tag.makkelijk { background: rgba(0,224,84,0.1); color: var(--green); }
+    .variatie-tag.moeilijk { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+
+    /* Print knop */
+    .oef-actions { display: flex; gap: 8px; padding: 1rem 1.5rem; border-top: 0.5px solid var(--border); }
+    .oef-action-btn { flex: 1; padding: 10px; border-radius: 10px; border: 0.5px solid var(--border); background: var(--dark3); color: var(--text-secondary); font-size: 13px; cursor: pointer; font-family: var(--font-body); transition: all 0.15s; text-align: center; }
+    .oef-action-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+    .oef-action-btn.favoriet.actief { border-color: rgba(255,184,77,0.3); color: #ffb84d; background: rgba(255,184,77,0.06); }
+
+    /* Oef sectie */
+    .oef-sectie { padding: 1.25rem 1.5rem; border-bottom: 0.5px solid var(--border); }
+    .oef-sectie:last-child { border-bottom: none; }
+    .oef-sectie-titel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-tertiary); margin-bottom: 12px; }
     .grafiek-wrap { background: var(--dark3); border-radius: 12px; padding: 1rem; margin: 1rem 0; }
     .grafiek-titel { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-tertiary); margin-bottom: 12px; }
     .grafiek-svg { width: 100%; overflow: visible; }
@@ -2484,17 +2545,160 @@ function renderOefeningen(){
     const th=t
       ?`<div class="card-thumb"><img src="${t}" alt=""><div class="play-overlay"><svg viewBox="0 0 12 14" fill="#0a0a0a"><path d="M1 1l10 6-10 6V1z"/></svg></div></div>`
       :`<div class="no-thumb"><div class="no-thumb-pitch">${PITCH_SVG}</div><span class="no-thumb-label">Geen video</span></div>`;
-    return`<div class="card${o.eigen?' eigen':o.publiek?' publiek':''}" onclick="openDetail('${o.id}')">${o.eigen?'<span class="eigen-tag">Eigen</span>':o.publiek?'<span class="eigen-tag" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">Publiek</span>':''}${th}<div class="card-body"><div class="card-top"><div class="card-title">${o.title}</div><span class="badge ${aC(o.age)}">${aL(o.age)}</span></div><div class="card-desc">${o.desc.slice(0,90)}...</div><div class="card-meta"><span class="meta"><span class="dot d-${o.cat}"></span>${cL(o.cat)}</span><span class="meta">⏱ ${o.duur||'–'}</span><span class="meta">👥 ${o.spelers||'–'}</span></div></div></div>`;
+    const moeilijkheidStr = o.moeilijkheid ? '★'.repeat(o.moeilijkheid)+'☆'.repeat(5-o.moeilijkheid) : '';
+    return`<div class="card${o.eigen?' eigen':o.publiek?' publiek':''}" onclick="openDetail('${o.id}')">${o.eigen?'<span class="eigen-tag">Eigen</span>':o.publiek?'<span class="eigen-tag" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">Publiek</span>':''}${th}<div class="card-body"><div class="card-top"><div class="card-title">${o.title}</div><span class="badge ${aC(o.age)}">${aL(o.age)}</span></div><div class="card-desc">${o.desc.slice(0,90)}...</div><div class="card-meta"><span class="meta"><span class="dot d-${o.cat}"></span>${cL(o.cat)}</span><span class="meta">⏱ ${o.duur||'–'}</span><span class="meta">👥 ${o.spelers||'–'}</span>${moeilijkheidStr?`<span class="meta" style="color:#ffb84d;letter-spacing:-1px;font-size:10px">${moeilijkheidStr}</span>`:''}</div></div></div>`;
   }).join('');
 }
 
 function openDetail(id){
   const o=oefeningen.find(x=>x.id==id||x.id==='pub_'+id);if(!o)return;
   const e=embedUrl(o.video);
-  const vh=e
-    ?`<div class="detail-video"><iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`
-    :`<div class="detail-novideo"><div style="opacity:.15">${PITCH_SVG}</div><span>Geen video gekoppeld</span></div>`;
-  document.getElementById('detailBody').innerHTML=`${vh}<div class="detail-body"><span class="badge ${aC(o.age)}">${aL(o.age)}</span><div class="detail-title">${o.title}</div><div class="detail-cat"><span class="dot d-${o.cat}"></span>${cL(o.cat)}${o.eigen?' · <span style="color:var(--green)">Eigen oefening</span>':''}</div><div class="sec-label">Beschrijving</div><div class="sec-text">${o.desc}</div><div class="sec-label">Trainingsdoel</div><div class="sec-text">${o.doel||'–'}</div><div class="info-grid"><div class="info-item"><div class="info-label">Duur</div><div class="info-val">${o.duur||'–'}</div></div><div class="info-item"><div class="info-label">Spelers</div><div class="info-val">${o.spelers||'–'}</div></div><div class="info-item" style="grid-column:1/-1"><div class="info-label">Materiaal</div><div class="info-val">${o.materiaal||'–'}</div></div></div>${o.eigen?`<button class="del-btn" onclick="delOef(${id})">Verwijderen</button>`:''}</div>`;
+
+  // ── Materiaal iconen ──
+  const MAT_ICONS = {
+    'bal': {icon:'⚽', label:'Bal'},
+    'ballen': {icon:'⚽', label:'Ballen'},
+    'pion': {icon:'🔺', label:'Pion'},
+    'pionnen': {icon:'🔺', label:'Pionnen'},
+    'hesje': {icon:'🦺', label:'Hesje'},
+    'hesjes': {icon:'🦺', label:'Hesjes'},
+    'doel': {icon:'🥅', label:'Doel'},
+    'doelen': {icon:'🥅', label:'Doelen'},
+    'keeper': {icon:'🧤', label:'Keeper'},
+    'hoekvlag': {icon:'🚩', label:'Hoekvlag'},
+    'pionnetje': {icon:'🔺', label:'Pion'},
+    'kleine doelen': {icon:'🥅', label:'Klein doel'},
+    'klein doel': {icon:'🥅', label:'Klein doel'},
+  };
+
+  function maakMateriaalIcons(mat) {
+    if (!mat || mat === '–') return '<div style="font-size:13px;color:var(--text-tertiary)">Geen materiaal nodig</div>';
+    const items = mat.toLowerCase().split(/[,;]+/).map(s=>s.trim()).filter(Boolean);
+    return `<div class="materiaal-grid">${items.map(item => {
+      let icon = '📦'; let label = item;
+      for (const [key, val] of Object.entries(MAT_ICONS)) {
+        if (item.includes(key)) { icon = val.icon; label = val.label; break; }
+      }
+      return `<div class="materiaal-item"><div class="materiaal-icon">${icon}</div><div class="materiaal-label">${label}</div></div>`;
+    }).join('')}</div>`;
+  }
+
+  // ── Moeilijkheid sterren ──
+  function maakSterren(n) {
+    n = n || 3;
+    return `<div class="moeilijk-sterren">${[1,2,3,4,5].map(i =>
+      `<span class="moeilijk-ster ${i<=n?'aan':'uit'}">★</span>`
+    ).join('')}</div>`;
+  }
+
+  // ── Intensiteit blokken ──
+  function maakIntensiteit(lvl) {
+    lvl = lvl || 'medium';
+    const nrs = {laag:1, medium:2, hoog:3};
+    const n = nrs[lvl] || 2;
+    const kleur = `aan-${lvl}`;
+    return `<div class="intensiteit-wrap">
+      <div class="intensiteit-balk">
+        ${[1,2,3].map(i => `<div class="intensiteit-blok ${i<=n?kleur:'uit'}"></div>`).join('')}
+      </div>
+      <span style="font-size:12px;color:var(--text-secondary);text-transform:capitalize">${lvl}</span>
+    </div>`;
+  }
+
+  // ── Fase badge ──
+  const FASE_KLEUREN = {'warming-up':'blauw', 'kern':'groen', 'cooling-down':'grijs'};
+  const faseBadge = o.fase ? `<span class="oef-badge oef-badge-${FASE_KLEUREN[o.fase]||'grijs'}">${o.fase}</span>` : '';
+
+  // ── Focus badge ──
+  const FOCUS_KLEUREN = {'techniek':'groen', 'tactiek':'blauw', 'conditie':'rood', 'plezier':'oranje'};
+  const focusBadge = o.focus ? `<span class="oef-badge oef-badge-${FOCUS_KLEUREN[o.focus]||'grijs'}">${o.focus}</span>` : '';
+
+  // ── Coachingspunten ──
+  function maakCoachingsPunten(txt) {
+    if (!txt) return '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen coachingspunten toegevoegd.</div>';
+    return txt.split('\n').filter(s=>s.trim()).map(s =>
+      `<div class="coaching-punt">${s.trim()}</div>`
+    ).join('');
+  }
+
+  // ── Variaties ──
+  function maakVariaties(txt) {
+    if (!txt) return '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen variaties toegevoegd.</div>';
+    return txt.split('\n').filter(s=>s.trim()).map((s,i) => {
+      const isMakkelijk = s.toLowerCase().startsWith('makkelijk') || s.toLowerCase().startsWith('eenvoudig') || s.toLowerCase().startsWith('+');
+      const isMoeilijk = s.toLowerCase().startsWith('moeilijk') || s.toLowerCase().startsWith('uitdaging') || s.toLowerCase().startsWith('++');
+      const tag = isMakkelijk ? '<span class="variatie-tag makkelijk">Makkelijker</span>' :
+                  isMoeilijk ? '<span class="variatie-tag moeilijk">Uitdagender</span>' :
+                  `<span class="variatie-tag makkelijk" style="background:rgba(91,184,255,0.1);color:#5bb8ff">Variant ${i+1}</span>`;
+      return `<div class="variatie-item">${tag}<span>${s.trim()}</span></div>`;
+    }).join('');
+  }
+
+  // ── Video of veldtekening ──
+  const videoHtml = e
+    ? `<div class="detail-video"><iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`
+    : `<div style="background:var(--dark3);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border-radius:12px;margin:0 1.5rem 1rem">
+        <div style="text-align:center;color:var(--text-tertiary)">
+          <div style="font-size:32px;margin-bottom:8px">📹</div>
+          <div style="font-size:13px">Geen video gekoppeld</div>
+        </div>
+      </div>`;
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="oef-detail-wrap">
+      ${videoHtml}
+
+      <div class="oef-hero">
+        <div class="oef-badges">
+          <span class="oef-badge oef-badge-${o.age==='U6'?'groen':o.age==='U10'?'blauw':'oranje'}">${o.age||'Alle'}</span>
+          <span class="oef-badge oef-badge-grijs">${o.cat||'overig'}</span>
+          ${faseBadge}
+          ${focusBadge}
+          ${o.eigen?'<span class="oef-badge oef-badge-groen">Eigen</span>':''}
+          ${o.publiek?'<span class="oef-badge oef-badge-oranje">Publiek</span>':''}
+        </div>
+        <div class="oef-title">${o.title}</div>
+        <div class="oef-meta-row">
+          <div class="oef-meta-item"><span class="oef-meta-icon">⏱</span>${o.duur||'–'}</div>
+          <div class="oef-meta-item"><span class="oef-meta-icon">👥</span>${o.spelers||'–'} spelers</div>
+          <div class="oef-meta-item"><span class="oef-meta-icon">⭐</span>${maakSterren(o.moeilijkheid)}</div>
+          <div class="oef-meta-item"><span class="oef-meta-icon">🔥</span>${maakIntensiteit(o.intensiteit)}</div>
+        </div>
+      </div>
+
+      <div class="oef-sectie">
+        <div class="oef-sectie-titel">Beschrijving</div>
+        <div style="font-size:14px;color:var(--text-secondary);line-height:1.8">${o.desc||'–'}</div>
+      </div>
+
+      <div class="oef-sectie">
+        <div class="oef-sectie-titel">Trainingsdoel</div>
+        <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">${o.doel||'–'}</div>
+      </div>
+
+      <div class="oef-sectie">
+        <div class="oef-sectie-titel">Materiaal</div>
+        ${maakMateriaalIcons(o.materiaal)}
+      </div>
+
+      <div class="oef-sectie">
+        <div class="oef-sectie-titel">Coachingspunten</div>
+        ${maakCoachingsPunten(o.coaching_punten||o.coachingPunten)}
+      </div>
+
+      <div class="oef-sectie">
+        <div class="oef-sectie-titel">Variaties</div>
+        ${maakVariaties(o.variaties)}
+      </div>
+
+      <div class="oef-actions">
+        <button class="oef-action-btn favoriet ${(favorieten||[]).includes(String(id))?'actief':''}" onclick="toggleFavoriet('${id}',this)">
+          ${(favorieten||[]).includes(String(id))?'★ Favoriet':'☆ Favoriet'}
+        </button>
+        <button class="oef-action-btn" onclick="printOefening('${id}')">🖨 Printen</button>
+        ${o.eigen||o.publiek?`<button class="oef-action-btn" style="color:#ff6b6b;border-color:rgba(255,107,107,0.2)" onclick="delOef('${id}')">Verwijderen</button>`:''}
+      </div>
+    </div>`;
   oModal('detailOverlay');
 }
 function delOef(id){
@@ -3259,6 +3463,57 @@ function toonLimietMelding(type, limiet) {
   oModal('accountOverlay');
 }
 
+// ── FAVORIETEN ──
+let favorieten = JSON.parse(localStorage.getItem('trainershub_favorieten') || '[]');
+
+function toggleFavoriet(id, btn) {
+  id = String(id);
+  if (favorieten.includes(id)) {
+    favorieten = favorieten.filter(f => f !== id);
+    btn.textContent = '☆ Favoriet';
+    btn.classList.remove('actief');
+  } else {
+    favorieten.push(id);
+    btn.textContent = '★ Favoriet';
+    btn.classList.add('actief');
+  }
+  localStorage.setItem('trainershub_favorieten', JSON.stringify(favorieten));
+}
+
+function printOefening(id) {
+  const o = oefeningen.find(x => x.id==id || x.id==='pub_'+id);
+  if (!o) return;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8">
+    <title>${o.title}</title>
+    <style>
+      body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:20px;color:#111}
+      h1{font-size:28px;margin-bottom:8px}
+      .badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;background:#eee;margin:2px}
+      .label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-top:16px;margin-bottom:4px}
+      .punt::before{content:"→ ";color:#333}
+      hr{border:none;border-top:1px solid #eee;margin:16px 0}
+    </style></head><body>
+    <h1>${o.title}</h1>
+    <div>
+      <span class="badge">${o.age||'Alle'}</span>
+      <span class="badge">${o.cat||''}</span>
+      <span class="badge">⏱ ${o.duur||'–'}</span>
+      <span class="badge">👥 ${o.spelers||'–'} spelers</span>
+      ${'★'.repeat(o.moeilijkheid||3)+'☆'.repeat(5-(o.moeilijkheid||3))}
+    </div>
+    <hr>
+    <div class="label">Beschrijving</div><p>${o.desc||'–'}</p>
+    <div class="label">Doel</div><p>${o.doel||'–'}</p>
+    <div class="label">Materiaal</div><p>${o.materiaal||'–'}</p>
+    ${o.coaching_punten?`<div class="label">Coachingspunten</div>${o.coaching_punten.split('\n').filter(s=>s.trim()).map(s=>`<p class="punt">${s}</p>`).join('')}`:''}
+    ${o.variaties?`<div class="label">Variaties</div>${o.variaties.split('\n').filter(s=>s.trim()).map(s=>`<p class="punt">${s}</p>`).join('')}`:''}
+    <hr><p style="font-size:11px;color:#aaa">TrainersHub — ${new Date().toLocaleDateString('nl-NL')}</p>
+    </body></html>`);
+  win.document.close();
+  win.print();
+}
+
 // ── COMMUNITY ──
 let communityBerichten = [];
 let communityAbonnement = null;
@@ -3389,8 +3644,11 @@ async function laadPubliekeOefeningen() {
           oefeningen.unshift({
             id: 'pub_' + o.id,
             title: o.title, age: o.age, cat: o.cat,
+            fase: o.fase, focus: o.focus,
+            intensiteit: o.intensiteit, moeilijkheid: o.moeilijkheid,
             duur: o.duur, spelers: o.spelers_aantal, desc: o.beschrijving,
             doel: o.doel, materiaal: o.materiaal, video: o.video,
+            coaching_punten: o.coaching_punten, variaties: o.variaties,
             eigen: false, publiek: true
           });
         }
@@ -3398,6 +3656,14 @@ async function laadPubliekeOefeningen() {
       renderOefeningen();
     }
   } catch(e) { console.warn('Publieke oefeningen laden mislukt:', e); }
+}
+
+function setMoeilijkheid(n) {
+  document.getElementById('aoMoeilijkheid').value = n;
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('mster' + i);
+    if (el) { el.textContent = i <= n ? '★' : '☆'; el.style.color = i <= n ? '#ffb84d' : '#555'; }
+  }
 }
 
 let adminBewerkId = null; // null = nieuw, getal = bewerken
@@ -3413,9 +3679,14 @@ function openAdminOefening(o = null) {
   document.getElementById('aoVideo').value = o?.video || '';
   document.getElementById('aoAge').value = o?.age || 'alle';
   document.getElementById('aoCat').value = o?.cat || 'passing';
+  document.getElementById('aoFase').value = o?.fase || 'kern';
+  document.getElementById('aoFocus').value = o?.focus || 'techniek';
+  document.getElementById('aoIntensiteit').value = o?.intensiteit || 'medium';
+  document.getElementById('aoCoaching').value = o?.coaching_punten || '';
+  document.getElementById('aoVariaties').value = o?.variaties || '';
+  setMoeilijkheid(o?.moeilijkheid || 3);
   document.getElementById('errAoTitle').style.display = 'none';
   document.getElementById('errAoDesc').style.display = 'none';
-  // Verander knoptekst
   document.getElementById('aoSubmitBtn').textContent = o ? 'Wijzigingen opslaan' : 'Opslaan voor iedereen';
   document.querySelector('#adminOefOverlay .form-title').textContent = o ? 'Oefening bewerken' : 'Publieke oefening toevoegen';
   oModal('adminOefOverlay');
@@ -3432,11 +3703,17 @@ async function submitAdminOefening() {
   const payload = {
     title, age: document.getElementById('aoAge').value,
     cat: document.getElementById('aoCat').value,
+    fase: document.getElementById('aoFase').value,
+    focus: document.getElementById('aoFocus').value,
+    intensiteit: document.getElementById('aoIntensiteit').value,
+    moeilijkheid: parseInt(document.getElementById('aoMoeilijkheid').value) || 3,
     duur: document.getElementById('aoDuur').value.trim() || '–',
     spelers_aantal: document.getElementById('aoSpelers').value.trim() || '–',
     beschrijving: desc,
     doel: document.getElementById('aoDoel').value.trim(),
     materiaal: document.getElementById('aoMat').value.trim(),
+    coaching_punten: document.getElementById('aoCoaching').value.trim(),
+    variaties: document.getElementById('aoVariaties').value.trim(),
     video: vid || null
   };
 
@@ -3451,9 +3728,13 @@ async function submitAdminOefening() {
     if (oIdx >= 0) oefeningen[oIdx] = {
       ...oefeningen[oIdx],
       title, age: payload.age, cat: payload.cat,
+      fase: payload.fase, focus: payload.focus,
+      intensiteit: payload.intensiteit, moeilijkheid: payload.moeilijkheid,
       duur: payload.duur, spelers: payload.spelers_aantal,
       desc: payload.beschrijving, doel: payload.doel,
-      materiaal: payload.materiaal, video: payload.video
+      materiaal: payload.materiaal, video: payload.video,
+      coaching_punten: payload.coaching_punten,
+      variaties: payload.variaties
     };
   } else {
     // ── NIEUW TOEVOEGEN ──
@@ -3462,8 +3743,11 @@ async function submitAdminOefening() {
     publiekeOefeningen.unshift(data);
     oefeningen.unshift({
       id: 'pub_' + data.id, title, age: data.age, cat: data.cat,
+      fase: data.fase, focus: data.focus,
+      intensiteit: data.intensiteit, moeilijkheid: data.moeilijkheid,
       duur: data.duur, spelers: data.spelers_aantal, desc: data.beschrijving,
       doel: data.doel, materiaal: data.materiaal, video: data.video,
+      coaching_punten: data.coaching_punten, variaties: data.variaties,
       eigen: false, publiek: true
     });
   }
@@ -3790,14 +4074,58 @@ async function doInstall() {
             <option value="overig">Overig</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Duur</label><input class="form-input" id="aoDuur" type="text" placeholder="bijv. 15 min"></div>
+        <div class="form-group">
+          <label class="form-label">Fase training</label>
+          <select class="form-input" id="aoFase">
+            <option value="warming-up">Warming-up</option>
+            <option value="kern" selected>Kern</option>
+            <option value="cooling-down">Cooling-down</option>
+          </select>
+        </div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Aantal spelers</label><input class="form-input" id="aoSpelers" type="text" placeholder="bijv. 8–12"></div>
-        <div class="form-group"><label class="form-label">Materiaal</label><input class="form-input" id="aoMat" type="text" placeholder="bijv. Pionnen, ballen"></div>
+        <div class="form-group">
+          <label class="form-label">Focus</label>
+          <select class="form-input" id="aoFocus">
+            <option value="techniek">Techniek</option>
+            <option value="tactiek">Tactiek</option>
+            <option value="conditie">Conditie</option>
+            <option value="plezier">Plezier</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Intensiteit</label>
+          <select class="form-input" id="aoIntensiteit">
+            <option value="laag">Laag</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hoog">Hoog</option>
+          </select>
+        </div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Duur</label><input class="form-input" id="aoDuur" type="text" placeholder="bijv. 15 min"></div>
+        <div class="form-group"><label class="form-label">Aantal spelers</label><input class="form-input" id="aoSpelers" type="text" placeholder="bijv. 8–12"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Moeilijkheid (1–5 sterren)</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px" id="moeilijkheidPicker">
+          ${[1,2,3,4,5].map(i=>`<span onclick="setMoeilijkheid(${i})" style="font-size:24px;cursor:pointer;transition:transform 0.1s" id="mster${i}">☆</span>`).join('')}
+          <input type="hidden" id="aoMoeilijkheid" value="3">
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Materiaal</label><input class="form-input" id="aoMat" type="text" placeholder="bijv. Pionnen, ballen, hesjes, doel"></div>
       <div class="form-group"><label class="form-label">Beschrijving *</label><textarea class="form-input" id="aoDesc" placeholder="Beschrijf de oefening stap voor stap..."></textarea><div class="form-error" id="errAoDesc">Vul een beschrijving in.</div></div>
-      <div class="form-group"><label class="form-label">Doelstelling</label><input class="form-input" id="aoDoel" type="text" placeholder="Wat leren spelers van deze oefening?"></div>
+      <div class="form-group"><label class="form-label">Trainingsdoel</label><input class="form-input" id="aoDoel" type="text" placeholder="Wat leren spelers van deze oefening?"></div>
+      <div class="form-group">
+        <label class="form-label">Coachingspunten</label>
+        <textarea class="form-input" id="aoCoaching" placeholder="Één punt per regel:&#10;Houd hoofd omhoog&#10;Pas met binnenkant voet&#10;Communiceer met medespelers" style="min-height:90px"></textarea>
+        <div class="form-hint">Één coachingspunt per regel.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Variaties</label>
+        <textarea class="form-input" id="aoVariaties" placeholder="Één variatie per regel:&#10;Makkelijker: grotere ruimte&#10;Moeilijker: 1 touch limiet" style="min-height:80px"></textarea>
+        <div class="form-hint">Begin met "Makkelijker:" of "Moeilijker:" voor automatische labels.</div>
+      </div>
       <div class="form-group">
         <label class="form-label">YouTube / Vimeo link</label>
         <input class="form-input" id="aoVideo" type="url" placeholder="https://youtube.com/watch?v=...">
