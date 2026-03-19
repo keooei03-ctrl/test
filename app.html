@@ -2640,21 +2640,32 @@ Geef een trainingsplan terug als JSON (geen markdown, geen uitleg, alleen JSON) 
 
 Gebruik bestaande oefeningen uit de bibliotheek waar mogelijk. Vul aan met eigen onderdelen waar nodig. Zorg dat de totale duur klopt met ${duur}. Antwoord ALLEEN met valid JSON.`;
 
+  const ANTHROPIC_KEY = 'JOUW_API_KEY_HIER'; // vervang dit met je sk-ant-... key
+
   btn.disabled=true;
   btn.innerHTML=`<div class="ai-spinner"></div> Plan wordt gegenereerd...`;
   resultEl.style.display='none';
 
   try {
-    const res=await fetch('/functions/ai-training',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt})
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
     });
-    const data=await res.json();
-    if(!res.ok) throw new Error(data.error||'Onbekende fout');
-    const raw=data.content.map(c=>c.text||'').join('');
-    const clean=raw.replace(/```json|```/g,'').trim();
-    const plan=JSON.parse(clean);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API fout');
+    const raw = data.content.map(c => c.text||'').join('');
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const plan = JSON.parse(clean);
     renderAIPlan(plan, age, duur, focus);
   } catch(err){
     resultEl.style.display='block';
