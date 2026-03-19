@@ -1641,23 +1641,10 @@ const COLORS=[
   {bg:'#0a1e28',text:'#22d3ee'},{bg:'#1e1a08',text:'#fbbf24'},
 ];
 let selColor=0;
-const BASE=[
-  {id:1,title:"Rondo 4v1",age:"U6",cat:"passing",duur:"10 min",spelers:"5",desc:"Vier spelers houden de bal van één verdediger in het midden. Focus op snelle één-twee's en communicatie.",doel:"Passing en balcontrole onder druk.",materiaal:"1 bal, 4 pionnen",video:null,eigen:false},
-  {id:2,title:"Slalom dribbelen",age:"U6",cat:"dribbelen",duur:"8 min",spelers:"6–12",desc:"Spelers dribbelen door een parcours van pionnen, afwisselend links en rechts.",doel:"Balvaardigheid en coördinatie.",materiaal:"8 pionnen, 1 bal p.p.",video:null,eigen:false},
-  {id:3,title:"Raket warming-up",age:"U6",cat:"warming-up",duur:"5 min",spelers:"8–16",desc:"Spelers reageren op commando's: springen, stilstaan, draaien. Speels en energiek.",doel:"Mobilisatie en concentratie.",materiaal:"Geen",video:null,eigen:false},
-  {id:4,title:"Dribbelen naar doel",age:"U6",cat:"schieten",duur:"12 min",spelers:"6–8",desc:"Elke speler dribbelt van 10 meter naar het doel en rondt af.",doel:"Afronden en doelgerichtheid.",materiaal:"Doel, 1 bal p.p.",video:null,eigen:false},
-  {id:5,title:"Paspoort passing",age:"U10",cat:"passing",duur:"15 min",spelers:"8–14",desc:"In tweetallen passen op 5, 10 en 15 meter. Na elke serie schuiven ze op.",doel:"Pasnauwkeurigheid op variabele afstand.",materiaal:"1 bal p. tweetal, pionnen",video:null,eigen:false},
-  {id:6,title:"3v3 positiespel",age:"U10",cat:"positiespel",duur:"20 min",spelers:"6",desc:"Twee teams van drie op klein veld. Geen keeper. Balcirculatie en vrije ruimte.",doel:"Ruimte vinden en snel schakelen.",materiaal:"Hesjes, 2 mini-doelen, 1 bal",video:null,eigen:false},
-  {id:7,title:"Schiettechniek",age:"U10",cat:"schieten",duur:"15 min",spelers:"8–12",desc:"Dribbel naar binnen, schiet met wreef. Wissel kant na elke reeks.",doel:"Schietkracht en techniek.",materiaal:"Doel, pionnen, 2 ballen",video:null,eigen:false},
-  {id:8,title:"Kapbeweging 1v1",age:"U10",cat:"dribbelen",duur:"15 min",spelers:"8",desc:"Aanvaller probeert met kapbeweging langs verdediger in smal kanaal.",doel:"Basisbewegingen in 1v1.",materiaal:"Pionnen, 1 bal p. tweetal",video:null,eigen:false},
-  {id:9,title:"Positiespel 5v2",age:"U14",cat:"positiespel",duur:"20 min",spelers:"7",desc:"Vijf houden bal ten opzichte van twee belagers. Max 2 aanraken.",doel:"Automatiseren van positiespel.",materiaal:"Pionnen, hesjes, 1 bal",video:null,eigen:false},
-  {id:10,title:"Afwerken na combinatie",age:"U14",cat:"schieten",duur:"18 min",spelers:"8–12",desc:"A past naar B, loopt door, ontvangt terugpass en schiet direct.",doel:"Afwerken uit beweging.",materiaal:"Doel, pionnen, 3 ballen",video:null,eigen:false},
-  {id:11,title:"Intensieve warming-up",age:"U14",cat:"warming-up",duur:"8 min",spelers:"10–16",desc:"Hoge knieën, hielen naar billen, zijwaartse stap, sprints op 60–80%.",doel:"Spieractivatie en hartslag verhogen.",materiaal:"Geen",video:null,eigen:false},
-  {id:12,title:"Pressing trigger",age:"U14",cat:"positiespel",duur:"25 min",spelers:"10–14",desc:"Bij een vaste trigger-pass gaat het andere team drukzetten.",doel:"Georganiseerd druk zetten.",materiaal:"Hesjes, pionnen, groot veld",video:null,eigen:false},
-  {id:13,title:"Lange passing",age:"U14",cat:"passing",duur:"15 min",spelers:"8",desc:"Spelers op 25 meter afstand. Lange diagonale pass, ontvanger controleert en geeft terug.",doel:"Lange pass nauwkeurigheid.",materiaal:"Pionnen, 2 ballen",video:null,eigen:false},
-];
+// Alle oefeningen komen uit Supabase (publieke_oefeningen tabel)
+const BASE=[];
 let oefeningen=[...BASE],spelers=[],trainingen=[];
-const defaultOefeningen = [...BASE]; // bewaar standaard oefeningen voor reset bij uitloggen
+const defaultOefeningen = []; // geen hardcoded oefeningen meer
 let nextOId=200,nextSId=1,nextTId=1,fAge='alle',fCat='alle',curPage='oefeningen',sterRating=0;
 
 // pitch SVG voor lege kaartjes
@@ -2869,9 +2856,7 @@ function renderOefeningen(){
   if(!list.length){grid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
 
-  // Gratis: max 2 per leeftijdsgroep zichtbaar
-  const GRATIS_OEF_LIMIET = 2;
-  const teller = {}; // per age groep tellen
+  // Gratis: alleen oefeningen zichtbaar die admin heeft vrijgegeven via gratis_zichtbaar toggle
 
   grid.innerHTML=list.map(o=>{
     const t=thumb(o.video);
@@ -2880,13 +2865,9 @@ function renderOefeningen(){
       :`<div class="no-thumb"><div class="no-thumb-pitch">${PITCH_SVG}</div><span class="no-thumb-label">Geen video</span></div>`;
     const moeilijkheidStr = o.moeilijkheid ? '★'.repeat(o.moeilijkheid)+'☆'.repeat(5-o.moeilijkheid) : '';
 
-    // Bepaal of slot nodig is
-    const ageKey = o.age || 'alle';
-    if (!teller[ageKey]) teller[ageKey] = 0;
-    // Gratis zichtbaar flag overschrijft het limiet
+    // Slot tonen als: gratis gebruiker + niet eigen + niet expliciet vrijgegeven door admin
     const gratisVrijgegeven = o.gratis_zichtbaar === true;
-    const isGesloten = !isPro() && !o.eigen && !gratisVrijgegeven && teller[ageKey] >= GRATIS_OEF_LIMIET;
-    if (!isPro() && !o.eigen && !gratisVrijgegeven) teller[ageKey]++;
+    const isGesloten = !isPro() && !o.eigen && !gratisVrijgegeven;
 
     const slotHtml = isGesloten ? `<div class="card-slot-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><span>Pro</span></div>` : '';
     const cardKlik = isGesloten ? `onclick="checkPro('oefeningen_limiet')"` : `onclick="openDetail('${o.id}')"`;
@@ -4025,7 +4006,7 @@ async function doLogout() {
   trainingen = [];
   wedstrijden = [];
   aanwSessies = [];
-  oefeningen = [...defaultOefeningen];
+  oefeningen = []; // reset — worden herladen uit Supabase bij inloggen
   tactBordInit = false;
   tactBorden = [];
   tactObjecten = [];
