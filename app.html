@@ -1359,7 +1359,7 @@ function initTactischBord() {
   tactCtx = tactCanvas.getContext('2d');
   tactBordInit = true;
 
-  // Borden initialiseren
+  // Reset borden bij nieuwe sessie als ze nog niet geladen zijn uit Supabase
   if (!tactBorden.length) {
     tactBorden = [{ naam: 'Bord 1', objecten: [] }];
     tactHuidigBord = 0;
@@ -2896,6 +2896,14 @@ function openAccount() {
 
 async function doLogout() {
   await sb.auth.signOut();
+  // Reset alle data zodat volgende gebruiker schoon begint
+  spelers = [];
+  trainingen = [];
+  wedstrijden = [];
+  aanwSessies = [];
+  tactBordInit = false;
+  tactBorden = [];
+  tactObjecten = [];
   cModal('accountOverlay');
 }
 
