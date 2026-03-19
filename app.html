@@ -751,6 +751,10 @@
     .card-slot-icon span { font-size:11px; font-weight:700; color:rgba(255,255,255,0.8); letter-spacing:.06em; text-transform:uppercase; }
     .card-slot { cursor:pointer !important; pointer-events:all !important; }
     .card-slot:hover::after { background:rgba(10,10,10,0.45); }
+    /* ── DETAIL SLIDER ── */
+    .detail-slide { flex:0 0 100%;width:100%; }
+    .detail-slide-dot { width:7px;height:7px;border-radius:50%;background:var(--border);cursor:pointer;transition:background 0.2s; }
+    .detail-slide-dot.active { background:var(--green); }
     /* ── VELD EDITOR ── */
     .veld-tool-btn { padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark2);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font-body);transition:all 0.15s; }
     .veld-tool-btn:hover { border-color:rgba(0,224,84,0.4); }
@@ -3007,15 +3011,40 @@ function openDetail(id){
     }).join('');
   }
 
-  // ── Video of veldtekening ──
-  const videoHtml = e
-    ? `<div class="detail-video"><iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`
-    : `<div style="background:var(--dark3);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border-radius:12px;margin:0 1.5rem 1rem">
-        <div style="text-align:center;color:var(--text-tertiary)">
-          <div style="font-size:32px;margin-bottom:8px">📹</div>
-          <div style="font-size:13px">Geen video gekoppeld</div>
-        </div>
-      </div>`;
+  // ── Slider: video + velddiagram ──
+  const heeftVideo = !!e;
+  const heeftDiagram = !!o.veld_diagram;
+  const aantalSlides = (heeftVideo ? 1 : 0) + (heeftDiagram ? 1 : 0);
+
+  let slidesHtml = '';
+  if (heeftVideo) {
+    slidesHtml += `<div class="detail-slide"><div class="detail-video"><iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media"></iframe></div></div>`;
+  }
+  if (heeftDiagram) {
+    slidesHtml += `<div class="detail-slide"><canvas id="detailVeldCanvas" width="480" height="300" style="width:100%;border-radius:12px;display:block"></canvas></div>`;
+  }
+  if (!heeftVideo && !heeftDiagram) {
+    slidesHtml = `<div class="detail-slide"><div style="background:var(--dark3);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border-radius:12px">
+      <div style="text-align:center;color:var(--text-tertiary)"><div style="font-size:32px;margin-bottom:8px">📹</div><div style="font-size:13px">Geen video of diagram</div></div></div></div>`;
+  }
+
+  const dotsHtml = aantalSlides > 1
+    ? `<div style="display:flex;justify-content:center;gap:6px;margin-top:8px;padding:0 1.5rem">
+        ${heeftVideo ? `<div class="detail-slide-dot active" id="dot_0" onclick="gaNaarSlide(0)"></div>` : ''}
+        ${heeftDiagram ? `<div class="detail-slide-dot${!heeftVideo?' active':''}" id="dot_${heeftVideo?1:0}" onclick="gaNaarSlide(${heeftVideo?1:0})"></div>` : ''}
+       </div>` : '';
+
+  const videoHtml = `
+    <div style="position:relative;overflow:hidden;margin-bottom:4px">
+      <div id="detailSlider" style="display:flex;transition:transform 0.3s ease;will-change:transform">
+        ${slidesHtml}
+      </div>
+      ${aantalSlides > 1 ? `
+        <button onclick="gaNaarSlide(0)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center" id="sliderPrev">‹</button>
+        <button onclick="gaNaarSlide(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center" id="sliderNext">›</button>
+      ` : ''}
+    </div>
+    ${dotsHtml}`;
 
   document.getElementById('detailBody').innerHTML = `
     <div class="oef-detail-wrap">
@@ -3094,10 +3123,22 @@ function openDetail(id){
         ${o.eigen||o.publiek?`<button class="oef-action-btn" style="color:#ff6b6b;border-color:rgba(255,107,107,0.2)" onclick="delOef('${id}')">Verwijderen</button>`:''}
       </div>
     </div>`;
-  // Veld diagram tonen als aanwezig
+  // Slider functie
+  window._detailSlideIndex = 0;
+  window._detailAantalSlides = aantalSlides;
+
+  // Veld canvas tekenen na render
   if (o.veld_diagram) {
-    var detailWrap = document.querySelector('#detailBody .oef-detail-wrap');
-    if (detailWrap) renderVeldDiagramInDetail(o.veld_diagram, detailWrap);
+    setTimeout(function() {
+      var c = document.getElementById('detailVeldCanvas');
+      if (!c) return;
+      var ctx = c.getContext('2d');
+      var data;
+      try { data = JSON.parse(o.veld_diagram); } catch(e) { return; }
+      _tekenHalfveld(ctx, 480, 300);
+      _tekenPijlen(ctx, data.pijlen||[]);
+      _tekenElementen(ctx, data.elementen||[]);
+    }, 80);
   }
   oModal('detailOverlay');
 }
@@ -5296,6 +5337,40 @@ async function doInstall() {
   if (outcome === 'accepted') {
     document.getElementById('installBanner')?.remove();
     installPrompt = null;
+  }
+}
+
+// ══════════════════════════════════════
+// DETAIL SLIDER
+// ══════════════════════════════════════
+function gaNaarSlide(idx) {
+  var slider = document.getElementById('detailSlider');
+  if (!slider) return;
+  var max = (window._detailAantalSlides || 1) - 1;
+  idx = Math.max(0, Math.min(idx, max));
+  window._detailSlideIndex = idx;
+  slider.style.transform = 'translateX(-' + (idx * 100) + '%)';
+  // Dots updaten
+  for (var i = 0; i <= max; i++) {
+    var dot = document.getElementById('dot_' + i);
+    if (dot) dot.classList.toggle('active', i === idx);
+  }
+  // Prev/next knoppen updaten
+  var prev = document.getElementById('sliderPrev');
+  var next = document.getElementById('sliderNext');
+  if (prev) prev.style.opacity = idx === 0 ? '0.3' : '1';
+  if (next) next.style.opacity = idx === max ? '0.3' : '1';
+  // Teken veld canvas als we naar diagram slide gaan
+  if (idx > 0) {
+    setTimeout(function() {
+      var c = document.getElementById('detailVeldCanvas');
+      if (c && c._data) {
+        var ctx = c.getContext('2d');
+        _tekenHalfveld(ctx, 480, 300);
+        _tekenPijlen(ctx, c._data.pijlen||[]);
+        _tekenElementen(ctx, c._data.elementen||[]);
+      }
+    }, 50);
   }
 }
 
