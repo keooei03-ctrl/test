@@ -2609,36 +2609,52 @@ async function generatePlan(){
   const spelers=document.getElementById('aiSpelers').value;
   const extra=document.getElementById('aiExtra').value.trim();
 
-  // Oefeningen uit bibliotheek meegeven als context
-  const oefContext=oefeningen.map(o=>`- ${o.title} (${o.cat}, ${aL(o.age)}, ${o.duur||'?'}): ${o.desc.slice(0,80)}`).join('\n');
+  // Oefeningen uit bibliotheek meegeven als context met ID
+  const oefContext = oefeningen.map(o =>
+    `- ID:${o.id} | ${o.title} (${o.cat}, ${o.duur||'?'}): ${(o.desc||'').slice(0,80)}`
+  ).join('\n');
 
-  const prompt=`Je bent een ervaren jeugdvoetbaltrainer in Nederland. Stel een concreet trainingsplan op voor de volgende situatie:
+  const totalMin = parseInt(duur) || 60;
+  const warmupMin = Math.min(10, Math.round(totalMin * 0.1));
+  const coolMin = Math.min(5, Math.round(totalMin * 0.08));
+  const kernMin = totalMin - warmupMin - coolMin;
+
+  const prompt=`Je bent een ervaren jeugdvoetbaltrainer in Nederland. Stel een concreet trainingsplan op.
 
 Leeftijdsgroep: ${age}
-Duur: ${duur}
+Totale duur: ${totalMin} minuten
 Hoofdfocus: ${focus}
 Aantal spelers: ${spelers}
 ${extra?`Extra wensen: ${extra}`:''}
 
-Beschikbare oefeningen uit de bibliotheek:
+STRIKTE TIJDSVERDELING (houd je hier EXACT aan):
+- Warming-up: ${warmupMin} minuten (1 oefening, activering en mobilisatie)
+- Techniek/passing/trap vormen: 10-15 minuten (1-2 oefeningen, kleine vormen)
+- Grotere spelvorm: 15-20 minuten (1 oefening, meer spelers betrokken)
+- Partijvorm / wedstrijdvorm: 15-20 minuten (1 oefening, zo wedstrijdecht mogelijk)
+- Cooling-down: ${coolMin} minuten (1 oefening, rustig afsluiten)
+Totaal moet exact ${totalMin} minuten zijn.
+
+Beschikbare oefeningen uit de bibliotheek (gebruik de ID als die past):
 ${oefContext}
 
-Geef een trainingsplan terug als JSON (geen markdown, geen uitleg, alleen JSON) in dit exacte formaat:
+Geef een trainingsplan terug als JSON (geen markdown, geen uitleg, alleen JSON):
 {
-  "titel": "Korte pakkende titel van het plan",
-  "samenvatting": "Twee zinnen over het doel van deze training",
+  "titel": "Korte pakkende titel",
+  "samenvatting": "Twee zinnen over het doel",
   "onderdelen": [
     {
       "naam": "Naam van onderdeel",
       "duur": "X min",
-      "beschrijving": "Concrete instructie voor de trainer (2-3 zinnen)",
-      "type": "warming-up|techniek|spelvorm|cooling-down"
+      "beschrijving": "Concrete instructie (2-3 zinnen)",
+      "type": "warming-up|techniek|spelvorm|cooling-down",
+      "oefening_id": "ID uit bibliotheek of null als eigen oefening"
     }
   ],
-  "trainerstip": "Één concrete tip voor deze specifieke training"
+  "trainerstip": "Één concrete tip voor deze training"
 }
 
-Gebruik bestaande oefeningen uit de bibliotheek waar mogelijk. Vul aan met eigen onderdelen waar nodig. Zorg dat de totale duur klopt met ${duur}. Antwoord ALLEEN met valid JSON.`;
+Gebruik oefeningen uit de bibliotheek waar mogelijk — zet dan het exacte ID in oefening_id. Antwoord ALLEEN met valid JSON.`;
 
   btn.disabled=true;
   btn.innerHTML=`<div class="ai-spinner"></div> Plan wordt gegenereerd...`;
@@ -2679,17 +2695,34 @@ function renderAIPlan(plan, age, duur, focus){
     'cooling-down':'rgba(192,132,252,0.25)'
   };
   const typeLabels={'warming-up':'Warming-up','techniek':'Techniek','spelvorm':'Spelvorm','cooling-down':'Cooling-down'};
+  const typeIcons={'warming-up':'🔥','techniek':'⚽','spelvorm':'🎯','cooling-down':'🧘'};
 
-  const onderdelen=plan.onderdelen.map((o,i)=>`
-    <div class="ai-oef-item" style="background:${typeColors[o.type]||'var(--dark3)'};border-color:${typeBorders[o.type]||'var(--border)'}">
-      <div class="ai-oef-num">${String(i+1).padStart(2,'0')}</div>
-      <div>
+  const onderdelen = plan.onderdelen.map((o,i) => {
+    // Zoek gekoppelde oefening
+    const oef = o.oefening_id ? oefeningen.find(x =>
+      String(x.id) === String(o.oefening_id) ||
+      x.id === 'pub_' + o.oefening_id ||
+      String(x.id) === 'pub_' + o.oefening_id
+    ) : null;
+
+    const oefLink = oef ? `
+      <div onclick="openDetailVanAI('${oef.id}')" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 12px;background:rgba(0,224,84,0.08);border:0.5px solid rgba(0,224,84,0.2);border-radius:8px;cursor:pointer;font-size:12px;color:var(--green);font-weight:600;transition:all 0.15s" onmouseover="this.style.background='rgba(0,224,84,0.15)'" onmouseout="this.style.background='rgba(0,224,84,0.08)'">
+        📖 Bekijk oefening: ${oef.title}
+      </div>` : '';
+
+    return `<div class="ai-oef-item" style="background:${typeColors[o.type]||'var(--dark3)'};border-color:${typeBorders[o.type]||'var(--border)'}">
+      <div class="ai-oef-num">${typeIcons[o.type]||'📌'}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:10px;padding:2px 8px;border-radius:6px;background:${typeBorders[o.type]||'var(--border)'};color:var(--text-secondary)">${typeLabels[o.type]||o.type}</span>
+          <span style="font-size:11px;color:var(--text-tertiary)">⏱ ${o.duur}</span>
+        </div>
         <div class="ai-oef-name">${o.naam}</div>
         <div class="ai-oef-desc">${o.beschrijving}</div>
-        <div style="margin-top:5px"><span style="font-size:10px;padding:2px 8px;border-radius:6px;background:${typeBorders[o.type]||'var(--border)'};color:var(--text-secondary)">${typeLabels[o.type]||o.type}</span></div>
+        ${oefLink}
       </div>
-      <div class="ai-oef-duur">⏱ ${o.duur}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   const resultEl=document.getElementById('aiResult');
   resultEl.style.display='block';
@@ -2716,11 +2749,79 @@ function renderAIPlan(plan, age, duur, focus){
           <div class="ai-block-label">Trainerstip</div>
           <div class="ai-tip"><strong>💡 Tip:</strong> ${plan.trainerstip}</div>
         </div>`:''}
-        <button class="ai-save-btn" onclick="savePlanAsTraining()">+ Dit plan opslaan als training</button>
+        <button class="btn-primary" style="width:100%;padding:14px;font-size:15px;margin-top:8px" onclick="startTrainingVanPlan()">
+          ▶ Training starten — bekijk alle oefeningen
+        </button>
       </div>
     </div>`;
   resultEl.scrollIntoView({behavior:'smooth',block:'start'});
-  window._lastPlan=plan;
+  window._lastPlan = plan;
+}
+
+function openDetailVanAI(oefId) {
+  // Open oefening detail overlay direct
+  openDetail(oefId);
+}
+
+function startTrainingVanPlan() {
+  const plan = window._lastPlan;
+  if (!plan) return;
+
+  // Bouw een trainingspagina met alle oefeningen
+  const typeColors = {
+    'warming-up':'rgba(255,184,77,0.12)',
+    'techniek':'rgba(91,184,255,0.1)',
+    'spelvorm':'rgba(0,224,84,0.08)',
+    'cooling-down':'rgba(192,132,252,0.1)'
+  };
+  const typeBorders = {
+    'warming-up':'rgba(255,184,77,0.3)',
+    'techniek':'rgba(91,184,255,0.25)',
+    'spelvorm':'rgba(0,224,84,0.25)',
+    'cooling-down':'rgba(192,132,252,0.25)'
+  };
+  const typeLabels = {'warming-up':'🔥 Warming-up','techniek':'⚽ Techniek','spelvorm':'🎯 Spelvorm','cooling-down':'🧘 Cooling-down'};
+
+  const secties = plan.onderdelen.map((o, i) => {
+    const oef = o.oefening_id ? oefeningen.find(x =>
+      String(x.id) === String(o.oefening_id) ||
+      x.id === 'pub_' + o.oefening_id ||
+      String(x.id) === 'pub_' + o.oefening_id
+    ) : null;
+
+    const embedV = oef?.video ? embedUrl(oef.video) : null;
+    const videoHtml = embedV
+      ? `<div style="aspect-ratio:16/9;border-radius:12px;overflow:hidden;margin-top:12px"><iframe src="${embedV}" style="width:100%;height:100%;border:none" allowfullscreen></iframe></div>`
+      : '';
+
+    const matHtml = oef?.materiaal ? `<div style="font-size:12px;color:var(--text-tertiary);margin-top:6px">📦 ${oef.materiaal}</div>` : '';
+    const doelHtml = oef?.doel ? `<div style="font-size:13px;color:var(--text-secondary);margin-top:8px;padding:10px;background:var(--dark3);border-radius:8px;border-left:2px solid var(--green)">🎯 <em>${oef.doel}</em></div>` : '';
+
+    return `<div style="background:var(--dark2);border:0.5px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:12px;border-top:3px solid ${typeBorders[o.type]||'var(--border)'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)">${typeLabels[o.type]||o.type} — Onderdeel ${i+1}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--green)">⏱ ${o.duur}</span>
+      </div>
+      <div style="font-family:var(--font-display);font-size:22px;letter-spacing:1px;color:var(--text);margin-bottom:8px">${o.naam}</div>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">${o.beschrijving}</div>
+      ${oef ? `
+        ${matHtml}
+        ${doelHtml}
+        ${videoHtml}
+        ${oef.coaching_punten ? `<div style="margin-top:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:6px">Coachingspunten</div>${oef.coaching_punten.split('\n').filter(s=>s.trim()).map(s=>`<div style="font-size:13px;color:var(--text-secondary);padding:4px 0;border-bottom:0.5px solid var(--border)">→ ${s}</div>`).join('')}</div>` : ''}
+      ` : ''}
+    </div>`;
+  }).join('');
+
+  // Toon in een fullscreen overlay
+  document.getElementById('trainingsOverlayBody').innerHTML = `
+    <div style="padding:1.5rem">
+      <div style="font-family:var(--font-display);font-size:28px;letter-spacing:1px;color:var(--text);margin-bottom:4px">${plan.titel}</div>
+      <div style="font-size:13px;color:var(--text-tertiary);margin-bottom:1.5rem">${plan.samenvatting}</div>
+      ${secties}
+      ${plan.trainerstip ? `<div style="background:rgba(0,224,84,0.06);border:0.5px solid rgba(0,224,84,0.2);border-radius:12px;padding:1rem;margin-top:8px"><strong style="color:var(--green)">💡 Trainerstip:</strong> <span style="color:var(--text-secondary)">${plan.trainerstip}</span></div>` : ''}
+    </div>`;
+  oModal('trainingsOverlay');
 }
 
 function savePlanAsTraining(){
@@ -5243,6 +5344,14 @@ async function doInstall() {
       <button class="btn-cancel" onclick="cModal('aanwAgendaOverlay')">Annuleren</button>
       <button class="btn-primary" onclick="slaAanwOp()">Opslaan</button>
     </div>
+  </div>
+</div>
+
+<!-- OVERLAY: TRAINING STARTEN -->
+<div class="overlay" id="trainingsOverlay" onclick="oClick(event,'trainingsOverlay')">
+  <div class="modal" style="max-width:680px;max-height:90vh;overflow-y:auto">
+    <button class="modal-close" onclick="cModal('trainingsOverlay')">✕</button>
+    <div id="trainingsOverlayBody"></div>
   </div>
 </div>
 
