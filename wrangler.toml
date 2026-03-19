@@ -1,7 +1,2 @@
 name = "test"
-compatibility_date = "2024-01-01"
-
-[assets]
-directory = "."
 pages_build_output_dir = "."
-name = "test"
