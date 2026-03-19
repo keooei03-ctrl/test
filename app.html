@@ -2323,6 +2323,7 @@ function renderSpeelminGrid() {
 
 function submitWedstrijd(){
   if (checkDemoEnToon('Wedstrijd opslaan', 'Maak een gratis account aan om wedstrijden bij te houden.', '⚽')) return;
+  if (!isPro() && wedstrijden.length >= 5) { checkPro('wedstrijden'); return; }
   const datum=document.getElementById('wDatum').value;
   const tegen=document.getElementById('wTegenstander').value.trim();
   let ok=true;
@@ -2609,6 +2610,7 @@ function setExample(txt){ document.getElementById('aiExtra').value=txt; }
 
 async function generatePlan(){
   if (checkDemoEnToon('AI Trainingsplan', 'Maak een gratis account aan om AI trainingsplannen te genereren.', '✦')) return;
+  if (!checkPro('ai')) return;
   const btn=document.getElementById('aiGenBtn');
   const resultEl=document.getElementById('aiResult');
   const age=document.getElementById('aiAge').value;
@@ -3093,6 +3095,7 @@ function openAddOef(){
 }
 function submitOefening(){
   if (checkDemoEnToon('Oefening opslaan', 'Maak een gratis account aan om eigen oefeningen toe te voegen.', '🎯')) return;
+  if (!isPro() && oefeningen.filter(function(o){return o.eigen;}).length >= 3) { checkPro('oefeningen'); return; }
   const title=document.getElementById('fTitle').value.trim(),desc=document.getElementById('fDesc').value.trim(),vid=document.getElementById('fVideo').value.trim();
   let ok=true;
   document.getElementById('errTitle').style.display=title?'none':'block';if(!title)ok=false;
@@ -3246,6 +3249,7 @@ function openSpeler(id){
   oModal('spelerDetailOverlay');
 }
 function genereerSpelerRapport(id) {
+  if (!checkPro('rapport')) return;
   const s = spelers.find(x => x.id === id); if (!s) return;
   const leeftijd = s.jaar ? new Date().getFullYear() - s.jaar : null;
   const st = trainingen.filter(t => t.sid === id).sort((a,b) => new Date(a.datum)-new Date(b.datum));
@@ -4059,17 +4063,41 @@ function checkSpelerLimiet() {
 }
 
 function toonLimietMelding(type, limiet) {
-  document.getElementById('accountModalBody').innerHTML = `
-    <div style="text-align:center;padding:1rem 0">
-      <div style="font-size:36px;margin-bottom:1rem">🔒</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:#f0f0f0;margin-bottom:8px">Limiet bereikt</div>
-      <div style="font-size:13px;color:#888;margin-bottom:1.5rem">Het gratis plan heeft een limiet van ${limiet} ${type}.<br>Upgrade naar Pro voor onbeperkt gebruik.</div>
-      <button onclick="openUpgrade();cModal('accountOverlay')" style="width:100%;padding:12px;border-radius:10px;background:#00e054;color:#0a0a0a;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">
-        Upgraden naar Pro · €7/maand
-      </button>
-    </div>
-  `;
+  checkPro(type === 'spelers' ? 'spelers' : type);
+}
+
+function isPro() {
+  return huidigPlan === 'pro' || huidigPlan === 'club' || huidigPlan === 'admin';
+}
+
+function checkPro(functie) {
+  if (isPro()) return true;
+  var berichten = {
+    'ai': 'De AI trainingsplan generator is een Pro functie.',
+    'rapport': 'Speler rapporten genereren is een Pro functie.',
+    'spelers': 'Je hebt het maximum van 5 spelers bereikt op het gratis plan.',
+    'oefeningen': 'Je hebt het maximum van 3 eigen oefeningen bereikt op het gratis plan.',
+    'wedstrijden': 'Je hebt het maximum van 5 wedstrijden bereikt op het gratis plan.',
+    'schema': 'Het herhalend trainingsschema is een Pro functie.',
+    'community': 'Berichten posten in de community is een Pro functie.',
+    'oefenwedstrijden': 'Oefenwedstrijden aanvragen is een Pro functie.'
+  };
+  var msg = berichten[functie] || 'Deze functie is beschikbaar in het Pro plan.';
+  var feats = ['Onbeperkt spelers & wedstrijden','AI trainingsplan generator','Speler rapport als PDF','Herhalend trainingsschema','Onbeperkt eigen oefeningen','Community berichten posten','Oefenwedstrijden aanvragen'];
+  var html = '<div style="text-align:center;padding:1rem 0">'
+    + '<div style="font-size:40px;margin-bottom:1rem">&#11088;</div>'
+    + '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:24px;letter-spacing:1px;color:#f0f0f0;margin-bottom:8px">Pro functie</div>'
+    + '<div style="font-size:14px;color:#888;margin-bottom:1rem;line-height:1.6">' + msg + '</div>'
+    + '<div style="background:var(--dark3);border-radius:12px;padding:1rem;margin-bottom:1.5rem;text-align:left">'
+    + '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Pro plan bevat:</div>'
+    + feats.map(function(f) { return '<div style="font-size:13px;color:#aaa;padding:3px 0">&#10003; ' + f + '</div>'; }).join('')
+    + '</div>'
+    + '<button onclick="openUpgrade();cModal(\'accountOverlay\')" style="width:100%;padding:14px;border-radius:12px;background:#00e054;color:#0a0a0a;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">Upgraden naar Pro &middot; &euro;7/maand</button>'
+    + '<button onclick="cModal(\'accountOverlay\')" style="width:100%;padding:10px;border-radius:12px;background:none;color:#555;border:0.5px solid #333;font-size:13px;cursor:pointer">Verder met gratis plan</button>'
+    + '</div>';
+  document.getElementById('accountModalBody').innerHTML = html;
   oModal('accountOverlay');
+  return false;
 }
 
 // ── SEIZOENSPLANNING ──
@@ -4315,6 +4343,7 @@ async function verwijderPlanItem(id) {
 
 // ── HERHALEND SCHEMA ──
 async function openSchemaInstellingen() {
+  if (!checkPro('schema')) return;
   oModal('schemaOverlay');
   renderSchemaLijst();
 }
@@ -4530,6 +4559,7 @@ function renderOwGrid() {
 
 function openNieuwVerzoek() {
   if (checkDemoEnToon('Verzoek plaatsen', 'Maak een gratis account aan om oefenwedstrijden te zoeken.', '🤝')) return;
+  if (!checkPro('oefenwedstrijden')) return;
   document.getElementById('owClub').value = '';
   document.getElementById('owTeam').value = '';
   document.getElementById('owNiveau').value = '';
@@ -4793,6 +4823,7 @@ function renderCommunity() {
 }
 
 async function postBericht() {
+  if (!checkPro('community')) return;
   const input = document.getElementById('communityInput');
   const inhoud = input.value.trim();
   if (!inhoud) return;
