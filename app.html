@@ -3020,9 +3020,207 @@ function openSpeler(id){
 
       <div class="sec-label">Recente trainingen</div>
       ${th}
-      <button class="del-btn" onclick="delSpeler(${id})">Speler verwijderen</button>
+      <div style="display:flex;gap:8px;margin-top:1.5rem">
+        <button class="btn-primary" style="flex:1;padding:12px" onclick="genereerSpelerRapport(${id})">📄 Rapport genereren</button>
+        <button class="del-btn" onclick="delSpeler(${id})">Verwijderen</button>
+      </div>
     </div>`;
   oModal('spelerDetailOverlay');
+}
+function genereerSpelerRapport(id) {
+  const s = spelers.find(x => x.id === id); if (!s) return;
+  const leeftijd = s.jaar ? new Date().getFullYear() - s.jaar : null;
+  const st = trainingen.filter(t => t.sid === id).sort((a,b) => new Date(a.datum)-new Date(b.datum));
+  const pct = aanwPct(id);
+  const wedMetMin = wedstrijden.filter(w => w.speelminuten && w.speelminuten[id] > 0);
+  const totaalMin = wedMetMin.reduce((sum,w) => sum + (w.speelminuten[id]||0), 0);
+  const teamNaam = huidigUser?.user_metadata?.naam || huidigUser?.email?.split('@')[0] || 'Trainer';
+  const vandaag = new Date().toLocaleDateString('nl-NL', { day:'numeric', month:'long', year:'numeric' });
+
+  // Aanwezigheid per maand voor grafiek
+  const maandData = {};
+  aanwSessies.forEach(sess => {
+    const maand = sess.datum?.slice(0,7);
+    if (!maand) return;
+    if (!maandData[maand]) maandData[maand] = { aanwezig:0, totaal:0 };
+    if (sess.aanwezig[id] !== undefined && sess.aanwezig[id] !== null) {
+      maandData[maand].totaal++;
+      if (sess.aanwezig[id] === 'aanwezig' || sess.aanwezig[id] === true) maandData[maand].aanwezig++;
+    }
+  });
+  const maanden = Object.keys(maandData).sort().slice(-6);
+
+  // SVG aanwezigheidsgrafiek
+  const grafiekW = 500, grafiekH = 80;
+  let grafiekSvg = '';
+  if (maanden.length >= 2) {
+    const maxPct = 100;
+    const pts = maanden.map((m, i) => {
+      const d = maandData[m];
+      const p = d.totaal ? Math.round(d.aanwezig/d.totaal*100) : 0;
+      const x = 20 + (i/(maanden.length-1))*(grafiekW-40);
+      const y = grafiekH - 10 - (p/maxPct)*(grafiekH-20);
+      return {x, y, p, m};
+    });
+    const line = pts.map((p,i) => `${i===0?'M':'L'}${p.x},${p.y}`).join(' ');
+    const area = `${line} L${pts[pts.length-1].x},${grafiekH} L${pts[0].x},${grafiekH} Z`;
+    grafiekSvg = `<svg width="${grafiekW}" height="${grafiekH}" viewBox="0 0 ${grafiekW} ${grafiekH}" style="width:100%">
+      <path d="${area}" fill="rgba(0,168,84,0.1)"/>
+      <path d="${line}" fill="none" stroke="#00a854" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#00a854"/>`).join('')}
+      ${pts.map(p => `<text x="${p.x}" y="${grafiekH-1}" text-anchor="middle" font-size="9" fill="#666">${p.m.slice(5)}</text>`).join('')}
+      ${pts.map(p => `<text x="${p.x}" y="${p.y-7}" text-anchor="middle" font-size="9" fill="#00a854" font-weight="bold">${p.p}%</text>`).join('')}
+    </svg>`;
+  }
+
+  // Recente trainingsnotities
+  const notities = st.slice(-8).reverse().filter(t => t.notitie).map(t =>
+    `<tr><td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;color:#666;font-size:12px;white-space:nowrap">${fmtD(t.datum)}</td>
+     <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px">
+       ${'★'.repeat(t.ster||0)}${'☆'.repeat(5-(t.ster||0))} ${t.notitie}
+     </td></tr>`
+  ).join('');
+
+  // Wedstrijden overzicht
+  const wedRijen = wedMetMin.slice(-6).reverse().map(w =>
+    `<tr><td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:12px;white-space:nowrap">${fmtD(w.datum)}</td>
+     <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px">${w.tegenstander||'–'}</td>
+     <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;text-align:center">${w.doelVoor}–${w.doelTegen}</td>
+     <td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px;text-align:center;font-weight:bold;color:#00a854">${w.speelminuten[id]}'</td></tr>`
+  ).join('');
+
+  const aanwKleur = pct >= 80 ? '#00a854' : pct >= 60 ? '#f59e0b' : '#ef4444';
+
+  const html = `<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Spelersrapport — ${s.naam}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #1a1a1a; background:#fff; padding:40px; max-width:800px; margin:0 auto; }
+  @media print { body { padding:20px; } .no-print { display:none; } }
+
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; padding-bottom:20px; border-bottom:3px solid #00a854; }
+  .logo-blok { display:flex; align-items:center; gap:12px; }
+  .logo-cirkel { width:48px; height:48px; background:#00a854; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-size:22px; font-weight:900; flex-shrink:0; }
+  .logo-naam { font-size:22px; font-weight:900; letter-spacing:2px; color:#111; }
+  .logo-sub { font-size:11px; color:#888; letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+  .rapport-datum { font-size:12px; color:#888; text-align:right; }
+
+  .speler-blok { display:flex; align-items:center; gap:20px; background:#f8faf8; border:1px solid #e0f0e8; border-radius:16px; padding:24px; margin-bottom:28px; }
+  .avatar { width:72px; height:72px; border-radius:50%; background:#00a854; color:white; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:900; flex-shrink:0; }
+  .speler-naam { font-size:28px; font-weight:900; color:#111; margin-bottom:4px; }
+  .speler-sub { font-size:14px; color:#666; }
+
+  .stats-rij { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
+  .stat-blok { background:#f8f8f8; border-radius:12px; padding:16px; text-align:center; border:1px solid #eee; }
+  .stat-num { font-size:28px; font-weight:900; color:#111; line-height:1; }
+  .stat-label { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:.06em; margin-top:4px; }
+
+  .sectie { margin-bottom:28px; }
+  .sectie-titel { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#888; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid #eee; }
+
+  table { width:100%; border-collapse:collapse; }
+  th { background:#f5f5f5; padding:8px 10px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#888; }
+
+  .notitie-blok { background:#fff8e6; border-left:3px solid #f59e0b; border-radius:0 8px 8px 0; padding:12px 16px; margin-bottom:8px; font-size:13px; line-height:1.6; }
+  .footer { margin-top:40px; padding-top:16px; border-top:1px solid #eee; display:flex; justify-content:space-between; font-size:11px; color:#aaa; }
+  .print-btn { background:#00a854; color:white; border:none; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; margin-bottom:24px; }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">🖨 Rapport printen / opslaan als PDF</button>
+
+<div class="header">
+  <div class="logo-blok">
+    <div class="logo-cirkel">T</div>
+    <div>
+      <div class="logo-naam">TRAINERSHUB</div>
+      <div class="logo-sub">Spelersrapport · Seizoen ${new Date().getFullYear()}</div>
+    </div>
+  </div>
+  <div class="rapport-datum">
+    Gegenereerd op<br><strong>${vandaag}</strong><br><br>
+    Trainer: ${teamNaam}
+  </div>
+</div>
+
+<div class="speler-blok">
+  <div class="avatar">${ini(s.naam)}</div>
+  <div>
+    <div class="speler-naam">${s.naam}</div>
+    <div class="speler-sub">
+      ${s.positie || 'Positie onbekend'}${leeftijd ? ' · ' + leeftijd + ' jaar' : ''}${s.jaar ? ' (geb. ' + s.jaar + ')' : ''}${s.voet ? ' · Sterkste voet: ' + s.voet : ''}${s.nummer ? ' · Rugnummer #' + s.nummer : ''}
+    </div>
+  </div>
+</div>
+
+<div class="stats-rij">
+  <div class="stat-blok">
+    <div class="stat-num">${st.length}</div>
+    <div class="stat-label">Trainingen</div>
+  </div>
+  <div class="stat-blok">
+    <div class="stat-num" style="color:${aanwKleur}">${pct !== null ? pct + '%' : '–'}</div>
+    <div class="stat-label">Aanwezigheid</div>
+  </div>
+  <div class="stat-blok">
+    <div class="stat-num" style="color:#00a854">${totaalMin > 0 ? totaalMin + "'" : '–'}</div>
+    <div class="stat-label">Speelminuten</div>
+  </div>
+  <div class="stat-blok">
+    <div class="stat-num">${wedMetMin.length}</div>
+    <div class="stat-label">Wedstrijden</div>
+  </div>
+</div>
+
+${maanden.length >= 2 ? `
+<div class="sectie">
+  <div class="sectie-titel">Aanwezigheid per maand</div>
+  ${grafiekSvg}
+</div>` : ''}
+
+${notities ? `
+<div class="sectie">
+  <div class="sectie-titel">Trainingsnotities van de trainer</div>
+  <table>
+    <tr><th>Datum</th><th>Notitie</th></tr>
+    ${notities}
+  </table>
+</div>` : ''}
+
+${wedRijen ? `
+<div class="sectie">
+  <div class="sectie-titel">Speelminuten overzicht</div>
+  <table>
+    <tr><th>Datum</th><th>Tegenstander</th><th>Uitslag</th><th>Minuten</th></tr>
+    ${wedRijen}
+  </table>
+</div>` : ''}
+
+${s.notities ? `
+<div class="sectie">
+  <div class="sectie-titel">Algemene notities</div>
+  <div class="notitie-blok">${s.notities}</div>
+</div>` : ''}
+
+<div class="footer">
+  <div>TrainersHub · trainershub.nl</div>
+  <div>${s.naam} · Seizoen ${new Date().getFullYear()}</div>
+</div>
+
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+function genereerTeamRapport() {
+  // Toekomst: rapport voor heel team
 }
 function delSpeler(id){
   spelers=spelers.filter(s=>s.id!==id);
