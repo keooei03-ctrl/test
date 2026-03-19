@@ -751,6 +751,10 @@
     .card-slot-icon span { font-size:11px; font-weight:700; color:rgba(255,255,255,0.8); letter-spacing:.06em; text-transform:uppercase; }
     .card-slot { cursor:pointer !important; pointer-events:all !important; }
     .card-slot:hover::after { background:rgba(10,10,10,0.45); }
+    /* ── VELD EDITOR ── */
+    .veld-tool-btn { padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark2);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font-body);transition:all 0.15s; }
+    .veld-tool-btn:hover { border-color:rgba(0,224,84,0.4); }
+    .veld-tool-btn.active { border-color:rgba(0,224,84,0.6);background:rgba(0,224,84,0.12);color:#00e054; }
     .ow-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 14px; margin-top: 1.5rem; }
     .ow-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 16px; padding: 1.25rem; transition: all 0.2s; position: relative; overflow: hidden; }
     .ow-card:hover { border-color: rgba(0,224,84,0.2); transform: translateY(-2px); }
@@ -3090,6 +3094,11 @@ function openDetail(id){
         ${o.eigen||o.publiek?`<button class="oef-action-btn" style="color:#ff6b6b;border-color:rgba(255,107,107,0.2)" onclick="delOef('${id}')">Verwijderen</button>`:''}
       </div>
     </div>`;
+  // Veld diagram tonen als aanwezig
+  if (o.veld_diagram) {
+    var detailWrap = document.querySelector('#detailBody .oef-detail-wrap');
+    if (detailWrap) renderVeldDiagramInDetail(o.veld_diagram, detailWrap);
+  }
   oModal('detailOverlay');
 }
 function delOef(id){
@@ -4910,6 +4919,7 @@ async function laadPubliekeOefeningen() {
             doel: o.doel, materiaal: o.materiaal, video: o.video,
             coaching_punten: o.coaching_punten, variaties: o.variaties,
             gratis_zichtbaar: o.gratis_zichtbaar || false,
+            veld_diagram: o.veld_diagram || null,
             eigen: false, publiek: true
           });
         }
@@ -4951,6 +4961,10 @@ function openAdminOefening(o = null) {
   document.getElementById('aoSubmitBtn').textContent = o ? 'Wijzigingen opslaan' : 'Opslaan voor iedereen';
   document.querySelector('#adminOefOverlay .form-title').textContent = o ? 'Oefening bewerken' : 'Publieke oefening toevoegen';
   oModal('adminOefOverlay');
+  setTimeout(function() {
+    initVeldEditor();
+    laadVeldDiagram(o?.veld_diagram || null);
+  }, 100);
 }
 
 async function submitAdminOefening() {
@@ -4975,7 +4989,8 @@ async function submitAdminOefening() {
     materiaal: document.getElementById('aoMat').value.trim(),
     coaching_punten: document.getElementById('aoCoaching').value.trim(),
     variaties: document.getElementById('aoVariaties').value.trim(),
-    video: vid || null
+    video: vid || null,
+    veld_diagram: document.getElementById('aoVeldDiagram').value || null
   };
 
   if (adminBewerkId) {
@@ -5010,6 +5025,7 @@ async function submitAdminOefening() {
       doel: data.doel, materiaal: data.materiaal, video: data.video,
       coaching_punten: data.coaching_punten, variaties: data.variaties,
       gratis_zichtbaar: data.gratis_zichtbaar || false,
+      veld_diagram: data.veld_diagram || null,
       eigen: false, publiek: true
     });
   }
@@ -5245,6 +5261,207 @@ async function doInstall() {
     document.getElementById('installBanner')?.remove();
     installPrompt = null;
   }
+}
+
+// ══════════════════════════════════════
+// VELD EDITOR
+// ══════════════════════════════════════
+var veldTool = 'aanvaller';
+var veldElementen = [];
+var veldPijlen = [];
+var veldTekenen = false;
+var veldStartX = 0, veldStartY = 0;
+var veldAantalA = 0, veldAantalV = 0, veldAantalN = 0;
+
+function setVeldTool(tool) {
+  veldTool = tool;
+  document.querySelectorAll('.veld-tool-btn').forEach(function(b){ b.classList.remove('active'); });
+  var btn = document.getElementById('vt_' + tool);
+  if (btn) btn.classList.add('active');
+}
+
+function clearVeld() {
+  veldElementen = []; veldPijlen = [];
+  veldAantalA = 0; veldAantalV = 0; veldAantalN = 0;
+  tekenVeldCanvas(); slaVeldOp();
+}
+
+function tekenVeldCanvas() {
+  var canvas = document.getElementById('veldEditor');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  _tekenHalfveld(ctx, W, H);
+  _tekenPijlen(ctx, veldPijlen);
+  _tekenElementen(ctx, veldElementen);
+}
+
+function _tekenHalfveld(ctx, W, H) {
+  ctx.fillStyle = '#2d6b27'; ctx.fillRect(0,0,W,H);
+  for (var i=0;i<6;i++) { ctx.fillStyle=i%2===0?'#2d6b27':'#316e2b'; ctx.fillRect(i*(W/6),0,W/6,H); }
+  ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=1.5;
+  ctx.strokeRect(16,16,W-32,H-32);
+  ctx.strokeRect(W-90,H/2-60,74,120);
+  ctx.strokeRect(W-50,H/2-35,34,70);
+  ctx.beginPath(); ctx.arc(W-90,H/2,50,-Math.PI*0.6,Math.PI*0.6); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.arc(W-68,H/2,3,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.9)';
+  ctx.fillRect(W-18,H/2-28,5,56); ctx.fillRect(W-18,H/2-28,22,4); ctx.fillRect(W-18,H/2+24,22,4);
+}
+
+function _tekenPijlen(ctx, pijlen) {
+  (pijlen||[]).forEach(function(p) {
+    ctx.beginPath(); ctx.setLineDash(p.type==='paslijn'?[7,4]:[]);
+    ctx.moveTo(p.x1,p.y1); ctx.lineTo(p.x2,p.y2);
+    ctx.strokeStyle=p.type==='paslijn'?'rgba(255,230,80,0.9)':'rgba(100,220,100,0.9)';
+    ctx.lineWidth=2; ctx.stroke(); ctx.setLineDash([]);
+    var angle=Math.atan2(p.y2-p.y1,p.x2-p.x1);
+    ctx.beginPath(); ctx.moveTo(p.x2,p.y2);
+    ctx.lineTo(p.x2-10*Math.cos(angle-0.4),p.y2-10*Math.sin(angle-0.4));
+    ctx.lineTo(p.x2-10*Math.cos(angle+0.4),p.y2-10*Math.sin(angle+0.4));
+    ctx.closePath(); ctx.fillStyle=p.type==='paslijn'?'rgba(255,230,80,0.9)':'rgba(100,220,100,0.9)'; ctx.fill();
+  });
+}
+
+function _tekenElementen(ctx, elementen) {
+  (elementen||[]).forEach(function(el) {
+    ctx.save();
+    if (el.type==='aanvaller'||el.type==='verdediger'||el.type==='neutraal') {
+      var fill = el.type==='aanvaller'?'#1b5e20':el.type==='verdediger'?'#b71c1c':'#37474f';
+      var stroke = el.type==='aanvaller'?'#69f0ae':el.type==='verdediger'?'#ff5252':'#b0bec5';
+      ctx.beginPath(); ctx.arc(el.x,el.y,14,0,Math.PI*2);
+      ctx.fillStyle=fill; ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle=stroke; ctx.stroke();
+      ctx.fillStyle='#fff'; ctx.font='bold 10px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(el.label||el.type[0].toUpperCase(),el.x,el.y);
+    } else if (el.type==='bal') {
+      ctx.beginPath(); ctx.arc(el.x,el.y,9,0,Math.PI*2);
+      ctx.fillStyle='#fffde7'; ctx.fill(); ctx.lineWidth=1.5; ctx.strokeStyle='#f9a825'; ctx.stroke();
+      ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(el.x,el.y,3,0,Math.PI*2); ctx.fill();
+    } else if (el.type==='pion') {
+      ctx.beginPath(); ctx.moveTo(el.x,el.y-12); ctx.lineTo(el.x+9,el.y+6); ctx.lineTo(el.x-9,el.y+6); ctx.closePath();
+      ctx.fillStyle='#ff9800'; ctx.fill(); ctx.lineWidth=1.5; ctx.strokeStyle='#e65100'; ctx.stroke();
+      ctx.fillStyle='#e65100'; ctx.fillRect(el.x-5,el.y+6,10,4);
+    } else if (el.type==='minidoel') {
+      ctx.fillStyle='rgba(255,255,255,0.85)';
+      ctx.fillRect(el.x-16,el.y-8,4,28); ctx.fillRect(el.x-16,el.y-8,20,4); ctx.fillRect(el.x-16,el.y+16,20,4);
+    }
+    ctx.restore();
+  });
+}
+
+function veldGetPos(e, canvas) {
+  var r = canvas.getBoundingClientRect();
+  var scaleX = canvas.width/r.width, scaleY = canvas.height/r.height;
+  var cx = e.touches ? e.touches[0].clientX : e.clientX;
+  var cy = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: (cx-r.left)*scaleX, y: (cy-r.top)*scaleY };
+}
+
+function veldKlik(e) {
+  var canvas = document.getElementById('veldEditor');
+  if (!canvas) return;
+  var pos = veldGetPos(e, canvas);
+  if (veldTool==='pijl'||veldTool==='paslijn') return;
+  if (veldTool==='gum') {
+    var idx = -1;
+    for (var i=0;i<veldElementen.length;i++) {
+      var dx=veldElementen[i].x-pos.x, dy=veldElementen[i].y-pos.y;
+      if (Math.sqrt(dx*dx+dy*dy)<18) { idx=i; break; }
+    }
+    if (idx>=0) { veldElementen.splice(idx,1); tekenVeldCanvas(); slaVeldOp(); }
+    return;
+  }
+  var label = '';
+  if (veldTool==='aanvaller') { veldAantalA++; label='A'+veldAantalA; }
+  else if (veldTool==='verdediger') { veldAantalV++; label='V'+veldAantalV; }
+  else if (veldTool==='neutraal') { veldAantalN++; label='N'+veldAantalN; }
+  veldElementen.push({ type:veldTool, x:pos.x, y:pos.y, label:label });
+  tekenVeldCanvas(); slaVeldOp();
+}
+
+function veldDragStart(e) {
+  if (veldTool!=='pijl'&&veldTool!=='paslijn') return;
+  e.preventDefault();
+  var canvas = document.getElementById('veldEditor');
+  var pos = veldGetPos(e, canvas);
+  veldTekenen=true; veldStartX=pos.x; veldStartY=pos.y;
+}
+
+function veldDragMove(e) {
+  if (!veldTekenen) return;
+  e.preventDefault();
+  var canvas = document.getElementById('veldEditor');
+  var pos = veldGetPos(e, canvas);
+  tekenVeldCanvas();
+  var ctx = canvas.getContext('2d');
+  ctx.beginPath(); ctx.setLineDash(veldTool==='paslijn'?[7,4]:[]);
+  ctx.moveTo(veldStartX,veldStartY); ctx.lineTo(pos.x,pos.y);
+  ctx.strokeStyle=veldTool==='paslijn'?'rgba(255,230,80,0.7)':'rgba(100,220,100,0.7)';
+  ctx.lineWidth=2; ctx.stroke(); ctx.setLineDash([]);
+}
+
+function veldDragEnd(e) {
+  if (!veldTekenen) return;
+  veldTekenen=false;
+  var canvas = document.getElementById('veldEditor');
+  var src = e.changedTouches ? {clientX:e.changedTouches[0].clientX,clientY:e.changedTouches[0].clientY} : e;
+  var pos = veldGetPos(src, canvas);
+  var dx=pos.x-veldStartX, dy=pos.y-veldStartY;
+  if (Math.sqrt(dx*dx+dy*dy)>15) {
+    veldPijlen.push({ type:veldTool, x1:veldStartX, y1:veldStartY, x2:pos.x, y2:pos.y });
+  }
+  tekenVeldCanvas(); slaVeldOp();
+}
+
+function slaVeldOp() {
+  var inp = document.getElementById('aoVeldDiagram');
+  if (inp) inp.value = JSON.stringify({ elementen:veldElementen, pijlen:veldPijlen });
+}
+
+function initVeldEditor() {
+  var canvas = document.getElementById('veldEditor');
+  if (!canvas) return;
+  canvas.addEventListener('click', veldKlik);
+  canvas.addEventListener('mousedown', veldDragStart);
+  canvas.addEventListener('mousemove', veldDragMove);
+  canvas.addEventListener('mouseup', veldDragEnd);
+  canvas.addEventListener('touchstart', veldDragStart, { passive:false });
+  canvas.addEventListener('touchmove', veldDragMove, { passive:false });
+  canvas.addEventListener('touchend', veldDragEnd);
+  tekenVeldCanvas();
+}
+
+function laadVeldDiagram(jsonStr) {
+  veldElementen=[]; veldPijlen=[];
+  veldAantalA=0; veldAantalV=0; veldAantalN=0;
+  if (!jsonStr) { tekenVeldCanvas(); return; }
+  try {
+    var data = typeof jsonStr==='string' ? JSON.parse(jsonStr) : jsonStr;
+    veldElementen = data.elementen||[];
+    veldPijlen = data.pijlen||[];
+    veldElementen.forEach(function(el) {
+      if (el.type==='aanvaller') veldAantalA++;
+      else if (el.type==='verdediger') veldAantalV++;
+      else if (el.type==='neutraal') veldAantalN++;
+    });
+  } catch(err) {}
+  tekenVeldCanvas();
+}
+
+function renderVeldDiagramInDetail(jsonStr, container) {
+  if (!jsonStr||!container) return;
+  var data;
+  try { data = typeof jsonStr==='string'?JSON.parse(jsonStr):jsonStr; } catch(e) { return; }
+  if (!data||(!data.elementen?.length&&!data.pijlen?.length)) return;
+  var canvas = document.createElement('canvas');
+  canvas.width=480; canvas.height=300;
+  canvas.style.cssText='width:100%;border-radius:10px;display:block;margin-bottom:12px';
+  container.insertBefore(canvas, container.firstChild);
+  var ctx = canvas.getContext('2d');
+  _tekenHalfveld(ctx, 480, 300);
+  _tekenPijlen(ctx, data.pijlen||[]);
+  _tekenElementen(ctx, data.elementen||[]);
 }
 </script>
 <!-- MODAL: aanwezigheid nieuwe training -->
@@ -5751,6 +5968,35 @@ async function doInstall() {
         <input class="form-input" id="aoVideo" type="url" placeholder="https://youtube.com/watch?v=...">
         <div class="form-hint">Plak een YouTube of Vimeo link — wordt automatisch ingebed.</div>
       </div>
+
+      <div class="form-group">
+        <label class="form-label">Veld diagram</label>
+        <div style="background:var(--dark3);border-radius:12px;padding:12px;border:0.5px solid var(--border)">
+
+          <!-- Toolbar -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="veldToolbar">
+            <button type="button" onclick="setVeldTool('aanvaller')" id="vt_aanvaller" class="veld-tool-btn active" title="Aanvaller">🟢 A</button>
+            <button type="button" onclick="setVeldTool('verdediger')" id="vt_verdediger" class="veld-tool-btn" title="Verdediger">🔴 V</button>
+            <button type="button" onclick="setVeldTool('neutraal')" id="vt_neutraal" class="veld-tool-btn" title="Neutrale speler">⚫ N</button>
+            <button type="button" onclick="setVeldTool('bal')" id="vt_bal" class="veld-tool-btn" title="Bal">⚽</button>
+            <button type="button" onclick="setVeldTool('pion')" id="vt_pion" class="veld-tool-btn" title="Pion">🔺</button>
+            <button type="button" onclick="setVeldTool('minidoel')" id="vt_minidoel" class="veld-tool-btn" title="Mini doel">🥅</button>
+            <button type="button" onclick="setVeldTool('pijl')" id="vt_pijl" class="veld-tool-btn" title="Looplijn">➡️ Lijn</button>
+            <button type="button" onclick="setVeldTool('paslijn')" id="vt_paslijn" class="veld-tool-btn" title="Paslijn">- - Pass</button>
+            <button type="button" onclick="setVeldTool('gum')" id="vt_gum" class="veld-tool-btn" title="Verwijderen">🗑️</button>
+            <button type="button" onclick="clearVeld()" class="veld-tool-btn" style="margin-left:auto;color:#ff6b6b">✕ Leegmaken</button>
+          </div>
+
+          <!-- Canvas halfveld -->
+          <canvas id="veldEditor" width="480" height="300" style="width:100%;border-radius:8px;cursor:crosshair;touch-action:none"></canvas>
+
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px">
+            Klik om te plaatsen · Sleep voor lijnen · Klik op element + 🗑️ om te verwijderen
+          </div>
+        </div>
+        <input type="hidden" id="aoVeldDiagram">
+      </div>
+
       <div class="form-actions">
         <button class="btn-cancel" onclick="cModal('adminOefOverlay')">Annuleren</button>
         <button class="btn-primary" id="aoSubmitBtn" onclick="submitAdminOefening()">Opslaan voor iedereen</button>
