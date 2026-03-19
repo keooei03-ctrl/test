@@ -708,6 +708,9 @@
     /* Kalender grid */
     .plan-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
     .plan-dag { min-height:90px; background:var(--dark2); border-radius:8px; border:0.5px solid var(--border); padding:6px; cursor:pointer; transition:all 0.15s; position:relative; }
+    .plan-dag:hover { border-color:rgba(0,224,84,0.2); }
+    .plan-dag:hover .plan-dag-plus { opacity:1; }
+    .plan-dag-plus { position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:50%; background:rgba(0,224,84,0.15); color:#00e054; font-size:14px; line-height:18px; text-align:center; opacity:0; transition:opacity 0.15s; cursor:pointer; font-weight:300; }
     .plan-dag:hover { border-color:rgba(0,224,84,0.25); }
     .plan-dag.vandaag { border-color:rgba(0,224,84,0.5); background:rgba(0,224,84,0.04); }
     .plan-dag.andere-maand { opacity:0.35; }
@@ -4284,6 +4287,17 @@ function renderKalender() {
   const schemaItems = getSchemaItemsVoorMaand(planJaar, planMaand);
   const alleItems = [...planItems, ...schemaItems];
 
+  // Schema banner
+  const banner = document.getElementById('planSchemaBanner');
+  const samenvatting = document.getElementById('planSchemaSamenvatting');
+  if (seizoenSchema.length && banner) {
+    banner.style.display = 'block';
+    const DAG_LABEL = ['ma','di','wo','do','vr','za','zo'];
+    samenvatting.textContent = seizoenSchema.map(s => `${DAG_LABEL[s.dag_van_week]}: ${s.titel} ${s.tijd||''}`).join(' · ');
+  } else if (banner) {
+    banner.style.display = 'none';
+  }
+
   let html = '';
   const totalDagen = Math.ceil((startDag + dagenInMaand) / 7) * 7;
 
@@ -4306,17 +4320,18 @@ function renderKalender() {
 
     let itemsHtml = dagItems.slice(0, 2).map(item => {
       const k = PLAN_KLEUREN[item.type] || PLAN_KLEUREN.overig;
-      const escapedId = item.id.replace(/'/g, "\\'");
       if (item.isSchema) {
         return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text};border-left:2px solid ${k.text}" onclick="event.stopPropagation();openAanwVanAgenda('${datumStr}','${item.schema_id}','1')">${item.titel}</div>`;
       } else {
         return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text}" onclick="event.stopPropagation();openPlanItem('${item.id}')">${item.titel}</div>`;
       }
     }).join('');
-    if (dagItems.length > 2) itemsHtml += `<div class="plan-meer">+${dagItems.length - 2} meer</div>`;
+    if (dagItems.length > 2) itemsHtml += `<div class="plan-meer">+${dagItems.length - 2}</div>`;
 
-    html += `<div class="plan-dag${isVandaag?' vandaag':''}${andereMaand?' andere-maand':''}${dagItems.length?' heeft-items':''}" onclick="klikOpDag('${datumStr}')">
-      <div class="plan-dag-num">${dag}</div>${itemsHtml}</div>`;
+    const plusKnop = !andereMaand ? `<div class="plan-dag-plus" onclick="event.stopPropagation();klikOpDag('${datumStr}')">+</div>` : '';
+
+    html += `<div class="plan-dag${isVandaag?' vandaag':''}${andereMaand?' andere-maand':''}${dagItems.length?' heeft-items':''}" onclick="${andereMaand ? '' : `klikOpDag('${datumStr}')`}">
+      <div class="plan-dag-num">${dag}</div>${plusKnop}${itemsHtml}</div>`;
   }
   grid.innerHTML = html;
   renderPlanLijst();
@@ -5740,26 +5755,28 @@ function renderVeldDiagramInDetail(jsonStr, container) {
 
     <!-- Nav -->
     <div class="plan-nav">
-      <div class="plan-maand-titel" id="planMaandTitel">Januari 2026</div>
-      <div class="plan-nav-btns">
-        <button class="plan-vandaag-btn" onclick="openSchemaInstellingen()" style="border-color:rgba(0,224,84,0.25);color:var(--green)">⚙ Herhalend schema</button>
-        <button class="plan-vandaag-btn" onclick="gaNaarVandaag()">Vandaag</button>
+      <div style="display:flex;align-items:center;gap:10px">
         <button class="plan-nav-btn" onclick="wisselMaand(-1)">‹</button>
+        <div class="plan-maand-titel" id="planMaandTitel">Januari 2026</div>
         <button class="plan-nav-btn" onclick="wisselMaand(1)">›</button>
+      </div>
+      <div class="plan-nav-btns">
+        <button class="plan-vandaag-btn" onclick="gaNaarVandaag()">Vandaag</button>
+        <button class="plan-vandaag-btn" onclick="openSchemaInstellingen()" style="border-color:rgba(0,224,84,0.25);color:var(--green)">⚙ Vaste dagen</button>
+        <button class="btn-primary" onclick="klikOpDag(new Date().toISOString().split('T')[0])" style="padding:7px 14px;font-size:13px">+ Toevoegen</button>
       </div>
     </div>
 
     <!-- Legenda -->
     <div class="plan-legenda">
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(0,224,84,0.5)"></div>Training</div>
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,107,107,0.5)"></div>Wedstrijd</div>
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,184,77,0.5)"></div>Toernooi</div>
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(91,184,255,0.5)"></div>Overig</div>
-      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:rgba(255,255,255,0.15)"></div>Vrije dag</div>
-      <div class="plan-legenda-item" style="border-left:2px solid rgba(0,224,84,0.5);padding-left:6px;color:var(--text-tertiary);font-size:11px">Herhalend schema</div>
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:#00e054"></div>Training</div>
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:#ff6b6b"></div>Wedstrijd</div>
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:#ffb84d"></div>Toernooi</div>
+      <div class="plan-legenda-item"><div class="plan-legenda-dot" style="background:#5bb8ff"></div>Overig</div>
+      <div class="plan-legenda-item" style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;border-left:2px solid rgba(0,224,84,0.6);background:rgba(0,224,84,0.06)"></div>Herhalend</div>
     </div>
 
-    <!-- Weekdagen -->
+    <!-- Weekdagen header -->
     <div class="plan-week-header">
       <div class="plan-week-dag">Ma</div>
       <div class="plan-week-dag">Di</div>
@@ -5770,10 +5787,16 @@ function renderVeldDiagramInDetail(jsonStr, container) {
       <div class="plan-week-dag">Zo</div>
     </div>
 
-    <!-- Kalender -->
+    <!-- Kalender grid -->
     <div class="plan-grid" id="planGrid"></div>
 
-    <!-- Aankomende items -->
+    <!-- Schema samenvatting -->
+    <div id="planSchemaBanner" style="display:none;background:rgba(0,224,84,0.06);border:0.5px solid rgba(0,224,84,0.15);border-radius:12px;padding:12px 16px;margin:12px 0;cursor:pointer" onclick="openSchemaInstellingen()">
+      <div style="font-size:12px;font-weight:700;color:#00e054;margin-bottom:4px">⚙ Herhalend schema actief</div>
+      <div id="planSchemaSamenvatting" style="font-size:12px;color:var(--text-secondary)"></div>
+    </div>
+
+    <!-- Aankomende items lijst -->
     <div class="plan-aankomend">
       <div class="plan-aankomend-titel">Aankomend deze maand</div>
       <div id="planLijst"></div>
@@ -5830,7 +5853,7 @@ function renderVeldDiagramInDetail(jsonStr, container) {
 </div>
 
 <!-- OVERLAY: HERHALEND SCHEMA -->
-<div class="overlay" id="schemaOverlay" onclick="oClick(event,'schemaOverlay')" style="display:none">
+<div class="overlay" id="schemaOverlay" onclick="oClick(event,'schemaOverlay')">
   <div class="modal">
     <button class="modal-close" onclick="cModal('schemaOverlay')">✕</button>
     <div class="form-title">⚙ Herhalend schema</div>
