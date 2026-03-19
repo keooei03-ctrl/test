@@ -1660,8 +1660,16 @@ const PITCH_SVG=`<svg width="120" height="85" viewBox="0 0 120 85" fill="none" s
 
 function embedUrl(u){if(!u)return null;const yt=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);if(yt)return`https://www.youtube.com/embed/${yt[1]}`;const vm=u.match(/vimeo\.com\/(?:video\/)?(\d+)/);if(vm)return`https://player.vimeo.com/video/${vm[1]}`;return null;}
 function thumb(u){if(!u)return null;const yt=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);return yt?`https://img.youtube.com/vi/${yt[1]}/mqdefault.jpg`:null;}
-function aC(a){return a==='U6'?'b-u6':a==='U10'?'b-u10':'b-u14';}
-function aL(a){return a==='U6'?'U6–U9':a==='U10'?'U10–U13':'U14–U17';}
+function aC(a){
+  if(a==='U6'||a==='U8')return 'b-u6';
+  if(a==='U10'||a==='U12')return 'b-u10';
+  if(a==='alle'||a==='Alle')return 'b-u10';
+  return 'b-u14';
+}
+function aL(a){
+  var labels={'U6':'U6','U8':'U8','U10':'U10','U12':'U12','U14':'U14','U16':'U16','U17':'U17+','alle':'Alle','Alle':'Alle'};
+  return labels[a]||a||'Alle';
+}
 function cL(c){return c.charAt(0).toUpperCase()+c.slice(1);}
 function ini(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
 function oModal(id){document.getElementById(id).classList.add('open');}
@@ -4997,19 +5005,23 @@ async function laadPubliekeOefeningen() {
       publiekeOefeningen = data;
       // Voeg toe aan oefeningen array
       data.forEach(o => {
-        if (!oefeningen.find(x => x.id === 'pub_' + o.id)) {
-          oefeningen.unshift({
-            id: 'pub_' + o.id,
-            title: o.title, age: o.age, cat: o.cat,
-            fase: o.fase, focus: o.focus,
-            intensiteit: o.intensiteit, moeilijkheid: o.moeilijkheid,
-            duur: o.duur, spelers: o.spelers_aantal, desc: o.beschrijving,
-            doel: o.doel, materiaal: o.materiaal, video: o.video,
-            coaching_punten: o.coaching_punten, variaties: o.variaties,
-            gratis_zichtbaar: o.gratis_zichtbaar || false,
-            veld_diagram: o.veld_diagram || null,
-            eigen: false, publiek: true
-          });
+        const nieuw = {
+          id: 'pub_' + o.id,
+          title: o.title, age: o.age, cat: o.cat,
+          fase: o.fase, focus: o.focus,
+          intensiteit: o.intensiteit, moeilijkheid: o.moeilijkheid,
+          duur: o.duur, spelers: o.spelers_aantal, desc: o.beschrijving,
+          doel: o.doel, materiaal: o.materiaal, video: o.video,
+          coaching_punten: o.coaching_punten, variaties: o.variaties,
+          gratis_zichtbaar: o.gratis_zichtbaar || false,
+          veld_diagram: o.veld_diagram || null,
+          eigen: false, publiek: true
+        };
+        const bestaand = oefeningen.findIndex(x => x.id === 'pub_' + o.id);
+        if (bestaand >= 0) {
+          oefeningen[bestaand] = nieuw; // altijd updaten
+        } else {
+          oefeningen.unshift(nieuw);
         }
       });
       renderOefeningen();
