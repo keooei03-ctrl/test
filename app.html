@@ -2873,9 +2873,18 @@ function renderOefeningen(){
 
   grid.innerHTML=gesorteerd.map(o=>{
     const t=thumb(o.video);
-    const th=t
-      ?`<div class="card-thumb"><img src="${t}" alt=""><div class="play-overlay"><svg viewBox="0 0 12 14" fill="#0a0a0a"><path d="M1 1l10 6-10 6V1z"/></svg></div></div>`
-      :`<div class="no-thumb"><div class="no-thumb-pitch">${PITCH_SVG}</div><span class="no-thumb-label">Geen video</span></div>`;
+
+    // Thumbnail: video → YouTube thumb, diagram → canvas dataURL, anders placeholder
+    let thHtml;
+    if (t) {
+      thHtml = `<div class="card-thumb"><img src="${t}" alt=""><div class="play-overlay"><svg viewBox="0 0 12 14" fill="#0a0a0a"><path d="M1 1l10 6-10 6V1z"/></svg></div></div>`;
+    } else if (o.veld_diagram) {
+      // Render diagram naar canvas en gebruik als img
+      const dataUrl = renderDiagramNaarDataUrl(o.veld_diagram);
+      thHtml = `<div class="card-thumb" style="background:#0d1f0d"><img src="${dataUrl}" alt="Veld diagram" style="object-fit:cover;width:100%;height:100%"></div>`;
+    } else {
+      thHtml = `<div class="no-thumb"><div class="no-thumb-pitch">${PITCH_SVG}</div><span class="no-thumb-label">Geen video</span></div>`;
+    }
     const moeilijkheidStr = o.moeilijkheid ? '★'.repeat(o.moeilijkheid)+'☆'.repeat(5-o.moeilijkheid) : '';
 
     // Slot tonen als: gratis gebruiker + niet eigen + niet expliciet vrijgegeven door admin
@@ -2886,7 +2895,7 @@ function renderOefeningen(){
     const cardKlik = isGesloten ? `onclick="checkPro('oefeningen_limiet')"` : `onclick="openDetail('${o.id}')"`;
     const cardClass = `card${o.eigen?' eigen':o.publiek?' publiek':''}${isGesloten?' card-slot':''}`;
 
-    return`<div class="${cardClass}" ${cardKlik}>${slotHtml}${o.eigen?'<span class="eigen-tag">Eigen</span>':o.publiek?'<span class="eigen-tag" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">Publiek</span>':''}${th}<div class="card-body"><div class="card-top"><div class="card-title">${o.title}</div><span class="badge ${aC(o.age)}">${aL(o.age)}</span></div><div class="card-desc">${o.desc.slice(0,90)}...</div><div class="card-meta"><span class="meta"><span class="dot d-${o.cat}"></span>${cL(o.cat)}</span><span class="meta">⏱ ${o.duur||'–'}</span><span class="meta">👥 ${o.spelers||'–'}</span>${moeilijkheidStr?`<span class="meta" style="color:#ffb84d;letter-spacing:-1px;font-size:10px">${moeilijkheidStr}</span>`:''}</div></div></div>`;
+    return`<div class="${cardClass}" ${cardKlik}>${slotHtml}${o.eigen?'<span class="eigen-tag">Eigen</span>':o.publiek?'<span class="eigen-tag" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">Publiek</span>':''}${thHtml}<div class="card-body"><div class="card-top"><div class="card-title">${o.title}</div><span class="badge ${aC(o.age)}">${aL(o.age)}</span></div><div class="card-desc">${o.desc.slice(0,90)}...</div><div class="card-meta"><span class="meta"><span class="dot d-${o.cat}"></span>${cL(o.cat)}</span><span class="meta">⏱ ${o.duur||'–'}</span><span class="meta">👥 ${o.spelers||'–'}</span>${moeilijkheidStr?`<span class="meta" style="color:#ffb84d;letter-spacing:-1px;font-size:10px">${moeilijkheidStr}</span>`:''}</div></div></div>`;
   }).join('');
 }
 
@@ -5340,6 +5349,24 @@ async function doInstall() {
     document.getElementById('installBanner')?.remove();
     installPrompt = null;
   }
+}
+
+// ── DIAGRAM → DATAURL voor card thumbnail ──
+var _diagramCache = {};
+function renderDiagramNaarDataUrl(jsonStr) {
+  if (!jsonStr) return null;
+  if (_diagramCache[jsonStr]) return _diagramCache[jsonStr];
+  var data;
+  try { data = JSON.parse(jsonStr); } catch(e) { return null; }
+  var c = document.createElement('canvas');
+  c.width = 480; c.height = 300;
+  var ctx = c.getContext('2d');
+  _tekenHalfveld(ctx, 480, 300);
+  _tekenPijlen(ctx, data.pijlen||[]);
+  _tekenElementen(ctx, data.elementen||[]);
+  var url = c.toDataURL('image/png');
+  _diagramCache[jsonStr] = url;
+  return url;
 }
 
 // ══════════════════════════════════════
