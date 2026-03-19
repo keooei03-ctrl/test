@@ -692,6 +692,37 @@
     .speelmin-input:focus { border-color: var(--green); outline: none; }
     .totaal-min { font-family: var(--font-display); font-size: 28px; letter-spacing: 1px; color: var(--green); }
     .totaal-min-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .06em; }
+    /* ── OEFENWEDSTRIJDEN PRIKBORD ── */
+    .ow-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 14px; margin-top: 1.5rem; }
+    .ow-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 16px; padding: 1.25rem; transition: all 0.2s; position: relative; overflow: hidden; }
+    .ow-card:hover { border-color: rgba(0,224,84,0.2); transform: translateY(-2px); }
+    .ow-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--green),transparent); opacity:0; transition:opacity 0.2s; }
+    .ow-card:hover::before { opacity:1; }
+    .ow-card-eigen { border-color: rgba(0,224,84,0.15); }
+    .ow-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+    .ow-club { font-family: var(--font-display); font-size: 20px; letter-spacing:1px; color: var(--text); }
+    .ow-datum { font-size: 13px; font-weight: 600; color: var(--green); }
+    .ow-badges { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+    .ow-badge { padding:3px 9px; border-radius:6px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+    .ow-badge-leeftijd { background:rgba(91,184,255,0.1); color:#5bb8ff; border:0.5px solid rgba(91,184,255,0.2); }
+    .ow-badge-niveau { background:rgba(255,184,77,0.1); color:#ffb84d; border:0.5px solid rgba(255,184,77,0.2); }
+    .ow-badge-regio { background:rgba(255,255,255,0.05); color:#888; border:0.5px solid rgba(255,255,255,0.08); }
+    .ow-info { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+    .ow-info-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-secondary); }
+    .ow-info-icon { font-size:14px; width:20px; flex-shrink:0; text-align:center; }
+    .ow-opmerking { font-size:13px; color:var(--text-tertiary); font-style:italic; border-top:0.5px solid var(--border); padding-top:10px; margin-top:4px; line-height:1.6; }
+    .ow-footer { display:flex; gap:8px; margin-top:12px; }
+    .ow-btn-interesse { flex:1; padding:10px; border-radius:10px; background:var(--green); color:#0a0a0a; font-weight:700; font-size:13px; border:none; cursor:pointer; font-family:var(--font-body); transition:opacity 0.15s; }
+    .ow-btn-interesse:hover { opacity:0.85; }
+    .ow-btn-del { padding:10px 14px; border-radius:10px; background:none; border:0.5px solid rgba(255,107,107,0.2); color:#ff6b6b; font-size:13px; cursor:pointer; font-family:var(--font-body); transition:all 0.15s; }
+    .ow-btn-del:hover { background:rgba(255,107,107,0.08); }
+    .ow-verlopen { opacity:0.4; pointer-events:none; }
+    .ow-verlopen-tag { position:absolute; top:12px; right:12px; font-size:10px; padding:2px 8px; border-radius:4px; background:rgba(255,107,107,0.12); color:#ff6b6b; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+    .ow-empty { text-align:center; padding:4rem 1rem; color:var(--text-tertiary); }
+    .ow-filter-pill { padding:6px 14px; border-radius:20px; border:0.5px solid var(--border); background:var(--dark3); color:var(--text-secondary); font-size:12px; cursor:pointer; transition:all 0.15s; font-family:var(--font-body); }
+    .ow-filter-pill.active { background:rgba(0,224,84,0.1); color:var(--green); border-color:rgba(0,224,84,0.3); }
+    @media(max-width:700px){ .ow-grid { grid-template-columns:1fr; } }
+
     .community-feed { display: flex; flex-direction: column; gap: 12px; margin-top: 1.5rem; }
     .bericht-card { background: var(--dark2); border: 0.5px solid var(--border); border-radius: 16px; padding: 1.25rem; transition: border-color 0.2s; }
     .bericht-card:hover { border-color: var(--border-strong); }
@@ -1003,6 +1034,7 @@
     <button class="nav-tab" onclick="showPage('tactisch',this)">✎ Tactisch bord</button>
     <button class="nav-tab" onclick="showPage('ai',this)" style="color:var(--green)">✦ AI Plan</button>
     <button class="nav-tab" onclick="showPage('community',this)">💬 Community</button>
+    <button class="nav-tab" onclick="showPage('oefenwedstrijden',this)">🤝 Oefenwedstrijden</button>
     <button class="nav-tab" id="adminTab" onclick="showPage('admin',this)" style="display:none;color:#ffb84d">⚙ Beheer</button>
   </div>
   <button class="add-btn" onclick="handleAddBtn()">
@@ -1041,6 +1073,7 @@
 
 <!-- MEER MENU -->
 <div class="mobile-meer-menu" id="meerMenu">
+  <button class="mobile-meer-btn" onclick="showPage('oefenwedstrijden',null);setMobileTab('oefenwedstrijden');sluitMeer()">🤝 Oefenwedstrijden</button>
   <button class="mobile-meer-btn" onclick="showPage('ai',null);setMobileTab('ai');sluitMeer()" style="color:var(--green)">✦ AI Plan</button>
   <button class="mobile-meer-btn" onclick="showPage('resultaten',null);setMobileTab('resultaten');sluitMeer()">📋 Resultaten</button>
   <button class="mobile-meer-btn" onclick="showPage('aanwezigheid',null);setMobileTab('aanwezigheid');sluitMeer()">✅ Aanwezigheid</button>
@@ -1542,7 +1575,7 @@ function showPage(page,el){
   curPage=page;
   setMobileTab(page);
   sluitMeer();
-  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',community:'Bericht posten',admin:'+ Oefening toevoegen'};
+  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',community:'Bericht posten',oefenwedstrijden:'+ Verzoek plaatsen',admin:'+ Oefening toevoegen'};
   document.getElementById('addBtnLabel').textContent=lbl[page]||'Toevoegen';
   if(page==='spelers')renderSpelers();
   if(page==='resultaten')renderResultaten();
@@ -1550,6 +1583,7 @@ function showPage(page,el){
   if(page==='wedstrijden')renderWedstrijden();
   if(page==='tactisch')initTactischBord();
   if(page==='community')laadCommunity();
+  if(page==='oefenwedstrijden')laadOefenwedstrijden();
   if(page==='admin')renderAdminOefeningen();
 }
 function handleAddBtn(){
@@ -1559,6 +1593,7 @@ function handleAddBtn(){
   else if(curPage==='wedstrijden')openAddWedstrijd();
   else if(curPage==='tactisch')resetBord();
   else if(curPage==='community')document.getElementById('communityInput').focus();
+  else if(curPage==='oefenwedstrijden')openNieuwVerzoek();
   else if(curPage==='admin')openAdminOefening();
   else openAddOef();
 }
@@ -3518,6 +3553,169 @@ function toonLimietMelding(type, limiet) {
   oModal('accountOverlay');
 }
 
+// ── OEFENWEDSTRIJDEN ──
+let owVerzoeken = [];
+let owAgeFilter = 'alle';
+let owHuidigId = null;
+
+async function laadOefenwedstrijden() {
+  document.getElementById('owLaad').style.display = 'block';
+  document.getElementById('owGrid').innerHTML = '';
+  document.getElementById('owEmpty').style.display = 'none';
+  try {
+    const vandaag = new Date().toISOString().split('T')[0];
+    const { data } = await sb.from('oefenwedstrijden')
+      .select('id,user_id,clubnaam,leeftijdsgroep,niveau,regio,datum,tijdstip,locatie,thuis_uit,opmerking,aangemaakt_op')
+      .gte('datum', vandaag)
+      .order('datum', { ascending: true });
+    owVerzoeken = data || [];
+    // Verwijder automatisch verlopen verzoeken van eigen account
+    renderOwGrid();
+    updateOwStats();
+  } catch(e) { console.warn('Oefenwedstrijden laden mislukt:', e); }
+  document.getElementById('owLaad').style.display = 'none';
+}
+
+function updateOwStats() {
+  document.getElementById('owStatOpen').textContent = owVerzoeken.length;
+  const clubs = new Set(owVerzoeken.map(v => v.clubnaam));
+  document.getElementById('owStatTeams').textContent = clubs.size;
+}
+
+function setOwAge(el) {
+  document.querySelectorAll('.ow-filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  owAgeFilter = el.dataset.owAge;
+  renderOwGrid();
+}
+
+function renderOwGrid() {
+  const grid = document.getElementById('owGrid');
+  const empty = document.getElementById('owEmpty');
+  const vandaag = new Date().toISOString().split('T')[0];
+
+  let lijst = owVerzoeken;
+  if (owAgeFilter !== 'alle') lijst = lijst.filter(v => v.leeftijdsgroep === owAgeFilter);
+
+  if (!lijst.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = lijst.map(v => {
+    const isEigen = v.user_id === huidigUser?.id;
+    const verlopen = v.datum < vandaag;
+    const datumStr = new Date(v.datum).toLocaleDateString('nl-NL', { weekday:'short', day:'numeric', month:'long' });
+    const tijdStr = v.tijdstip ? ' · ' + v.tijdstip : '';
+
+    return `<div class="ow-card${isEigen?' ow-card-eigen':''}${verlopen?' ow-verlopen':''}">
+      ${verlopen ? '<div class="ow-verlopen-tag">Verlopen</div>' : ''}
+      <div class="ow-header">
+        <div class="ow-club">${escOwHtml(v.clubnaam)}</div>
+        <div class="ow-datum">${datumStr}${tijdStr}</div>
+      </div>
+      <div class="ow-badges">
+        <span class="ow-badge ow-badge-leeftijd">${v.leeftijdsgroep||'–'}</span>
+        ${v.niveau ? `<span class="ow-badge ow-badge-niveau">${escOwHtml(v.niveau)}</span>` : ''}
+        ${v.regio ? `<span class="ow-badge ow-badge-regio">📍 ${escOwHtml(v.regio)}</span>` : ''}
+      </div>
+      <div class="ow-info">
+        <div class="ow-info-row"><span class="ow-info-icon">🏟</span>${v.thuis_uit === 'thuis' ? 'Thuiswedstrijd' : v.thuis_uit === 'uit' ? 'Uitwedstrijd' : 'Thuis of uit — maakt niet uit'}</div>
+        ${v.tijdstip ? `<div class="ow-info-row"><span class="ow-info-icon">🕐</span>${v.tijdstip} uur</div>` : ''}
+      </div>
+      ${v.opmerking ? `<div class="ow-opmerking">"${escOwHtml(v.opmerking)}"</div>` : ''}
+      <div class="ow-footer">
+        ${!isEigen ? `<button class="ow-btn-interesse" onclick="openInteresse(${v.id})">🤝 Interesse tonen</button>` : `<span style="font-size:12px;color:var(--green);padding:10px 0;flex:1">✓ Jouw verzoek</span>`}
+        ${isEigen ? `<button class="ow-btn-del" onclick="verwijderOwVerzoek(${v.id})">Verwijderen</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openNieuwVerzoek() {
+  if (checkDemoEnToon('Verzoek plaatsen', 'Maak een gratis account aan om oefenwedstrijden te zoeken.', '🤝')) return;
+  document.getElementById('owClub').value = '';
+  document.getElementById('owNiveau').value = '';
+  document.getElementById('owRegio').value = '';
+  document.getElementById('owOpmerking').value = '';
+  document.getElementById('owTijdstip').value = '';
+  document.getElementById('owDatum').value = '';
+  document.getElementById('owEmail').value = huidigUser?.email || '';
+  ['errOwClub','errOwDatum','errOwEmail'].forEach(id => document.getElementById(id).style.display = 'none');
+  oModal('owVerzoekOverlay');
+}
+
+async function submitOwVerzoek() {
+  const club = document.getElementById('owClub').value.trim();
+  const datum = document.getElementById('owDatum').value;
+  const email = document.getElementById('owEmail').value.trim();
+  let ok = true;
+  document.getElementById('errOwClub').style.display = club ? 'none' : 'block'; if(!club) ok=false;
+  document.getElementById('errOwDatum').style.display = datum ? 'none' : 'block'; if(!datum) ok=false;
+  document.getElementById('errOwEmail').style.display = email ? 'none' : 'block'; if(!email) ok=false;
+  if (!ok) return;
+
+  const { data, error } = await sb.from('oefenwedstrijden').insert({
+    user_id: huidigUser.id,
+    clubnaam: club,
+    leeftijdsgroep: document.getElementById('owLeeftijd').value,
+    niveau: document.getElementById('owNiveau').value.trim() || null,
+    regio: document.getElementById('owRegio').value.trim() || null,
+    datum,
+    tijdstip: document.getElementById('owTijdstip').value || null,
+    thuis_uit: document.getElementById('owThuisUit').value,
+    opmerking: document.getElementById('owOpmerking').value.trim() || null,
+    email
+  }).select().single();
+
+  if (error) { alert('Fout: ' + error.message); return; }
+  owVerzoeken.unshift(data);
+  cModal('owVerzoekOverlay');
+  renderOwGrid();
+  updateOwStats();
+}
+
+function openInteresse(id) {
+  owHuidigId = id;
+  const v = owVerzoeken.find(x => x.id === id);
+  if (!v) return;
+  const datumStr = new Date(v.datum).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('owInteresseInfo').innerHTML = `
+    <strong style="color:var(--text)">${escOwHtml(v.clubnaam)}</strong><br>
+    ${v.leeftijdsgroep} ${v.niveau ? '· ' + escOwHtml(v.niveau) : ''}<br>
+    📅 ${datumStr}${v.tijdstip ? ' om ' + v.tijdstip : ''}
+    ${v.regio ? '<br>📍 ' + escOwHtml(v.regio) : ''}`;
+  document.getElementById('owEmailResultaat').style.display = 'none';
+  document.getElementById('owInteresseBtns').style.display = 'flex';
+  oModal('owInteresseOverlay');
+}
+
+async function toonOwEmail() {
+  const v = owVerzoeken.find(x => x.id === owHuidigId);
+  if (!v) return;
+  // Haal email op uit database (niet eerder meegestuurd voor privacy)
+  const { data } = await sb.from('oefenwedstrijden').select('email').eq('id', owHuidigId).single();
+  if (!data?.email) { alert('E-mailadres niet gevonden.'); return; }
+  document.getElementById('owEmailTekst').textContent = data.email;
+  document.getElementById('owEmailLink').href = `mailto:${data.email}?subject=Oefenwedstrijd ${v.leeftijdsgroep} - ${new Date(v.datum).toLocaleDateString('nl-NL')}`;
+  document.getElementById('owEmailResultaat').style.display = 'block';
+  document.getElementById('owInteresseBtns').style.display = 'none';
+}
+
+async function verwijderOwVerzoek(id) {
+  if (!confirm('Verzoek verwijderen?')) return;
+  await sb.from('oefenwedstrijden').delete().eq('id', id);
+  owVerzoeken = owVerzoeken.filter(v => v.id !== id);
+  renderOwGrid();
+  updateOwStats();
+}
+
+function escOwHtml(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 // ── FAVORIETEN ──
 let favorieten = JSON.parse(localStorage.getItem('trainershub_favorieten') || '[]');
 
@@ -4103,6 +4301,132 @@ async function doInstall() {
         <button class="btn-cancel" onclick="cModal('aanwOverlay')">Annuleren</button>
         <button class="btn-primary" onclick="submitNieuweTrainingAanw()">Aanmaken</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: OEFENWEDSTRIJDEN -->
+<div class="page" id="page-oefenwedstrijden">
+  <div class="main">
+    <div class="hero" style="background:linear-gradient(135deg,rgba(0,224,84,0.06),transparent);border-color:rgba(0,224,84,0.12)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-size:28px">🤝</span>
+        <div class="hero-title" style="font-size:30px">Oefenwedstrijden</div>
+      </div>
+      <div class="hero-sub">Vind een tegenstander op jouw niveau, leeftijdsgroep en datum.</div>
+      <div class="hero-stats" style="margin-top:1rem">
+        <div class="hero-stat"><div class="hero-stat-num" id="owStatOpen">–</div><div class="hero-stat-label">Open verzoeken</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="owStatTeams">–</div><div class="hero-stat-label">Clubs actief</div></div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)">Leeftijd</span>
+      <button class="ow-filter-pill active" data-ow-age="alle" onclick="setOwAge(this)">Alle</button>
+      <button class="ow-filter-pill" data-ow-age="U6" onclick="setOwAge(this)">U6–U9</button>
+      <button class="ow-filter-pill" data-ow-age="U10" onclick="setOwAge(this)">U10–U13</button>
+      <button class="ow-filter-pill" data-ow-age="U14" onclick="setOwAge(this)">U14–U17</button>
+      <button class="ow-filter-pill" data-ow-age="senioren" onclick="setOwAge(this)">Senioren</button>
+    </div>
+
+    <!-- Laadscherm -->
+    <div id="owLaad" style="text-align:center;padding:2rem">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- Grid -->
+    <div class="ow-grid" id="owGrid"></div>
+    <div class="ow-empty" id="owEmpty" style="display:none">
+      <div style="font-size:40px;margin-bottom:1rem">🤝</div>
+      <div style="font-family:var(--font-display);font-size:20px;letter-spacing:1px;margin-bottom:8px">Geen open verzoeken</div>
+      <div style="font-size:13px">Wees de eerste — plaats een verzoek via de + knop!</div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY: NIEUW VERZOEK -->
+<div class="overlay" id="owVerzoekOverlay" onclick="oClick(event,'owVerzoekOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('owVerzoekOverlay')">✕</button>
+    <div class="form-title">Oefenwedstrijd zoeken</div>
+    <div class="form-group">
+      <label class="form-label">Clubnaam *</label>
+      <input class="form-input" id="owClub" type="text" placeholder="bijv. SV Oranje">
+      <div class="form-error" id="errOwClub">Vul je clubnaam in.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Leeftijdsgroep *</label>
+        <select class="form-input" id="owLeeftijd">
+          <option value="U6">U6–U9</option>
+          <option value="U10" selected>U10–U13</option>
+          <option value="U14">U14–U17</option>
+          <option value="senioren">Senioren</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Niveau / klasse</label>
+        <input class="form-input" id="owNiveau" type="text" placeholder="bijv. 3e klasse">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Datum *</label>
+        <input class="form-input" id="owDatum" type="date">
+        <div class="form-error" id="errOwDatum">Kies een datum.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tijdstip</label>
+        <input class="form-input" id="owTijdstip" type="time" placeholder="10:00">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Regio / stad</label>
+        <input class="form-input" id="owRegio" type="text" placeholder="bijv. Amsterdam">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Thuis / uit</label>
+        <select class="form-input" id="owThuisUit">
+          <option value="thuis">Thuis</option>
+          <option value="uit">Uit</option>
+          <option value="maakt niet uit" selected>Maakt niet uit</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Opmerking</label>
+      <textarea class="form-input" id="owOpmerking" placeholder="bijv. Zoeken naar gelijkwaardig team, bij voorkeur zelfde regio..." style="min-height:70px"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Jouw e-mailadres *</label>
+      <input class="form-input" id="owEmail" type="email" placeholder="trainer@club.nl">
+      <div class="form-hint">Wordt getoond aan teams die interesse tonen — niet publiek zichtbaar.</div>
+      <div class="form-error" id="errOwEmail">Vul je e-mailadres in.</div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="cModal('owVerzoekOverlay')">Annuleren</button>
+      <button class="btn-primary" onclick="submitOwVerzoek()">Verzoek plaatsen</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY: INTERESSE TONEN -->
+<div class="overlay" id="owInteresseOverlay" onclick="oClick(event,'owInteresseOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('owInteresseOverlay')">✕</button>
+    <div class="form-title">Interesse tonen</div>
+    <div id="owInteresseInfo" style="background:var(--dark3);border-radius:12px;padding:1rem;margin-bottom:1.5rem;font-size:14px;color:var(--text-secondary);line-height:1.7"></div>
+    <p style="font-size:14px;color:var(--text-secondary);margin-bottom:1rem">Het e-mailadres van deze trainer wordt direct getoond zodat jullie contact kunnen opnemen.</p>
+    <div id="owEmailResultaat" style="display:none;background:rgba(0,224,84,0.06);border:0.5px solid rgba(0,224,84,0.2);border-radius:12px;padding:1rem;text-align:center">
+      <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">E-mailadres trainer</div>
+      <div id="owEmailTekst" style="font-size:18px;font-weight:600;color:var(--green);word-break:break-all"></div>
+      <a id="owEmailLink" href="#" style="display:inline-block;margin-top:10px;padding:8px 20px;background:var(--green);color:#0a0a0a;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none">✉ Stuur een e-mail</a>
+    </div>
+    <div id="owInteresseBtns" style="display:flex;gap:8px;margin-top:1rem">
+      <button class="btn-cancel" onclick="cModal('owInteresseOverlay')">Annuleren</button>
+      <button class="btn-primary" id="owToonEmailBtn" onclick="toonOwEmail()">📧 Toon e-mailadres</button>
     </div>
   </div>
 </div>
