@@ -4321,7 +4321,7 @@ function renderKalender() {
     let itemsHtml = dagItems.slice(0, 2).map(item => {
       const k = PLAN_KLEUREN[item.type] || PLAN_KLEUREN.overig;
       if (item.isSchema) {
-        return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text};border-left:2px solid ${k.text}" onclick="event.stopPropagation();openOfMaakTraining('${datumStr}','${item.titel}','${item.schema_id}')">${item.titel}</div>`;
+        return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text};border-left:2px solid ${k.text}" onclick="event.stopPropagation();openAanwVanAgenda('${datumStr}','${item.schema_id}','1')">${item.titel}</div>`;
       } else {
         return `<div class="plan-item ${item.type}" style="background:${k.bg};color:${k.text}" onclick="event.stopPropagation();openPlanItem('${item.id}')">${item.titel}</div>`;
       }
@@ -4364,7 +4364,7 @@ function renderPlanLijst() {
         <div class="plan-lijst-meta">${PLAN_TYPE_LABELS[item.type]||'–'}${item.tijd?' · '+item.tijd:''}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
-        ${isTraining ? `<button onclick="${item.isSchema ? `openOfMaakTraining('${item.datum}','${item.titel}','${item.schema_id}')` : `openPlanItem('${item.id}')`}" style="background:rgba(0,224,84,0.1);border:0.5px solid rgba(0,224,84,0.2);color:var(--green);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);font-weight:700">${item.isSchema ? '📋 Bekijk' : '📋 Bekijk'}</button>` : ''}
+        ${isTraining ? `<button onclick="openAanwVanAgenda('${item.datum}','${item.isSchema ? item.schema_id : ''}','${item.isSchema ? '1' : '0'}')" style="background:rgba(0,224,84,0.1);border:0.5px solid rgba(0,224,84,0.2);color:var(--green);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);font-weight:700">✓ Aanwezigheid</button>` : ''}
         ${!item.isSchema ? `<button class="plan-lijst-del" onclick="verwijderPlanItem(${item.id})">✕</button>` : ''}
       </div>
     </div>`;
@@ -4396,35 +4396,6 @@ function openNieuwPlanItem() {
   document.getElementById('planDatum').value = planGekozenDatum;
   document.getElementById('planItemTitel').textContent = 'Item toevoegen';
   oModal('planItemOverlay');
-}
-
-// ── OPEN OF MAAK TRAINING VOOR DATUM ──
-async function openOfMaakTraining(datum, titel, schemaId) {
-  if (checkDemoEnToon && checkDemoEnToon('Training openen', 'Maak een gratis account aan.', '📋')) return;
-
-  // Check of er al een training bestaat voor deze datum met deze titel
-  let item = planItems.find(p => p.datum === datum && p.type === 'training' && p.titel === titel);
-
-  if (!item) {
-    // Maak automatisch een training aan
-    const payload = {
-      user_id: huidigUser.id,
-      titel: titel,
-      datum: datum,
-      type: 'training',
-      schema_id: schemaId || null,
-      oefeningen_ids: JSON.stringify([]),
-      notitie: null
-    };
-    const { data, error } = await sb.from('seizoensplanning').insert(payload).select().single();
-    if (error) { alert('Fout: ' + error.message); return; }
-    planItems.push(data);
-    planItems.sort((a,b) => a.datum.localeCompare(b.datum));
-    item = data;
-    renderKalender();
-  }
-
-  openTrainingDetail(item);
 }
 
 // ── TRAINING DETAIL ──
