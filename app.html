@@ -334,6 +334,7 @@
     .cat-pill[data-cat="positiespel"].active{ background: #0a2a1a; color: #00e054; border-color: #1a5a2a; }
     .cat-pill[data-cat="dribbelen"].active  { background: #2a1a00; color: #ffb84d; border-color: #5a3a00; }
     .cat-pill[data-cat="warming-up"].active { background: #2a0a1a; color: #ff80b3; border-color: #5a1a3a; }
+    .cat-pill[data-cat="favorieten"].active { background: rgba(255,184,77,0.15); color: #ffb84d; border-color: rgba(255,184,77,0.5); }
 
     .search-wrap { display: flex; align-items: center; gap: 10px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 9px 14px; background: var(--dark2); margin-bottom: 1.5rem; transition: border-color 0.2s; }
     .search-wrap:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow2); }
@@ -1088,6 +1089,7 @@
       <div class="cat-pill" data-cat="positiespel">Positiespel</div>
       <div class="cat-pill" data-cat="dribbelen">Dribbelen</div>
       <div class="cat-pill" data-cat="warming-up">Warming-up</div>
+      <div class="cat-pill" data-cat="favorieten" id="favPill" style="border-color:rgba(255,184,77,0.3);color:#ffb84d">★ Favorieten</div>
     </div>
     <div class="search-wrap">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#555" stroke-width="1.5"/><path d="M10 10L14 14" stroke="#555" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -2534,7 +2536,13 @@ function setSter(v){sterRating=v;document.querySelectorAll('.ster-btn').forEach(
 
 function renderOefeningen(){
   const q=document.getElementById('searchInput').value.toLowerCase();
-  const list=oefeningen.filter(o=>(fAge==='alle'||o.age===fAge)&&(fCat==='alle'||o.cat===fCat)&&(!q||o.title.toLowerCase().includes(q)||o.cat.toLowerCase().includes(q)||o.desc.toLowerCase().includes(q)));
+  const list=oefeningen.filter(o=>{
+    if (fAge !== 'alle' && o.age !== fAge) return false;
+    if (fCat === 'favorieten') return (favorieten||[]).includes(String(o.id));
+    if (fCat !== 'alle' && o.cat !== fCat) return false;
+    if (q && !o.title.toLowerCase().includes(q) && !o.cat.toLowerCase().includes(q) && !(o.desc||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
   document.getElementById('countEl').textContent=list.length+' oefening'+(list.length!==1?'en':'');
   document.getElementById('statOef').textContent=oefeningen.length;
   const empty=document.getElementById('emptyEl'),grid=document.getElementById('cardsEl');
@@ -2560,26 +2568,46 @@ function openDetail(id){
     'ballen': {icon:'⚽', label:'Ballen'},
     'pion': {icon:'🔺', label:'Pion'},
     'pionnen': {icon:'🔺', label:'Pionnen'},
+    'pionnetje': {icon:'🔺', label:'Pion'},
     'hesje': {icon:'🦺', label:'Hesje'},
     'hesjes': {icon:'🦺', label:'Hesjes'},
     'doel': {icon:'🥅', label:'Doel'},
     'doelen': {icon:'🥅', label:'Doelen'},
-    'keeper': {icon:'🧤', label:'Keeper'},
-    'hoekvlag': {icon:'🚩', label:'Hoekvlag'},
-    'pionnetje': {icon:'🔺', label:'Pion'},
+    'mini doel': {icon:'🥅', label:'Mini doel'},
     'kleine doelen': {icon:'🥅', label:'Klein doel'},
     'klein doel': {icon:'🥅', label:'Klein doel'},
+    'keeper': {icon:'🧤', label:'Keeper'},
+    'hoekvlag': {icon:'🚩', label:'Hoekvlag'},
+    'lint': {icon:'🎗️', label:'Lint'},
+    'polo': {icon:'🎽', label:'Polo'},
+    'pionstaaf': {icon:'📏', label:'Staaf'},
+    'stang': {icon:'📏', label:'Stang'},
+    'lat': {icon:'📏', label:'Lat'},
+    'kegel': {icon:'🔺', label:'Kegel'},
   };
 
   function maakMateriaalIcons(mat) {
     if (!mat || mat === '–') return '<div style="font-size:13px;color:var(--text-tertiary)">Geen materiaal nodig</div>';
-    const items = mat.toLowerCase().split(/[,;]+/).map(s=>s.trim()).filter(Boolean);
+    const items = mat.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
     return `<div class="materiaal-grid">${items.map(item => {
-      let icon = '📦'; let label = item;
+      const lower = item.toLowerCase();
+      // Haal cijfer eruit bijv "8 pionnen" of "2x doelen"
+      const numMatch = lower.match(/^(\d+)\s*x?\s*/);
+      const aantal = numMatch ? numMatch[1] : null;
+      const zoekTekst = aantal ? lower.replace(/^\d+\s*x?\s*/, '') : lower;
+      let icon = '📦'; let label = zoekTekst;
       for (const [key, val] of Object.entries(MAT_ICONS)) {
-        if (item.includes(key)) { icon = val.icon; label = val.label; break; }
+        if (zoekTekst.includes(key)) { icon = val.icon; label = val.label; break; }
       }
-      return `<div class="materiaal-item"><div class="materiaal-icon">${icon}</div><div class="materiaal-label">${label}</div></div>`;
+      // Capitalize label
+      label = label.charAt(0).toUpperCase() + label.slice(1);
+      return `<div class="materiaal-item">
+        <div class="materiaal-icon" style="position:relative">
+          ${icon}
+          ${aantal ? `<span style="position:absolute;top:-6px;right:-6px;background:#00e054;color:#0a0a0a;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-body)">${aantal}</span>` : ''}
+        </div>
+        <div class="materiaal-label">${label}</div>
+      </div>`;
     }).join('')}</div>`;
   }
 
@@ -2682,13 +2710,34 @@ function openDetail(id){
       </div>
 
       <div class="oef-sectie">
-        <div class="oef-sectie-titel">Coachingspunten</div>
-        ${maakCoachingsPunten(o.coaching_punten||o.coachingPunten)}
+        <div class="oef-sectie-titel" style="display:flex;justify-content:space-between;align-items:center">
+          Coachingspunten
+          ${(isAdmin || o.eigen) ? `<button onclick="bewerkCoaching('${o.id}')" style="background:none;border:0.5px solid var(--border);color:var(--text-tertiary);font-size:11px;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:var(--font-body)">✎ Aanpassen</button>` : ''}
+        </div>
+        <div id="coachingWeergave_${id}">${maakCoachingsPunten(o.coaching_punten||o.coachingPunten)}</div>
+        <div id="coachingEdit_${id}" style="display:none">
+          <textarea id="coachingTekst_${id}" style="width:100%;min-height:100px;background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px;font-family:var(--font-body);resize:vertical;margin-top:8px">${o.coaching_punten||''}</textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button onclick="slaCoachingOp('${o.id}','${id}')" class="btn-primary" style="padding:8px 16px;font-size:13px">Opslaan</button>
+            <button onclick="document.getElementById('coachingEdit_${id}').style.display='none';document.getElementById('coachingWeergave_${id}').style.display='block'" class="btn-cancel" style="padding:8px 16px;font-size:13px">Annuleren</button>
+          </div>
+        </div>
       </div>
 
       <div class="oef-sectie">
-        <div class="oef-sectie-titel">Variaties</div>
-        ${maakVariaties(o.variaties)}
+        <div class="oef-sectie-titel" style="display:flex;justify-content:space-between;align-items:center">
+          Variaties
+          ${(isAdmin || o.eigen) ? `<button onclick="bewerkVariaties('${o.id}')" style="background:none;border:0.5px solid var(--border);color:var(--text-tertiary);font-size:11px;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:var(--font-body)">✎ Aanpassen</button>` : ''}
+        </div>
+        <div id="variatiesWeergave_${id}">${maakVariaties(o.variaties)}</div>
+        <div id="variatiesEdit_${id}" style="display:none">
+          <textarea id="variatiesTekst_${id}" style="width:100%;min-height:100px;background:var(--dark3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px;font-family:var(--font-body);resize:vertical;margin-top:8px">${o.variaties||''}</textarea>
+          <div class="form-hint">Begin met "Makkelijker:" of "Moeilijker:" voor labels.</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button onclick="slaVariatiesOp('${o.id}','${id}')" class="btn-primary" style="padding:8px 16px;font-size:13px">Opslaan</button>
+            <button onclick="document.getElementById('variatiesEdit_${id}').style.display='none';document.getElementById('variatiesWeergave_${id}').style.display='block'" class="btn-cancel" style="padding:8px 16px;font-size:13px">Annuleren</button>
+          </div>
+        </div>
       </div>
 
       <div class="oef-actions">
@@ -3658,6 +3707,73 @@ async function laadPubliekeOefeningen() {
   } catch(e) { console.warn('Publieke oefeningen laden mislukt:', e); }
 }
 
+function bewerkCoaching(oefId) {
+  const o = oefeningen.find(x => x.id==oefId || x.id==='pub_'+oefId);
+  if (!o) return;
+  const rawId = String(oefId).replace('pub_','');
+  document.getElementById('coachingWeergave_' + rawId).style.display = 'none';
+  document.getElementById('coachingEdit_' + rawId).style.display = 'block';
+}
+
+async function slaCoachingOp(oefId, rawId) {
+  const tekst = document.getElementById('coachingTekst_' + rawId).value.trim();
+  const o = oefeningen.find(x => x.id==oefId || x.id==='pub_'+oefId);
+  if (!o) return;
+  const dbId = String(oefId).replace('pub_','');
+  const tabel = o.publiek ? 'publieke_oefeningen' : 'eigen_oefeningen';
+  const { error } = await sb.from(tabel).update({ coaching_punten: tekst }).eq('id', dbId);
+  if (error) { alert('Fout: ' + error.message); return; }
+  o.coaching_punten = tekst;
+  // Update weergave
+  const weergave = document.getElementById('coachingWeergave_' + rawId);
+  if (weergave) weergave.innerHTML = maakCoachingsPuntenGlobaal(tekst);
+  document.getElementById('coachingEdit_' + rawId).style.display = 'none';
+  weergave.style.display = 'block';
+}
+
+function bewerkVariaties(oefId) {
+  const rawId = String(oefId).replace('pub_','');
+  document.getElementById('variatiesWeergave_' + rawId).style.display = 'none';
+  document.getElementById('variatiesEdit_' + rawId).style.display = 'block';
+}
+
+async function slaVariatiesOp(oefId, rawId) {
+  const tekst = document.getElementById('variatiesTekst_' + rawId).value.trim();
+  const o = oefeningen.find(x => x.id==oefId || x.id==='pub_'+oefId);
+  if (!o) return;
+  const dbId = String(oefId).replace('pub_','');
+  const tabel = o.publiek ? 'publieke_oefeningen' : 'eigen_oefeningen';
+  const { error } = await sb.from(tabel).update({ variaties: tekst }).eq('id', dbId);
+  if (error) { alert('Fout: ' + error.message); return; }
+  o.variaties = tekst;
+  const weergave = document.getElementById('variatiesWeergave_' + rawId);
+  if (weergave) weergave.innerHTML = maakVariatiesGlobaal(tekst);
+  document.getElementById('variatiesEdit_' + rawId).style.display = 'none';
+  weergave.style.display = 'block';
+}
+
+// Globale versies van render functies (buiten openDetail scope)
+function maakCoachingsPuntenGlobaal(txt) {
+  if (!txt) return '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen coachingspunten toegevoegd.</div>';
+  return txt.split('\n').filter(s=>s.trim()).map(s => `<div class="coaching-punt">${s.trim()}</div>`).join('');
+}
+function maakVariatiesGlobaal(txt) {
+  if (!txt) return '<div style="font-size:13px;color:var(--text-tertiary)">Nog geen variaties toegevoegd.</div>';
+  return txt.split('\n').filter(s=>s.trim()).map((s,i) => {
+    const isMakkelijk = s.toLowerCase().startsWith('makkelijk') || s.toLowerCase().startsWith('eenvoudig');
+    const isMoeilijk = s.toLowerCase().startsWith('moeilijk') || s.toLowerCase().startsWith('uitdaging');
+    const tag = isMakkelijk ? '<span class="variatie-tag makkelijk">Makkelijker</span>' :
+                isMoeilijk ? '<span class="variatie-tag moeilijk">Uitdagender</span>' :
+                `<span class="variatie-tag makkelijk" style="background:rgba(91,184,255,0.1);color:#5bb8ff">Variant ${i+1}</span>`;
+    return `<div class="variatie-item">${tag}<span>${s.trim()}</span></div>`;
+  }).join('');
+}
+  const aantal = document.getElementById('aoMatAantal')?.value || '1';
+  const huidig = document.getElementById('aoMat').value.trim();
+  const toevoegen = parseInt(aantal) > 1 ? `${aantal} ${item}` : item;
+  document.getElementById('aoMat').value = huidig ? huidig + ', ' + toevoegen : toevoegen;
+}
+
 function setMoeilijkheid(n) {
   document.getElementById('aoMoeilijkheid').value = n;
   for (let i = 1; i <= 5; i++) {
@@ -4113,7 +4229,23 @@ async function doInstall() {
           <input type="hidden" id="aoMoeilijkheid" value="3">
         </div>
       </div>
-      <div class="form-group"><label class="form-label">Materiaal</label><input class="form-input" id="aoMat" type="text" placeholder="bijv. Pionnen, ballen, hesjes, doel"></div>
+      <div class="form-group">
+        <label class="form-label">Materiaal — klik icoon om toe te voegen</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <div onclick="voegMatToe('bal')" style="cursor:pointer;padding:6px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:13px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(0,224,84,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">⚽ Bal</div>
+          <div onclick="voegMatToe('pionnen')" style="cursor:pointer;padding:6px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:13px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(0,224,84,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🔺 Pionnen</div>
+          <div onclick="voegMatToe('hesjes')" style="cursor:pointer;padding:6px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:13px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(0,224,84,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🦺 Hesjes</div>
+          <div onclick="voegMatToe('doel')" style="cursor:pointer;padding:6px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:13px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(0,224,84,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🥅 Doel</div>
+          <div onclick="voegMatToe('kleine doelen')" style="cursor:pointer;padding:6px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:13px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(0,224,84,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🥅 Klein doel</div>
+          <div onclick="voegMatToe('hoekvlag')" style="cursor:pointer;padding:6px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark3);font-size:13px;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(0,224,84,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">🚩 Hoekvlag</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <input type="number" id="aoMatAantal" min="1" max="99" value="1" style="width:64px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);background:var(--dark2);color:var(--text);font-size:13px;font-family:var(--font-body)">
+          <span style="font-size:13px;color:var(--text-secondary)">stuks bij volgende toevoeging</span>
+        </div>
+        <input class="form-input" id="aoMat" type="text" placeholder="bijv. 8 pionnen, 2 doelen, 1 bal">
+        <div class="form-hint">Of type direct. Gebruik aantallen: "8 pionnen, 2 doelen"</div>
+      </div>
       <div class="form-group"><label class="form-label">Beschrijving *</label><textarea class="form-input" id="aoDesc" placeholder="Beschrijf de oefening stap voor stap..."></textarea><div class="form-error" id="errAoDesc">Vul een beschrijving in.</div></div>
       <div class="form-group"><label class="form-label">Trainingsdoel</label><input class="form-input" id="aoDoel" type="text" placeholder="Wat leren spelers van deze oefening?"></div>
       <div class="form-group">
