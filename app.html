@@ -1544,7 +1544,15 @@
   </div>
 </div>
 
-<div class="overlay" id="detailOverlay" onclick="oClick(event,'detailOverlay')"><div class="modal"><button class="modal-close" onclick="cModal('detailOverlay')">✕</button><div id="detailBody"></div></div></div>
+<div class="overlay" id="detailOverlay" onclick="oClick(event,'detailOverlay')">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:8px;padding:12px 16px 0">
+      <button id="detailTerugBtn" onclick="sluitDetailNaarTraining()" style="display:none;background:none;border:0.5px solid var(--border);color:var(--text-secondary);padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--font-body)">← Terug naar training</button>
+      <button class="modal-close" style="margin-left:auto" onclick="cModal('detailOverlay')">✕</button>
+    </div>
+    <div id="detailBody"></div>
+  </div>
+</div>
 <div class="overlay" id="addOefOverlay" onclick="oClick(event,'addOefOverlay')">
   <div class="modal">
     <button class="modal-close" onclick="cModal('addOefOverlay')">✕</button>
@@ -2759,8 +2767,11 @@ function renderAIPlan(plan, age, duur, focus){
 }
 
 function openDetailVanAI(oefId) {
-  // Open oefening detail overlay direct
-  openDetail(oefId);
+  // Sluit trainingsOverlay tijdelijk en open de oefening detail
+  // Sla op welke overlay open was zodat we kunnen terugkeren
+  window._vorigeOverlay = 'trainingsOverlay';
+  cModal('trainingsOverlay');
+  setTimeout(() => openDetail(oefId), 150);
 }
 
 function startTrainingVanPlan() {
@@ -2858,8 +2869,21 @@ function renderOefeningen(){
   }).join('');
 }
 
+function sluitDetailNaarTraining() {
+  cModal('detailOverlay');
+  // Verberg terug knop
+  const btn = document.getElementById('detailTerugBtn');
+  if (btn) btn.style.display = 'none';
+  // Heropenen training overlay
+  setTimeout(() => oModal('trainingsOverlay'), 150);
+  window._vorigeOverlay = null;
+}
+
 function openDetail(id){
   const o=oefeningen.find(x=>x.id==id||x.id==='pub_'+id);if(!o)return;
+  // Toon terugknop als we vanuit AI plan komen
+  const terugBtn = document.getElementById('detailTerugBtn');
+  if (terugBtn) terugBtn.style.display = window._vorigeOverlay ? 'inline-block' : 'none';
   const e=embedUrl(o.video);
 
   // ── Materiaal iconen ──
