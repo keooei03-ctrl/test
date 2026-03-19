@@ -3565,7 +3565,7 @@ async function laadOefenwedstrijden() {
   try {
     const vandaag = new Date().toISOString().split('T')[0];
     const { data } = await sb.from('oefenwedstrijden')
-      .select('id,user_id,clubnaam,leeftijdsgroep,niveau,regio,datum,tijdstip,locatie,thuis_uit,opmerking,aangemaakt_op')
+      .select('id,user_id,clubnaam,teamnaam,leeftijdsgroep,niveau,regio,datum,tijdstip,locatie,thuis_uit,opmerking,aangemaakt_op')
       .gte('datum', vandaag)
       .order('datum', { ascending: true });
     owVerzoeken = data || [];
@@ -3613,7 +3613,10 @@ function renderOwGrid() {
     return `<div class="ow-card${isEigen?' ow-card-eigen':''}${verlopen?' ow-verlopen':''}">
       ${verlopen ? '<div class="ow-verlopen-tag">Verlopen</div>' : ''}
       <div class="ow-header">
-        <div class="ow-club">${escOwHtml(v.clubnaam)}</div>
+        <div>
+          <div class="ow-club">${escOwHtml(v.clubnaam)}</div>
+          ${v.teamnaam ? `<div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">${escOwHtml(v.teamnaam)}</div>` : ''}
+        </div>
         <div class="ow-datum">${datumStr}${tijdStr}</div>
       </div>
       <div class="ow-badges">
@@ -3637,22 +3640,25 @@ function renderOwGrid() {
 function openNieuwVerzoek() {
   if (checkDemoEnToon('Verzoek plaatsen', 'Maak een gratis account aan om oefenwedstrijden te zoeken.', '🤝')) return;
   document.getElementById('owClub').value = '';
+  document.getElementById('owTeam').value = '';
   document.getElementById('owNiveau').value = '';
   document.getElementById('owRegio').value = '';
   document.getElementById('owOpmerking').value = '';
   document.getElementById('owTijdstip').value = '';
   document.getElementById('owDatum').value = '';
   document.getElementById('owEmail').value = huidigUser?.email || '';
-  ['errOwClub','errOwDatum','errOwEmail'].forEach(id => document.getElementById(id).style.display = 'none');
+  ['errOwClub','errOwTeam','errOwDatum','errOwEmail'].forEach(id => document.getElementById(id).style.display = 'none');
   oModal('owVerzoekOverlay');
 }
 
 async function submitOwVerzoek() {
   const club = document.getElementById('owClub').value.trim();
+  const team = document.getElementById('owTeam').value.trim();
   const datum = document.getElementById('owDatum').value;
   const email = document.getElementById('owEmail').value.trim();
   let ok = true;
   document.getElementById('errOwClub').style.display = club ? 'none' : 'block'; if(!club) ok=false;
+  document.getElementById('errOwTeam').style.display = team ? 'none' : 'block'; if(!team) ok=false;
   document.getElementById('errOwDatum').style.display = datum ? 'none' : 'block'; if(!datum) ok=false;
   document.getElementById('errOwEmail').style.display = email ? 'none' : 'block'; if(!email) ok=false;
   if (!ok) return;
@@ -3660,6 +3666,7 @@ async function submitOwVerzoek() {
   const { data, error } = await sb.from('oefenwedstrijden').insert({
     user_id: huidigUser.id,
     clubnaam: club,
+    teamnaam: team,
     leeftijdsgroep: document.getElementById('owLeeftijd').value,
     niveau: document.getElementById('owNiveau').value.trim() || null,
     regio: document.getElementById('owRegio').value.trim() || null,
@@ -3683,7 +3690,7 @@ function openInteresse(id) {
   if (!v) return;
   const datumStr = new Date(v.datum).toLocaleDateString('nl-NL', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   document.getElementById('owInteresseInfo').innerHTML = `
-    <strong style="color:var(--text)">${escOwHtml(v.clubnaam)}</strong><br>
+    <strong style="color:var(--text)">${escOwHtml(v.clubnaam)}</strong>${v.teamnaam ? ` — <span style="color:var(--text-secondary)">${escOwHtml(v.teamnaam)}</span>` : ''}<br>
     ${v.leeftijdsgroep} ${v.niveau ? '· ' + escOwHtml(v.niveau) : ''}<br>
     📅 ${datumStr}${v.tijdstip ? ' om ' + v.tijdstip : ''}
     ${v.regio ? '<br>📍 ' + escOwHtml(v.regio) : ''}`;
@@ -4322,11 +4329,19 @@ async function doInstall() {
 
     <!-- Filters -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
-      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)">Leeftijd</span>
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)">Lichting</span>
       <button class="ow-filter-pill active" data-ow-age="alle" onclick="setOwAge(this)">Alle</button>
-      <button class="ow-filter-pill" data-ow-age="U6" onclick="setOwAge(this)">U6–U9</button>
-      <button class="ow-filter-pill" data-ow-age="U10" onclick="setOwAge(this)">U10–U13</button>
-      <button class="ow-filter-pill" data-ow-age="U14" onclick="setOwAge(this)">U14–U17</button>
+      <button class="ow-filter-pill" data-ow-age="U7" onclick="setOwAge(this)">U7</button>
+      <button class="ow-filter-pill" data-ow-age="U8" onclick="setOwAge(this)">U8</button>
+      <button class="ow-filter-pill" data-ow-age="U9" onclick="setOwAge(this)">U9</button>
+      <button class="ow-filter-pill" data-ow-age="U10" onclick="setOwAge(this)">U10</button>
+      <button class="ow-filter-pill" data-ow-age="U11" onclick="setOwAge(this)">U11</button>
+      <button class="ow-filter-pill" data-ow-age="U12" onclick="setOwAge(this)">U12</button>
+      <button class="ow-filter-pill" data-ow-age="U13" onclick="setOwAge(this)">U13</button>
+      <button class="ow-filter-pill" data-ow-age="U14" onclick="setOwAge(this)">U14</button>
+      <button class="ow-filter-pill" data-ow-age="U15" onclick="setOwAge(this)">U15</button>
+      <button class="ow-filter-pill" data-ow-age="U16" onclick="setOwAge(this)">U16</button>
+      <button class="ow-filter-pill" data-ow-age="U17" onclick="setOwAge(this)">U17</button>
       <button class="ow-filter-pill" data-ow-age="senioren" onclick="setOwAge(this)">Senioren</button>
     </div>
 
@@ -4350,18 +4365,28 @@ async function doInstall() {
   <div class="modal">
     <button class="modal-close" onclick="cModal('owVerzoekOverlay')">✕</button>
     <div class="form-title">Oefenwedstrijd zoeken</div>
-    <div class="form-group">
-      <label class="form-label">Clubnaam *</label>
-      <input class="form-input" id="owClub" type="text" placeholder="bijv. SV Oranje">
-      <div class="form-error" id="errOwClub">Vul je clubnaam in.</div>
-    </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Leeftijdsgroep *</label>
+        <label class="form-label">Clubnaam *</label>
+        <input class="form-input" id="owClub" type="text" placeholder="bijv. SV Oranje">
+        <div class="form-error" id="errOwClub">Vul je clubnaam in.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Team *</label>
+        <input class="form-input" id="owTeam" type="text" placeholder="bijv. SV Oranje U11-1">
+        <div class="form-error" id="errOwTeam">Vul je teamnaam in.</div>
         <select class="form-input" id="owLeeftijd">
-          <option value="U6">U6–U9</option>
-          <option value="U10" selected>U10–U13</option>
-          <option value="U14">U14–U17</option>
+          <option value="U7">U7</option>
+          <option value="U8">U8</option>
+          <option value="U9">U9</option>
+          <option value="U10">U10</option>
+          <option value="U11" selected>U11</option>
+          <option value="U12">U12</option>
+          <option value="U13">U13</option>
+          <option value="U14">U14</option>
+          <option value="U15">U15</option>
+          <option value="U16">U16</option>
+          <option value="U17">U17</option>
           <option value="senioren">Senioren</option>
         </select>
       </div>
