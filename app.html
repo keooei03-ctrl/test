@@ -818,6 +818,7 @@
     <button class="nav-tab" onclick="showPage('wedstrijden',this)">Wedstrijden</button>
     <button class="nav-tab" onclick="showPage('tactisch',this)">✎ Tactisch bord</button>
     <button class="nav-tab" onclick="showPage('ai',this)" style="color:var(--green)">✦ AI Plan</button>
+    <button class="nav-tab" id="adminTab" onclick="showPage('admin',this)" style="display:none;color:#ffb84d">⚙ Beheer</button>
   </div>
   <button class="add-btn" onclick="handleAddBtn()">
     <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -1316,13 +1317,14 @@ function showPage(page,el){
   document.getElementById('page-'+page).classList.add('active');
   if(el)el.classList.add('active');
   curPage=page;
-  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren'};
+  const lbl={oefeningen:'Toevoegen',spelers:'Speler toevoegen',resultaten:'Training loggen',aanwezigheid:'Training registreren',wedstrijden:'Wedstrijd toevoegen',tactisch:'Nieuw bord',ai:'✦ Plan genereren',admin:'+ Oefening toevoegen'};
   document.getElementById('addBtnLabel').textContent=lbl[page]||'Toevoegen';
   if(page==='spelers')renderSpelers();
   if(page==='resultaten')renderResultaten();
   if(page==='aanwezigheid')renderAanwezigheid();
   if(page==='wedstrijden')renderWedstrijden();
   if(page==='tactisch')initTactischBord();
+  if(page==='admin')renderAdminOefeningen();
 }
 function handleAddBtn(){
   if(curPage==='spelers')openAddSpeler();
@@ -1330,7 +1332,7 @@ function handleAddBtn(){
   else if(curPage==='aanwezigheid')openNieuweTrainingAanw();
   else if(curPage==='wedstrijden')openAddWedstrijd();
   else if(curPage==='tactisch')resetBord();
-  else if(curPage==='ai')generatePlan();
+  else if(curPage==='admin')openAdminOefening();
   else openAddOef();
 }
 
@@ -2760,7 +2762,9 @@ async function toonApp() {
   document.getElementById('authScreen').classList.add('hidden');
   updateAccountBtn();
   updateUpgradeBanner();
+  checkAdmin();
   await laadAlleData();
+  await laadPubliekeOefeningen();
 }
 
 function toonAuthScherm() {
@@ -2980,7 +2984,129 @@ function toonLimietMelding(type, limiet) {
   oModal('accountOverlay');
 }
 
-// ── DEMO via URL parameter ──
+// ── ADMIN BEHEER ──
+const ADMIN_ID = '9d2f10e2-0f27-4be8-9805-46b89c5be8d9';
+let isAdmin = false;
+let publiekeOefeningen = [];
+
+function checkAdmin() {
+  isAdmin = huidigUser?.id === ADMIN_ID || huidigPlan === 'admin';
+  const adminTab = document.getElementById('adminTab');
+  if (adminTab) adminTab.style.display = isAdmin ? 'block' : 'none';
+}
+
+async function laadPubliekeOefeningen() {
+  try {
+    const { data } = await sb.from('publieke_oefeningen').select('*').order('aangemaakt_op', {ascending: false});
+    if (data?.length) {
+      publiekeOefeningen = data;
+      // Voeg toe aan oefeningen array
+      data.forEach(o => {
+        if (!oefeningen.find(x => x.id === 'pub_' + o.id)) {
+          oefeningen.unshift({
+            id: 'pub_' + o.id,
+            title: o.title, age: o.age, cat: o.cat,
+            duur: o.duur, spelers: o.spelers_aantal, desc: o.beschrijving,
+            doel: o.doel, materiaal: o.materiaal, video: o.video,
+            eigen: false, publiek: true
+          });
+        }
+      });
+      renderOefeningen();
+    }
+  } catch(e) { console.warn('Publieke oefeningen laden mislukt:', e); }
+}
+
+function openAdminOefening() {
+  document.getElementById('aoTitle').value = '';
+  document.getElementById('aoDesc').value = '';
+  document.getElementById('aoDuur').value = '';
+  document.getElementById('aoSpelers').value = '';
+  document.getElementById('aoMat').value = '';
+  document.getElementById('aoDoel').value = '';
+  document.getElementById('aoVideo').value = '';
+  document.getElementById('errAoTitle').style.display = 'none';
+  document.getElementById('errAoDesc').style.display = 'none';
+  oModal('adminOefOverlay');
+}
+
+async function submitAdminOefening() {
+  const title = document.getElementById('aoTitle').value.trim();
+  const desc = document.getElementById('aoDesc').value.trim();
+  document.getElementById('errAoTitle').style.display = title ? 'none' : 'block';
+  document.getElementById('errAoDesc').style.display = desc ? 'none' : 'block';
+  if (!title || !desc) return;
+
+  const vid = document.getElementById('aoVideo').value.trim();
+  const { data, error } = await sb.from('publieke_oefeningen').insert({
+    title, age: document.getElementById('aoAge').value,
+    cat: document.getElementById('aoCat').value,
+    duur: document.getElementById('aoDuur').value.trim() || '–',
+    spelers_aantal: document.getElementById('aoSpelers').value.trim() || '–',
+    beschrijving: desc,
+    doel: document.getElementById('aoDoel').value.trim(),
+    materiaal: document.getElementById('aoMat').value.trim(),
+    video: vid || null
+  }).select().single();
+
+  if (error) { alert('Fout bij opslaan: ' + error.message); return; }
+
+  // Voeg direct toe aan lokale array
+  const nieuw = {
+    id: 'pub_' + data.id, title, age: data.age, cat: data.cat,
+    duur: data.duur, spelers: data.spelers_aantal, desc: data.beschrijving,
+    doel: data.doel, materiaal: data.materiaal, video: data.video,
+    eigen: false, publiek: true
+  };
+  oefeningen.unshift(nieuw);
+  publiekeOefeningen.unshift(data);
+
+  cModal('adminOefOverlay');
+  renderAdminOefeningen();
+  renderOefeningen();
+}
+
+function renderAdminOefeningen() {
+  const el = document.getElementById('adminCardsEl');
+  const count = document.getElementById('adminCountEl');
+  if (!el) return;
+
+  count.textContent = `${publiekeOefeningen.length} publieke oefeningen`;
+
+  if (!publiekeOefeningen.length) {
+    el.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-secondary)">
+      <div style="font-size:40px;margin-bottom:1rem">📚</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px">Nog geen publieke oefeningen</div>
+      <div style="font-size:13px;margin-top:8px">Voeg de eerste oefening toe via de knop hierboven.</div>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = publiekeOefeningen.map(o => `
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="card-badge">${o.age || 'Alle'}</div>
+          <div class="card-badge" style="background:rgba(255,184,77,0.1);color:#ffb84d;border-color:rgba(255,184,77,0.2)">${o.cat || 'overig'}</div>
+        </div>
+        <button onclick="verwijderPubliekeOef(${o.id})" style="background:none;border:none;color:#555;cursor:pointer;font-size:16px;transition:color 0.15s" onmouseover="this.style.color='#ff6b6b'" onmouseout="this.style.color='#555'">✕</button>
+      </div>
+      <div class="card-title">${o.title}</div>
+      <div class="card-meta">${o.duur || '–'} · ${o.spelers_aantal || '–'} spelers</div>
+      <div class="card-desc">${o.beschrijving || ''}</div>
+    </div>
+  `).join('');
+}
+
+async function verwijderPubliekeOef(id) {
+  if (!confirm('Weet je zeker dat je deze oefening wil verwijderen voor alle gebruikers?')) return;
+  const { error } = await sb.from('publieke_oefeningen').delete().eq('id', id);
+  if (error) { alert('Fout: ' + error.message); return; }
+  publiekeOefeningen = publiekeOefeningen.filter(o => o.id !== id);
+  oefeningen = oefeningen.filter(o => o.id !== 'pub_' + id);
+  renderAdminOefeningen();
+  renderOefeningen();
+}
 if (new URLSearchParams(window.location.search).get('demo') === '1') {
   setTimeout(() => activeerDemoModus(), 400);
 }
@@ -3128,5 +3254,80 @@ async function doInstall() {
   </div>
 </div>
 
-</body>
-</html>
+<!-- PAGE: ADMIN BEHEER -->
+<div class="page" id="page-admin">
+  <div class="main">
+    <div class="hero-block" style="background:linear-gradient(135deg,rgba(255,184,77,0.08),transparent);border-color:rgba(255,184,77,0.2)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-size:24px">⚙</span>
+        <div class="hero-title" style="font-size:32px;color:#ffb84d">Beheer paneel</div>
+      </div>
+      <div class="hero-sub">Voeg publieke oefeningen toe die alle TrainersHub gebruikers kunnen zien.</div>
+    </div>
+
+    <!-- PUBLIEKE OEFENINGEN BEHEER -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:#f0f0f0">Publieke oefeningen bibliotheek</div>
+      <button class="add-btn" onclick="openAdminOefening()">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Oefening toevoegen
+      </button>
+    </div>
+    <div class="count" id="adminCountEl"></div>
+    <div class="cards" id="adminCardsEl"></div>
+  </div>
+</div>
+
+<!-- MODAL: Admin oefening toevoegen -->
+<div class="overlay" id="adminOefOverlay" onclick="oClick(event,'adminOefOverlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="cModal('adminOefOverlay')">✕</button>
+    <div class="form-wrap">
+      <div class="form-title">Publieke oefening toevoegen</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Naam *</label><input class="form-input" id="aoTitle" type="text" placeholder="Naam van de oefening"><div class="form-error" id="errAoTitle">Vul een naam in.</div></div>
+        <div class="form-group">
+          <label class="form-label">Leeftijdsgroep</label>
+          <select class="form-input" id="aoAge">
+            <option value="alle">Alle leeftijden</option>
+            <option value="U6">U6</option><option value="U8">U8</option>
+            <option value="U10">U10</option><option value="U12">U12</option>
+            <option value="U14">U14</option><option value="U16">U16</option>
+            <option value="U17">U17+</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Categorie</label>
+          <select class="form-input" id="aoCat">
+            <option value="passing">Passing</option>
+            <option value="schieten">Schieten</option>
+            <option value="dribbling">Dribbling</option>
+            <option value="positiespel">Positiespel</option>
+            <option value="konditioneel">Konditioneel</option>
+            <option value="warming-up">Warming-up</option>
+            <option value="cooling-down">Cooling-down</option>
+            <option value="overig">Overig</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Duur</label><input class="form-input" id="aoDuur" type="text" placeholder="bijv. 15 min"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Aantal spelers</label><input class="form-input" id="aoSpelers" type="text" placeholder="bijv. 8–12"></div>
+        <div class="form-group"><label class="form-label">Materiaal</label><input class="form-input" id="aoMat" type="text" placeholder="bijv. Pionnen, ballen"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Beschrijving *</label><textarea class="form-input" id="aoDesc" placeholder="Beschrijf de oefening stap voor stap..."></textarea><div class="form-error" id="errAoDesc">Vul een beschrijving in.</div></div>
+      <div class="form-group"><label class="form-label">Doelstelling</label><input class="form-input" id="aoDoel" type="text" placeholder="Wat leren spelers van deze oefening?"></div>
+      <div class="form-group">
+        <label class="form-label">YouTube / Vimeo link</label>
+        <input class="form-input" id="aoVideo" type="url" placeholder="https://youtube.com/watch?v=...">
+        <div class="form-hint">Plak een YouTube of Vimeo link — wordt automatisch ingebed.</div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="cModal('adminOefOverlay')">Annuleren</button>
+        <button class="btn-primary" onclick="submitAdminOefening()">Opslaan voor iedereen</button>
+      </div>
+    </div>
+  </div>
+</div>
