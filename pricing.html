@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrainersHub — Prijzen</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #00e054;
+  --green-dim: rgba(0,224,84,0.12);
+  --green-border: rgba(0,224,84,0.25);
+  --dark0: #080f08;
+  --dark1: #0d150d;
+  --dark2: #111a11;
+  --dark3: #172017;
+  --dark4: #1e2a1e;
+  --text: #f0f0f0;
+  --text-secondary: rgba(240,240,240,0.6);
+  --text-tertiary: rgba(240,240,240,0.3);
+  --border: rgba(255,255,255,0.07);
+  --gold: #ffb84d;
+  --red: #ff6b6b;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--dark0);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Noise overlay */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+}
+
+.wrap { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:0 24px; }
+
+/* HERO */
+.hero {
+  text-align: center;
+  padding: 80px 24px 60px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green-dim);
+  border: 0.5px solid var(--green-border);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.hero h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(42px, 8vw, 72px);
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.hero h1 span { color: var(--green); }
+
+.hero p {
+  font-size: 17px;
+  color: var(--text-secondary);
+  max-width: 520px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+/* Toggle jaar/maand */
+.toggle-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--dark3);
+  border: 0.5px solid var(--border);
+  border-radius: 40px;
+  padding: 6px 8px;
+  margin-bottom: 60px;
+}
+
+.toggle-btn {
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all .2s;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.toggle-btn.active {
+  background: var(--green);
+  color: #000;
+}
+
+.save-badge {
+  background: rgba(255,184,77,0.15);
+  border: 0.5px solid rgba(255,184,77,0.3);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: .05em;
+}
+
+/* CARDS */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+
+@media(max-width:768px){
+  .cards { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--dark2);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  position: relative;
+  transition: transform .2s, border-color .2s;
+}
+
+.card:hover { transform: translateY(-4px); }
+
+.card.featured {
+  background: linear-gradient(160deg, var(--dark3) 0%, var(--dark4) 100%);
+  border-color: var(--green-border);
+  transform: scale(1.04);
+  box-shadow: 0 0 60px rgba(0,224,84,0.08), 0 0 0 1px rgba(0,224,84,0.15);
+}
+
+.card.featured:hover { transform: scale(1.04) translateY(-4px); }
+
+.popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--green);
+  color: #000;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 16px;
+  border-radius: 20px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.card.featured .card-name { color: var(--green); }
+
+.card-desc {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.price-wrap { margin-bottom: 28px; }
+
+.price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: 1px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.price sup {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  vertical-align: top;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.price-period {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.price-year {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.price-year span { color: var(--gold); font-weight: 700; }
+
+.cta {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: .03em;
+  transition: all .2s;
+  margin-bottom: 28px;
+}
+
+.cta-ghost {
+  background: transparent;
+  border: 0.5px solid var(--border);
+  color: var(--text-secondary);
+}
+.cta-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+.cta-green {
+  background: var(--green);
+  color: #000;
+}
+.cta-green:hover { background: #00f55e; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,224,84,0.25); }
+
+.cta-outline {
+  background: transparent;
+  border: 1.5px solid var(--green-border);
+  color: var(--green);
+}
+.cta-outline:hover { background: var(--green-dim); }
+
+/* Features lijst */
+.features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+.features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.features li .icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  margin-top: 1px;
+}
+
+.icon-check { background: rgba(0,224,84,0.15); color: var(--green); }
+.icon-x { background: rgba(255,255,255,0.05); color: var(--text-tertiary); }
+.icon-limit { background: rgba(255,184,77,0.12); color: var(--gold); }
+
+.features li.highlight { color: var(--text); font-weight: 600; }
+
+.divider {
+  height: 0.5px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* Club sectie */
+.club-section {
+  background: var(--dark2);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+@media(max-width:768px){
+  .club-section { grid-template-columns: 1fr; }
+}
+
+.club-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.club-title span { color: var(--green); }
+
+.club-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.club-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.club-tier {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--dark3);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.tier-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.tier-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.tier-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--green); }
+.tier-price span { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text-tertiary); font-weight: 400; }
+
+/* FAQ */
+.faq { margin-bottom: 80px; }
+.faq h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 32px;
+  color: var(--text-secondary);
+}
+
+.faq-item {
+  border-bottom: 0.5px solid var(--border);
+  padding: 20px 0;
+}
+
+.faq-q {
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.faq-q::after {
+  content: '+';
+  font-size: 20px;
+  color: var(--green);
+  flex-shrink: 0;
+  font-weight: 300;
+}
+
+.faq-a {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-top: 12px;
+  display: none;
+}
+
+.faq-item.open .faq-q::after { content: '−'; }
+.faq-item.open .faq-a { display: block; }
+
+/* Founding coaches banner */
+.founding {
+  background: linear-gradient(135deg, rgba(0,224,84,0.08) 0%, rgba(0,224,84,0.03) 100%);
+  border: 0.5px solid var(--green-border);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.founding h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.founding h2 span { color: var(--green); }
+.founding p { font-size: 15px; color: var(--text-secondary); max-width: 520px; margin: 0 auto 24px; line-height: 1.6; }
+
+.founding-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.founding-price .big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 64px;
+  color: var(--green);
+  line-height: 1;
+}
+
+.founding-price .small {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.founding-price .cross {
+  font-size: 20px;
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+}
+
+.spots {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 12px;
+}
+
+.spots span { color: var(--red); font-weight: 700; }
+
+/* Animaties */
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(20px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+.card { animation: fadeUp .4s ease both; }
+.card:nth-child(1) { animation-delay: .1s; }
+.card:nth-child(2) { animation-delay: .2s; }
+.card:nth-child(3) { animation-delay: .3s; }
+
+/* Jaar prijzen (hidden by default) */
+.price-maand { display: block; }
+.price-jaar { display: none; }
+.year-active .price-maand { display: none; }
+.year-active .price-jaar { display: block; }
+</style>
+</head>
+<body>
+
+<div class="hero wrap">
+  <div class="hero-badge">⚽ Transparante prijzen</div>
+  <h1>Investeer in je<br><span>trainersschap</span></h1>
+  <p>Geen verborgen kosten. Geen lange contracten. Maandelijks opzegbaar. Kies het plan dat bij jou past.</p>
+
+  <div class="toggle-wrap">
+    <button class="toggle-btn active" onclick="setToggle('maand',this)">Maandelijks</button>
+    <button class="toggle-btn" onclick="setToggle('jaar',this)">
+      Jaarlijks <span class="save-badge" style="margin-left:6px">-35%</span>
+    </button>
+  </div>
+</div>
+
+<div class="wrap" id="pricing-wrap">
+  <div class="cards">
+
+    <!-- STARTER -->
+    <div class="card">
+      <div class="card-name">Starter</div>
+      <div class="card-desc">Ontdek de app. Gratis, voor altijd.</div>
+      <div class="price-wrap">
+        <div class="price">
+          <sup>€</sup>0
+        </div>
+        <div class="price-period">voor altijd gratis</div>
+      </div>
+      <button class="cta cta-ghost" onclick="window.location.href='/app.html'">Begin gratis</button>
+      <ul class="features">
+        <li><span class="icon icon-check">✓</span>10 oefeningen uit de bibliotheek</li>
+        <li><span class="icon icon-limit">5</span>Maximaal 5 spelers</li>
+        <li><span class="icon icon-limit">5</span>Maximaal 5 wedstrijden</li>
+        <li><span class="icon icon-check">✓</span>Aanwezigheid bijhouden</li>
+        <li><span class="icon icon-check">✓</span>Seizoenskalender bekijken</li>
+        <li><span class="icon icon-x">✗</span><span style="color:var(--text-tertiary)">AI trainingsplan</span></li>
+        <li><span class="icon icon-x">✗</span><span style="color:var(--text-tertiary)">Training koppelen aan planning</span></li>
+        <li><span class="icon icon-x">✗</span><span style="color:var(--text-tertiary)">Tactisch bord</span></li>
+        <li><span class="icon icon-x">✗</span><span style="color:var(--text-tertiary)">Speler rapport PDF</span></li>
+      </ul>
+    </div>
+
+    <!-- BASIS / FEATURED -->
+    <div class="card featured">
+      <div class="popular-badge">⚡ Meest gekozen</div>
+      <div class="card-name">Basis</div>
+      <div class="card-desc">Voor de actieve trainer die professioneler wil werken.</div>
+      <div class="price-wrap">
+        <div class="price price-maand"><sup>€</sup>7<span style="font-size:28px">,99</span></div>
+        <div class="price price-jaar"><sup>€</sup>5<span style="font-size:28px">,19</span></div>
+        <div class="price-period price-maand">per maand · maandelijks opzegbaar</div>
+        <div class="price-period price-jaar">per maand · gefactureerd als €62/jaar</div>
+        <div class="price-year price-jaar"><span>Jij bespaart €34 per jaar</span></div>
+      </div>
+      <button class="cta cta-green" onclick="window.location.href='/app.html'">Start 30 dagen gratis</button>
+      <ul class="features">
+        <li class="highlight"><span class="icon icon-check">✓</span>Volledige oefeningen bibliotheek</li>
+        <li><span class="icon icon-check">✓</span>Maximaal 15 spelers</li>
+        <li><span class="icon icon-check">✓</span>Onbeperkt wedstrijden</li>
+        <li><span class="icon icon-check">✓</span>Aanwezigheid bijhouden</li>
+        <li><span class="icon icon-check">✓</span>Seizoensplanning + herhalend schema</li>
+        <li class="highlight"><span class="icon icon-check">✓</span>Training koppelen aan planning</li>
+        <li class="highlight"><span class="icon icon-limit">5×</span>AI trainingsplan per maand</li>
+        <li><span class="icon icon-check">✓</span>Tactisch bord</li>
+        <li><span class="icon icon-check">✓</span>Trainingslogboek (1 maand terug)</li>
+        <li><span class="icon icon-check">✓</span>Oefenwedstrijden prikbord</li>
+        <li><span class="icon icon-x">✗</span><span style="color:var(--text-tertiary)">Speler rapport PDF</span></li>
+        <li><span class="icon icon-x">✗</span><span style="color:var(--text-tertiary)">Community posten</span></li>
+      </ul>
+    </div>
+
+    <!-- PRO -->
+    <div class="card">
+      <div class="card-name">Pro</div>
+      <div class="card-desc">Voor de serieuze coach die niets wil missen.</div>
+      <div class="price-wrap">
+        <div class="price price-maand"><sup>€</sup>14<span style="font-size:28px">,99</span></div>
+        <div class="price price-jaar"><sup>€</sup>9<span style="font-size:28px">,74</span></div>
+        <div class="price-period price-maand">per maand · maandelijks opzegbaar</div>
+        <div class="price-period price-jaar">per maand · gefactureerd als €117/jaar</div>
+        <div class="price-year price-jaar"><span>Jij bespaart €63 per jaar</span></div>
+      </div>
+      <button class="cta cta-outline" onclick="window.location.href='/app.html'">Start 30 dagen gratis</button>
+      <ul class="features">
+        <li class="highlight"><span class="icon icon-check">✓</span>Alles uit Basis</li>
+        <div class="divider"></div>
+        <li><span class="icon icon-check">✓</span>Onbeperkt spelers</li>
+        <li class="highlight"><span class="icon icon-check">✓</span>Onbeperkt AI trainingsplan</li>
+        <li class="highlight"><span class="icon icon-check">✓</span>Volledig trainingslogboek</li>
+        <li class="highlight"><span class="icon icon-check">✓</span>Speler rapport PDF voor ouders</li>
+        <li><span class="icon icon-check">✓</span>Community — posten & reageren</li>
+        <li><span class="icon icon-check">✓</span>Eigen oefeningen onbeperkt</li>
+        <li><span class="icon icon-check">✓</span>Prioriteit support</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <p style="text-align:center;font-size:12px;color:var(--text-tertiary);margin-bottom:60px">
+    Alle plannen inclusief BTW · Geen automatische verlenging zonder herinnering · Annuleren kan altijd
+  </p>
+
+  <!-- FOUNDING COACHES -->
+  <div class="founding">
+    <h2>Word <span>Founding Coach</span></h2>
+    <p>Wij zoeken 25 trainers die samen met ons TrainersHub bouwen. Jij krijgt Pro voor altijd tegen startersprijs — nooit omhoog. In ruil vragen we jouw eerlijke feedback.</p>
+    <div class="founding-price">
+      <div class="cross">€14,99</div>
+      <div class="big">€4,99</div>
+      <div class="small">/maand<br>voor altijd</div>
+    </div>
+    <br>
+    <button class="cta cta-green" style="max-width:280px;margin:0 auto;display:block" onclick="window.location.href='mailto:info@trainershub.nl?subject=Founding Coach'">
+      Ik wil Founding Coach worden
+    </button>
+    <div class="spots">Nog <span>19 van de 25</span> plekken beschikbaar</div>
+  </div>
+
+  <!-- CLUB -->
+  <div class="club-section">
+    <div>
+      <div class="hero-badge" style="margin-bottom:16px">🏟 Voor clubs</div>
+      <div class="club-title">Club<span>licentie</span></div>
+      <div class="club-desc">
+        Eén licentie voor de hele technische staf. Alle trainers op één platform, spelersontwikkeling zichtbaar voor het bestuur, aanwezigheid per team. Schaalprijs op basis van teamaantal — hoe groter de club, hoe voordeliger per trainer.
+      </div>
+      <button class="cta cta-outline" style="max-width:220px" onclick="window.location.href='mailto:info@trainershub.nl?subject=Clublicentie'">
+        Vraag een demo aan
+      </button>
+    </div>
+    <div class="club-tiers">
+      <div class="club-tier">
+        <div>
+          <div class="tier-name">Mini Club</div>
+          <div class="tier-sub">Tot 5 teams · tot 5 trainers</div>
+        </div>
+        <div class="tier-price">€49 <span>/mnd</span></div>
+      </div>
+      <div class="club-tier">
+        <div>
+          <div class="tier-name">Midden Club</div>
+          <div class="tier-sub">6–15 teams · tot 15 trainers</div>
+        </div>
+        <div class="tier-price">€99 <span>/mnd</span></div>
+      </div>
+      <div class="club-tier">
+        <div>
+          <div class="tier-name">Grote Club</div>
+          <div class="tier-sub">16–30 teams · onbeperkt trainers</div>
+        </div>
+        <div class="tier-price">€179 <span>/mnd</span></div>
+      </div>
+      <div class="club-tier" style="border-color:var(--green-border)">
+        <div>
+          <div class="tier-name" style="color:var(--green)">Academie</div>
+          <div class="tier-sub">Betaald voetbal · maatwerk</div>
+        </div>
+        <div class="tier-price" style="font-size:16px;font-family:'DM Sans',sans-serif;font-weight:700">Op aanvraag</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <h2>Veelgestelde vragen</h2>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Kan ik op elk moment stoppen?</div>
+      <div class="faq-a">Ja, je kunt maandelijks opzeggen zonder opgaaf van reden. Bij een jaarabonnement loopt het door tot het einde van de betaalde periode.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Wat gebeurt er met mijn data als ik downgrade?</div>
+      <div class="faq-a">Je data blijft bewaard. Je kunt alleen geen nieuwe items meer aanmaken boven de limieten van je plan. Bestaande spelers, trainingen en wedstrijden blijven altijd zichtbaar.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Hoe werkt de 30 dagen gratis?</div>
+      <div class="faq-a">Je start direct met volledige toegang tot het gekozen plan. Geen creditcard nodig voor de proefperiode. Na 30 dagen kun je kiezen of je wil doorgaan — je krijgt een herinnering 7 dagen van tevoren.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Kan ik betalen met iDEAL?</div>
+      <div class="faq-a">Ja, we ondersteunen iDEAL, creditcard en automatische incasso via onze betaalpartner Mollie.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Werkt de app ook offline?</div>
+      <div class="faq-a">De app werkt het best met een internetverbinding. Basisfuncties zoals je trainingsplanning en spelerlijst zijn ook offline beschikbaar na het eerste laden.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Wat is het verschil tussen Basis en Pro in de praktijk?</div>
+      <div class="faq-a">Basis is voor de trainer die zijn dagelijkse werk wil organiseren — planning, oefeningen, aanwezigheid. Pro voegt daar onbeperkte AI, volledig trainingslogboek en PDF-rapporten voor ouders en bestuur aan toe. De meeste trainers starten met Basis en upgraden wanneer ze de waarde ervaren.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setToggle(mode, btn) {
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const wrap = document.getElementById('pricing-wrap');
+  if (mode === 'jaar') {
+    wrap.classList.add('year-active');
+  } else {
+    wrap.classList.remove('year-active');
+  }
+}
+
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+</script>
+</body>
+</html>
